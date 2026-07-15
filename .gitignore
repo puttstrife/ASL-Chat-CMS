@@ -5,3 +5,4 @@ elevenlabs
 server/.cache/
 dist/
 web v4/
+.vercel
