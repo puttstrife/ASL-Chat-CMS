@@ -340,6 +340,7 @@ export function CallScreen({ context, onPrivateChat }) {
               <p className="call-intro-kicker">A private message is waiting</p>
               <h1 id="call-intro-title">Marisol has something personal to share.</h1>
               <PrimaryButton className="call-intro-button" onClick={startIncomingCall}>
+                <Phone aria-hidden="true" />
                 I’m ready for Marisol’s call
               </PrimaryButton>
             </div>
