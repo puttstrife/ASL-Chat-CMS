@@ -104,6 +104,7 @@ function IOSAnswerSlider({ onAnswer }) {
 
 export function CallScreen({ context, onPrivateChat }) {
   const [phase, setPhase] = useState('ringing');
+  const [callStarted, setCallStarted] = useState(false);
   const [lineIndex, setLineIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [audioFailed, setAudioFailed] = useState(false);
@@ -144,8 +145,19 @@ export function CallScreen({ context, onPrivateChat }) {
     ringtoneRef.current = ringtone;
     ringtone.load();
 
+    return () => {
+      ringtone.pause();
+      ringtone.currentTime = 0;
+      if (ringtoneRef.current === ringtone) ringtoneRef.current = null;
+      navigator.vibrate?.(0);
+    };
+  }, [phase, platform]);
+
+  useEffect(() => {
+    if (phase !== 'ringing' || !callStarted) return undefined;
     const playRingtone = () => {
-      if (ringtone.paused) ringtone.play().catch(() => {});
+      const ringtone = ringtoneRef.current;
+      if (ringtone?.paused) ringtone.play().catch(() => {});
     };
     playRingtone();
     window.addEventListener('pointerdown', playRingtone, { once: true, capture: true });
@@ -161,12 +173,9 @@ export function CallScreen({ context, onPrivateChat }) {
       if (vibrationInterval) clearInterval(vibrationInterval);
       window.removeEventListener('pointerdown', playRingtone, { capture: true });
       window.removeEventListener('keydown', playRingtone, { capture: true });
-      ringtone.pause();
-      ringtone.currentTime = 0;
-      if (ringtoneRef.current === ringtone) ringtoneRef.current = null;
       navigator.vibrate?.(0);
     };
-  }, [phase, platform]);
+  }, [callStarted, phase, platform]);
 
   useEffect(() => {
     if (phase !== 'active') return undefined;
@@ -260,6 +269,12 @@ export function CallScreen({ context, onPrivateChat }) {
     navigator.vibrate?.(0);
   };
 
+  const startIncomingCall = () => {
+    // Start inside the click gesture so mobile browsers permit ringtone audio.
+    ringtoneRef.current?.play().catch(() => {});
+    setCallStarted(true);
+  };
+
   const acceptCall = () => {
     acceptedAtRef.current = Date.now();
     if (buttonClickRef.current) {
@@ -290,32 +305,46 @@ export function CallScreen({ context, onPrivateChat }) {
   if (phase === 'ringing') {
     return (
       <section className="call-screen call-ringing" aria-label="Incoming call from Marisol">
-        <div className="call-ringing-content">
-          <div className="call-caller-identity">
-            <h1 className="call-name">Marisol</h1>
-            <p className="call-ringing-detail">Private audio call</p>
-          </div>
-        </div>
-        <div className="call-incoming-footer">
-          <div className="call-incoming-utilities" aria-hidden="true">
-            <div><AlarmClock /><span>Remind Me</span></div>
-            <div><MessageCircle /><span>Message</span></div>
-          </div>
-          {platform === 'ios' ? (
-            <IOSAnswerSlider onAnswer={acceptCall} />
-          ) : (
-            <div className="call-ringing-actions">
-              <div className="call-ringing-action">
-                <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
-                <span>Decline</span>
-              </div>
-              <div className="call-ringing-action">
-                <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
-                <span>Accept</span>
+        {callStarted ? (
+          <>
+            <div className="call-ringing-content">
+              <div className="call-caller-identity">
+                <h1 className="call-name">Marisol</h1>
+                <p className="call-ringing-detail">Private audio call</p>
               </div>
             </div>
-          )}
-        </div>
+            <div className="call-incoming-footer">
+              <div className="call-incoming-utilities" aria-hidden="true">
+                <div><AlarmClock /><span>Remind Me</span></div>
+                <div><MessageCircle /><span>Message</span></div>
+              </div>
+              {platform === 'ios' ? (
+                <IOSAnswerSlider onAnswer={acceptCall} />
+              ) : (
+                <div className="call-ringing-actions">
+                  <div className="call-ringing-action">
+                    <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
+                    <span>Decline</span>
+                  </div>
+                  <div className="call-ringing-action">
+                    <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
+                    <span>Accept</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="call-intro-overlay" role="dialog" aria-modal="true" aria-labelledby="call-intro-title">
+            <div className="call-intro-glass">
+              <p className="call-intro-kicker">A private message is waiting</p>
+              <h1 id="call-intro-title">Marisol has something personal to share.</h1>
+              <PrimaryButton className="call-intro-button" onClick={startIncomingCall}>
+                I’m ready for Marisol’s call
+              </PrimaryButton>
+            </div>
+          </div>
+        )}
       </section>
     );
   }
