@@ -7,6 +7,12 @@ import { AuroraText } from '../../components/AuroraText.jsx';
 import { SparklesText } from './SparklesText.jsx';
 
 const CHAT_ACTION_REVEAL_SOUND = '/audio/chat-action-reveal.mp3';
+const BUTTON_CLICK_SOUND = '/audio/button-click.mp3';
+
+function getDockSignature(dock) {
+  if (dock.type === 'buttons') return `buttons:${dock.buttons.map((button) => button.label).join('|')}`;
+  return `${dock.type}:${dock.key || dock.next || ''}`;
+}
 
 const SPARKLE_PHRASES = [
   'certain desires are ready to surface',
@@ -21,35 +27,49 @@ export function PrivateChat({ context }) {
   const funnel = useCallFunnel(context);
   const scrollRef = useRef(null);
   const revealAudioRef = useRef(null);
+  const clickAudioRef = useRef(null);
   const lastDockSignatureRef = useRef('');
+  const dockSignature = getDockSignature(funnel.dock);
 
   useEffect(() => {
     const audio = new Audio(CHAT_ACTION_REVEAL_SOUND);
+    const clickAudio = new Audio(BUTTON_CLICK_SOUND);
     audio.preload = 'auto';
     audio.volume = 0.48;
     audio.load();
+    clickAudio.preload = 'auto';
+    clickAudio.volume = 0.58;
+    clickAudio.load();
     revealAudioRef.current = audio;
+    clickAudioRef.current = clickAudio;
 
     return () => {
       audio.pause();
+      clickAudio.pause();
       if (revealAudioRef.current === audio) revealAudioRef.current = null;
+      if (clickAudioRef.current === clickAudio) clickAudioRef.current = null;
     };
   }, []);
 
   useEffect(() => {
     if (!['buttons', 'continue', 'input'].includes(funnel.dock.type)) return;
-    const signature = funnel.dock.type === 'buttons'
-      ? `buttons:${funnel.dock.buttons.map((button) => button.label).join('|')}`
-      : `${funnel.dock.type}:${funnel.dock.key || funnel.dock.next || ''}`;
-    if (signature === lastDockSignatureRef.current) return;
-    lastDockSignatureRef.current = signature;
+    if (dockSignature === lastDockSignatureRef.current) return;
+    lastDockSignatureRef.current = dockSignature;
 
     const audio = revealAudioRef.current;
     if (!audio) return;
     audio.pause();
     audio.currentTime = 0;
     audio.play().catch(() => {});
-  }, [funnel.dock]);
+  }, [dockSignature, funnel.dock.type]);
+
+  const playClickSound = () => {
+    const audio = clickAudioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  };
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -78,7 +98,18 @@ export function PrivateChat({ context }) {
       </div>
 
       <div className="private-chat-dock">
-        <Dock dock={funnel.dock} onChoose={funnel.choose} onSubmit={funnel.submit} onAdvance={funnel.advance} />
+        <div
+          key={dockSignature}
+          className={['buttons', 'continue', 'input'].includes(funnel.dock.type) ? 'chat-action-drawer' : ''}
+        >
+          <Dock
+            dock={funnel.dock}
+            onChoose={funnel.choose}
+            onSubmit={funnel.submit}
+            onAdvance={funnel.advance}
+            onClickSound={playClickSound}
+          />
+        </div>
       </div>
     </section>
   );
@@ -133,27 +164,27 @@ function MarisolText({ text, name, auroraValues = [] }) {
   return parts;
 }
 
-function Dock({ dock, onChoose, onSubmit, onAdvance }) {
+function Dock({ dock, onChoose, onSubmit, onAdvance, onClickSound }) {
   if (dock.type === 'buttons') {
     return (
       <div className="call-options">
         {dock.buttons.map((button) => (
           button.next === '12' ? (
-            <RainbowButton key={button.label} className="call-rainbow-option" onClick={() => onChoose(button)}>
+            <RainbowButton key={button.label} className="call-rainbow-option" onClick={() => { onClickSound(); onChoose(button); }}>
               {button.label}
             </RainbowButton>
           ) : (
-            <button key={button.label} className="call-option" onClick={() => onChoose(button)}>{button.label}</button>
+            <button key={button.label} className="call-option" onClick={() => { onClickSound(); onChoose(button); }}>{button.label}</button>
           )
         ))}
       </div>
     );
   }
   if (dock.type === 'continue') {
-    return <PrimaryButton className="call-primary-wide" onClick={() => onAdvance(dock.next)}>Continue</PrimaryButton>;
+    return <PrimaryButton className="call-primary-wide" onClick={() => { onClickSound(); onAdvance(dock.next); }}>Continue</PrimaryButton>;
   }
   if (dock.type === 'input') {
-    return <ChatInput placeholder={dock.placeholder} onSend={(value) => onSubmit(dock.key, value, dock.next)} />;
+    return <ChatInput placeholder={dock.placeholder} onClickSound={onClickSound} onSend={(value) => onSubmit(dock.key, value, dock.next)} />;
   }
   if (dock.type === 'terminal') {
     return <div className="call-terminal">This private thread remains open.</div>;
@@ -161,7 +192,7 @@ function Dock({ dock, onChoose, onSubmit, onAdvance }) {
   return <div className="call-terminal">Marisol is with you…</div>;
 }
 
-function ChatInput({ placeholder, onSend }) {
+function ChatInput({ placeholder, onSend, onClickSound }) {
   const [value, setValue] = useState('');
   const inputRef = useRef(null);
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -169,6 +200,7 @@ function ChatInput({ placeholder, onSend }) {
   const send = () => {
     const trimmed = value.trim();
     if (!trimmed) return;
+    onClickSound();
     setValue('');
     onSend(trimmed);
   };

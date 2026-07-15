@@ -7,7 +7,6 @@ import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
 const IOS_RINGTONE = '/audio/iphone-ringtone.mp3';
 const ANDROID_RINGTONE = '/audio/android-ringtone.mp3';
 const BUTTON_CLICK_SOUND = '/audio/button-click.mp3';
-const SILENT_AUDIO = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgICA';
 const FIRST_TTS_DELAY_MS = 900;
 
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
@@ -115,25 +114,11 @@ export function CallScreen({ context, onPrivateChat }) {
   const audioRef = useRef(null);
   const urlRef = useRef(null);
   const ringtoneRef = useRef(null);
-  const buttonClickRef = useRef(null);
   const acceptedAtRef = useRef(0);
 
   const chunks = useMemo(() => CALL_CHUNKS.map((chunk) => interpolate(chunk, context)), [context]);
   const caption = chunks[lineIndex] || chunks[chunks.length - 1];
   const speaking = phase === 'active' && !audioFailed && !outputMuted;
-
-  useEffect(() => {
-    const buttonClick = new Audio(BUTTON_CLICK_SOUND);
-    buttonClick.preload = 'auto';
-    buttonClick.volume = 0.62;
-    buttonClick.load();
-    buttonClickRef.current = buttonClick;
-
-    return () => {
-      buttonClick.pause();
-      if (buttonClickRef.current === buttonClick) buttonClickRef.current = null;
-    };
-  }, []);
 
   useEffect(() => {
     if (phase !== 'ringing') return undefined;
@@ -208,6 +193,7 @@ export function CallScreen({ context, onPrivateChat }) {
       const audio = audioRef.current || new Audio();
       audio.pause();
       audio.src = url;
+      audio.volume = 1;
       audio.muted = outputMuted;
       audioRef.current = audio;
       audio.onended = () => {
@@ -277,13 +263,11 @@ export function CallScreen({ context, onPrivateChat }) {
 
   const acceptCall = () => {
     acceptedAtRef.current = Date.now();
-    if (buttonClickRef.current) {
-      buttonClickRef.current.currentTime = 0;
-      buttonClickRef.current.play().catch(() => {});
-    }
     const voiceAudio = audioRef.current || new Audio();
-    voiceAudio.src = SILENT_AUDIO;
+    voiceAudio.src = BUTTON_CLICK_SOUND;
+    voiceAudio.volume = 0.62;
     voiceAudio.muted = false;
+    voiceAudio.playsInline = true;
     voiceAudio.play().catch(() => {});
     audioRef.current = voiceAudio;
     stopRinging();
