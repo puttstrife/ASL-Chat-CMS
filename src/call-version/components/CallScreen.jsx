@@ -272,26 +272,37 @@ export function CallScreen({ context, onPrivateChat }) {
   return (
     <section className="call-screen call-active" aria-label="Private audio call with Marisol">
       <header className="call-active-header">
-        <h1 className="call-name">Marisol</h1>
-        <p className="call-status">{formatDuration(seconds)} · connected</p>
+        <MarisolAvatar size="small" active={speaking} />
+        <div className="call-active-identity">
+          <h1 className="call-name">Marisol</h1>
+          <p className="call-status">{formatDuration(seconds)} · connected</p>
+        </div>
       </header>
 
       <div className="call-active-main">
-        <MarisolAvatar size="large" active={speaking} />
+        <div className="call-controls">
+          <div className="call-control-item">
+            <button className={`call-control ${micMuted ? 'is-muted' : ''}`} onClick={() => setMicMuted((muted) => !muted)} aria-label={micMuted ? 'Unmute microphone' : 'Mute microphone'} aria-pressed={micMuted}>
+              {micMuted ? <MicOff /> : <Mic />}
+            </button>
+            <span>{micMuted ? 'unmute' : 'mute'}</span>
+          </div>
+          <div className="call-control-item">
+            <button className={`call-control ${outputMuted ? 'is-muted' : ''}`} onClick={() => setOutputMuted((muted) => !muted)} aria-label={outputMuted ? 'Turn on call audio' : 'Mute call audio'} aria-pressed={outputMuted}>
+              {outputMuted ? <VolumeX /> : <Volume2 />}
+            </button>
+            <span>speaker</span>
+          </div>
+        </div>
         <AudioBars active={speaking} />
       </div>
 
       <footer className="call-active-footer">
-        <div className="call-controls">
-          <button className={`call-control ${micMuted ? 'is-muted' : ''}`} onClick={() => setMicMuted((muted) => !muted)} aria-label={micMuted ? 'Unmute microphone' : 'Mute microphone'} aria-pressed={micMuted}>
-            {micMuted ? <MicOff /> : <Mic />}
-          </button>
+        <div className="call-control-item call-control-item-end">
           <button className="call-control call-control-end" onClick={endCall} aria-label="End call">
             <PhoneOff />
           </button>
-          <button className={`call-control ${outputMuted ? 'is-muted' : ''}`} onClick={() => setOutputMuted((muted) => !muted)} aria-label={outputMuted ? 'Turn on call audio' : 'Mute call audio'} aria-pressed={outputMuted}>
-            {outputMuted ? <VolumeX /> : <Volume2 />}
-          </button>
+          <span>end</span>
         </div>
       </footer>
 

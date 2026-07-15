@@ -71,20 +71,28 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-avatar-wrap img.is-active { animation: call-avatar-breathe 1.8s ease-in-out infinite; }
 .call-avatar-large { width: 148px; height: 148px; }
 .call-avatar-medium { width: 116px; height: 116px; }
+.call-avatar-small { width: 62px; height: 62px; }
 .call-avatar-ping { position: absolute; inset: 0; border-radius: 50%; background: rgba(182,118,255,.22); animation: call-ping 2.2s ease-out infinite; }
 
-.call-active { grid-template-rows: auto minmax(0,1fr) auto; animation: call-phase-fade .34s ease-out both; }
-.call-active-header { padding-top: 28px; text-align: center; }
-.call-active-header .call-name { font-size: 43px; }
-.call-active-header .call-status { margin-top: 3px; font-variant-numeric: tabular-nums; }
-.call-active-main { display: flex; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 20px 32px; text-align: center; }
-.call-active-footer { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 0 24px calc(26px + env(safe-area-inset-bottom)); }
-.call-controls { display: flex; align-items: center; justify-content: center; gap: 22px; }
+.call-active { isolation: isolate; overflow: hidden; grid-template-rows: auto minmax(0,1fr) auto; background: linear-gradient(155deg, rgba(31,27,37,.7), rgba(8,9,16,.48)); backdrop-filter: blur(30px) saturate(1.25); -webkit-backdrop-filter: blur(30px) saturate(1.25); animation: call-phase-fade .34s ease-out both; }
+.call-active::before { content:""; position:absolute; z-index:-1; inset:-18%; background: radial-gradient(circle at 18% 20%, rgba(201,133,49,.44), transparent 34%), radial-gradient(circle at 82% 38%, rgba(45,91,127,.42), transparent 37%), radial-gradient(circle at 46% 92%, rgba(137,36,45,.48), transparent 37%); filter:blur(42px); opacity:.82; pointer-events:none; }
+.call-active-header { display:flex; align-items:center; gap:15px; padding:36px 34px 0; text-align:left; }
+.call-active-header .call-avatar-wrap img { box-shadow:0 0 22px rgba(190,108,255,.35); }
+.call-active-identity { min-width:0; }
+.call-active-header .call-name { color:#fff; font-family:"Lato", sans-serif; font-size:27px; font-weight:400; line-height:1.15; }
+.call-active-header .call-status { margin-top:5px; color:rgba(255,255,255,.78); font-size:15px; font-variant-numeric:tabular-nums; }
+.call-active-main { display:flex; min-height:0; flex-direction:column; align-items:center; justify-content:center; gap:38px; padding:24px 32px; text-align:center; }
+.call-active-footer { display:flex; flex-direction:column; align-items:center; padding:0 24px calc(42px + env(safe-area-inset-bottom)); }
+.call-controls { display:flex; align-items:flex-start; justify-content:center; gap:58px; }
+.call-control-item { display:flex; flex-direction:column; align-items:center; gap:10px; color:rgba(255,255,255,.86); font-family:"Lato", sans-serif; font-size:14px; text-transform:lowercase; }
+.call-active-main .call-control { width:78px; height:78px; border-color:rgba(255,255,255,.14); background:rgba(28,30,39,.54); box-shadow:inset 0 1px 1px rgba(255,255,255,.1), 0 12px 28px rgba(0,0,0,.18); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+.call-active-main .call-control.is-muted { background:rgba(70,72,82,.66); }
+.call-active-main .call-control svg { width:29px; height:29px; }
 .call-control { display: grid; width: 54px; height: 54px; place-items: center; border: 1px solid rgba(255,255,255,.11); border-radius: 50%; background: rgba(255,255,255,.055); color: rgba(255,255,255,.84); cursor: pointer; transition: transform .18s ease, background .18s ease; }
 .call-control:hover { background: rgba(255,255,255,.11); transform: translateY(-1px); }
 .call-control.is-muted { background: rgba(255,255,255,.16); color: #fff; }
 .call-control svg { width: 21px; height: 21px; }
-.call-control-end { width: 66px; height: 66px; border: 0; background: #e5484d; color: #fff; box-shadow: 0 10px 30px rgba(229,72,77,.38); }
+.call-control-end { width: 70px; height: 70px; border: 0; background: #ff453a; color: #fff; box-shadow: 0 12px 32px rgba(255,69,58,.34); }
 .call-control-end:hover { background: #ee565b; }
 .call-control-end svg { width: 26px; height: 26px; }
 .call-audio-bars { display: flex; height: 25px; align-items: end; justify-content: center; gap: 3px; }
