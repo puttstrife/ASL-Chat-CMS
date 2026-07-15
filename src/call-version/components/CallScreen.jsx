@@ -4,9 +4,10 @@ import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
 
+import { BUTTON_CLICK_SOUND } from '../lib/sfx.js';
+
 const IOS_RINGTONE = '/audio/iphone-ringtone.mp3';
 const ANDROID_RINGTONE = '/audio/android-ringtone.mp3';
-const BUTTON_CLICK_SOUND = '/audio/button-click.mp3';
 const FIRST_TTS_DELAY_MS = 900;
 
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;

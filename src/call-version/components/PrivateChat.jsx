@@ -6,8 +6,7 @@ import { RainbowButton } from '../../components/RainbowButton.jsx';
 import { AuroraText } from '../../components/AuroraText.jsx';
 import { SparklesText } from './SparklesText.jsx';
 
-const CHAT_ACTION_REVEAL_SOUND = '/audio/chat-action-reveal.mp3';
-const BUTTON_CLICK_SOUND = '/audio/button-click.mp3';
+import { BUTTON_CLICK_SOUND, CHAT_ACTION_REVEAL_SOUND } from '../lib/sfx.js';
 
 function getDockSignature(dock) {
   if (dock.type === 'buttons') return `buttons:${dock.buttons.map((button) => button.label).join('|')}`;
