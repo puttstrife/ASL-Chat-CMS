@@ -169,6 +169,14 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes call-ring-control { 0%,100% { transform:scale(1); box-shadow:0 10px 30px rgba(48,164,108,.4),0 0 0 0 rgba(48,164,108,.45) } 50% { transform:scale(1.04); box-shadow:0 10px 30px rgba(48,164,108,.4),0 0 0 14px rgba(48,164,108,0) } }
 @keyframes call-drawer-up { from { opacity:0; transform:translateY(1rem) scale(.985) } to { opacity:1; transform:none } }
 
+@media (min-width: 640px) {
+  .call-active {
+    background: linear-gradient(155deg, rgba(31,27,37,.74), rgba(8,9,16,.54));
+    backdrop-filter: blur(34px) saturate(1.35);
+    -webkit-backdrop-filter: blur(34px) saturate(1.35);
+  }
+}
+
 @media (max-width: 639px) {
   .call-shell { padding: 0; }
   .call-frame { height: 100dvh; max-width: none; padding: 0; border: 0; border-radius: 0; }

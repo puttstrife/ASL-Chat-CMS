@@ -231,6 +231,11 @@ export function CallScreen({ context, onPrivateChat }) {
     if (audioRef.current) audioRef.current.muted = outputMuted;
   }, [outputMuted]);
 
+  // Keep audio failures per-line: a failed/slow chunk falls back to a timed
+  // caption, then the next line retries TTS fresh — one hiccup never silences
+  // the rest of the call.
+  useEffect(() => { setAudioFailed(false); }, [lineIndex]);
+
   useEffect(() => {
     if (phase !== 'active' || !audioFailed) return undefined;
     const duration = Math.max(2600, 900 + caption.length * 42);
