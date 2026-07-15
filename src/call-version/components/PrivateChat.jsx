@@ -6,6 +6,8 @@ import { RainbowButton } from '../../components/RainbowButton.jsx';
 import { AuroraText } from '../../components/AuroraText.jsx';
 import { SparklesText } from './SparklesText.jsx';
 
+const CHAT_ACTION_REVEAL_SOUND = '/audio/chat-action-reveal.mp3';
+
 const SPARKLE_PHRASES = [
   'certain desires are ready to surface',
   'truly meant to reach you',
@@ -18,6 +20,36 @@ const SPARKLE_PHRASES = [
 export function PrivateChat({ context }) {
   const funnel = useCallFunnel(context);
   const scrollRef = useRef(null);
+  const revealAudioRef = useRef(null);
+  const lastDockSignatureRef = useRef('');
+
+  useEffect(() => {
+    const audio = new Audio(CHAT_ACTION_REVEAL_SOUND);
+    audio.preload = 'auto';
+    audio.volume = 0.48;
+    audio.load();
+    revealAudioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      if (revealAudioRef.current === audio) revealAudioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!['buttons', 'continue', 'input'].includes(funnel.dock.type)) return;
+    const signature = funnel.dock.type === 'buttons'
+      ? `buttons:${funnel.dock.buttons.map((button) => button.label).join('|')}`
+      : `${funnel.dock.type}:${funnel.dock.key || funnel.dock.next || ''}`;
+    if (signature === lastDockSignatureRef.current) return;
+    lastDockSignatureRef.current = signature;
+
+    const audio = revealAudioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }, [funnel.dock]);
 
   useEffect(() => {
     const container = scrollRef.current;
