@@ -40,8 +40,8 @@ export function ChatCard({ funnel }) {
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="font-script text-3xl leading-tight text-[var(--gold)]">Marisol</p>
-          <p className="font-sans inline-flex items-center gap-1.5 text-[14px] text-white/55">
-            <span className="grid size-4 place-items-center rounded-full bg-[#38c878] text-[9px] font-black text-[#04130a]">✓</span>
+          <p className="font-sans inline-flex items-center gap-1.5 text-[.7rem] text-white/55">
+            <span className="grid size-4 place-items-center rounded-full bg-[#38c878] text-[.45rem] font-black text-[#04130a]">✓</span>
             Following your pattern
           </p>
         </div>
@@ -72,7 +72,7 @@ export function ChatCard({ funnel }) {
 function Message({ m }) {
   if (m.who === 'memo-label') {
     return (
-      <div className="font-sans mx-auto my-1 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#d8b4fe]/85">
+      <div className="font-sans mx-auto my-1 inline-flex items-center gap-2 text-[.6rem] font-bold uppercase tracking-[0.2em] text-[#d8b4fe]/85">
         <span className="size-1.5 rounded-full bg-[#c084fc] shadow-[0_0_12px_#c084fc]" style={{ animation: 'dotPulse 1.2s ease-in-out infinite' }} />
         {m.text}
       </div>
@@ -90,7 +90,7 @@ function Message({ m }) {
   if (m.who === 'reading-pending') {
     return (
       <div className="bubble-in max-w-[82%] self-start rounded-2xl border border-[#d8b4fe]/18 bg-[#090a10]/90 px-3.5 py-3 shadow-[0_16px_48px_rgba(75,28,137,0.24)]">
-        <p className="font-sans inline-flex items-center gap-2.5 text-[12.5px] font-bold uppercase tracking-[0.16em] text-[#d8b4fe]/80">
+        <p className="font-sans inline-flex items-center gap-2.5 text-[.625rem] font-bold uppercase tracking-[0.16em] text-[#d8b4fe]/80">
           <span className="size-2 rounded-full bg-[#c084fc] shadow-[0_0_14px_rgba(192,132,252,0.82)]" style={{ animation: 'dotPulse 1.2s ease-in-out infinite' }} />
           Sitting with your words
         </p>
@@ -103,7 +103,7 @@ function Message({ m }) {
       <BubbleContent>{m.text}</BubbleContent>
       {m.reaction && (
         <BubbleReactions
-          className="size-7 p-0 border border-white/10 bg-[#161720] text-[15px] leading-none ring-0"
+          className="size-7 p-0 border border-white/10 bg-[#161720] text-[.75rem] leading-none ring-0"
           style={{ animation: 'bubbleIn .3s cubic-bezier(.2,.7,.3,1)' }}
         >
           {m.reaction}
@@ -126,7 +126,7 @@ function Dock({ dock, onButton, onSubmit, onContinue }) {
             <button
               key={i}
               onClick={() => onButton(b)}
-              className="font-sans inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/10 bg-[#15161c] px-8 text-[17px] font-semibold text-white/50 transition-colors hover:bg-[#1b1c24] hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c084fc] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0d14]"
+              className="font-sans inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/10 bg-[#15161c] px-8 text-[.85rem] font-semibold text-white/50 transition-colors hover:bg-[#1b1c24] hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c084fc] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0d14]"
             >
               {b.label}
             </button>
@@ -167,7 +167,7 @@ function InputRow({ placeholder, onSend }) {
         placeholder={placeholder}
         onChange={(e) => { setValue(e.target.value); grow(e.target); }}
         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-        className="no-scrollbar font-sans max-h-[120px] min-h-[48px] w-full flex-1 resize-none rounded-[999px] border border-[var(--gold)]/20 bg-white/5 px-4.5 py-3 text-[18px] leading-tight text-white/90 outline-none placeholder:font-semibold placeholder:text-white/60"
+        className="no-scrollbar font-sans max-h-[120px] min-h-[48px] w-full flex-1 resize-none rounded-[999px] border border-[var(--gold)]/20 bg-white/5 px-4.5 py-3 text-[.9rem] leading-tight text-white/90 outline-none placeholder:font-semibold placeholder:text-white/60"
       />
       <RainbowButton type="submit" aria-label="Send" className="size-12 shrink-0 rounded-full px-0">
         <FiSend className="size-5" />

@@ -32,7 +32,7 @@ export function MarisolIdentity({ status, statusClassName = '', nameClassName = 
     <div className="text-center">
       <p className={`font-script leading-none text-[var(--gold)] ${nameClassName}`}>Marisol</p>
       {status && (
-        <p className={`font-sans mt-2 text-[14px] text-white/55 ${statusClassName}`}>
+        <p className={`font-sans mt-2 text-[.7rem] text-white/55 ${statusClassName}`}>
           {status}
         </p>
       )}

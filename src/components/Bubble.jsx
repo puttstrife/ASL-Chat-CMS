@@ -51,7 +51,7 @@ export function BubbleContent({ asChild = false, className, ...props }) {
     <Comp
       data-slot="bubble-content"
       className={cn(
-        'font-sans w-fit max-w-full min-w-0 overflow-hidden rounded-2xl border border-transparent px-4 py-2.5 text-[17px] leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end',
+        'font-sans w-fit max-w-full min-w-0 overflow-hidden rounded-2xl border border-transparent px-4 py-2.5 text-[.85rem] leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end',
         className
       )}
       {...props}

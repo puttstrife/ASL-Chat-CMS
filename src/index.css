@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/foundation.css";
 
 /* Required by AIGradientBorder — masks the inner glow spill to an ellipse. */
 .ai-glow-spill-mask {
@@ -56,7 +57,7 @@
   100% { background-position: 200%; }
 }
 
-html { height: 100%; font-size: 20px; }
+html { height: 100%; }
 body, #root { height: 100%; }
 body {
   margin: 0;
@@ -94,7 +95,7 @@ body {
   --secondary-color: rgba(216, 180, 254, 0.42); /* unplayed peaks */
   --disabled-color: rgba(255, 255, 255, 0.20);
   font-family: 'Lato', sans-serif;             /* match the chat font */
-  font-size: 15px;
+  font-size: .75rem;
   color: rgba(255, 255, 255, 0.82);
 }
 .marisol-voicemail .VoicemailPlayer-playButton {

@@ -90,7 +90,7 @@ export function CallScreen({ onConnect }) {
             <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-[#b676ff] transition-all duration-700 ease-out" style={{ width: `${((step + 1) / CONNECT_STEPS.length) * 100}%` }} />
             </div>
-            <p className="font-sans inline-flex items-center gap-2 text-[14px] text-white/60" key={step} style={{ animation: 'bubbleIn .35s ease' }}>
+            <p className="font-sans inline-flex items-center gap-2 text-[.7rem] text-white/60" key={step} style={{ animation: 'bubbleIn .35s ease' }}>
               <Loader2 className="size-4 animate-spin" /> {CONNECT_STEPS[step]}
             </p>
           </div>
@@ -122,7 +122,7 @@ export function CallScreen({ onConnect }) {
       <div className="flex flex-col items-center justify-center gap-6 px-8 text-center">
         <MarisolAvatar sizeClass="size-36" active={speaking} />
         <AudioActivity active={speaking} />
-        <p className="font-sans min-h-[3.6em] max-w-[300px] text-[17px] leading-relaxed text-white/85" key={lineIdx} style={{ animation: 'bubbleIn .4s ease' }}>
+        <p className="font-sans min-h-[3.6em] max-w-[300px] text-[.85rem] leading-relaxed text-white/85" key={lineIdx} style={{ animation: 'bubbleIn .4s ease' }}>
           {LINES[lineIdx]}
         </p>
       </div>
@@ -149,7 +149,7 @@ export function CallScreen({ onConnect }) {
       {/* Redirect can't autoplay sound → one-tap to connect audio */}
       {needsTap && (
         <button onClick={connectAudio} className="absolute inset-0 z-30 grid place-items-center bg-[#050208]/80 backdrop-blur-sm">
-          <span className="font-sans flex items-center gap-2 rounded-full border border-[var(--gold)]/40 bg-white/5 px-5 py-3 text-[15px] font-semibold text-white/85">
+          <span className="font-sans flex items-center gap-2 rounded-full border border-[var(--gold)]/40 bg-white/5 px-5 py-3 text-[.75rem] font-semibold text-white/85">
             <Volume2 className="size-5 text-[var(--gold)]" /> Tap to connect audio
           </span>
         </button>

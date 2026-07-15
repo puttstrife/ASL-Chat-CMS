@@ -43,7 +43,7 @@ export function LiveOverlay({ onClose }) {
     <div className="absolute inset-0 z-[900] grid place-items-center bg-[radial-gradient(ellipse_80%_70%_at_50%_20%,rgba(93,40,148,0.4),transparent_68%)] backdrop-blur-xl">
       <div className="flex flex-col items-center gap-3.5 p-6 text-center">
         <MarisolAvatar sizeClass="size-32" active={speaking} />
-        <MarisolIdentity status={status} nameClassName="text-4xl" statusClassName="min-h-[1.4em] text-[15px] text-white/70" />
+        <MarisolIdentity status={status} nameClassName="text-4xl" statusClassName="min-h-[1.4em] text-[.75rem] text-white/70" />
         <AudioActivity active={speaking} className="my-1" />
         <RainbowButton onClick={onClose} className="font-sans px-6">End call</RainbowButton>
       </div>

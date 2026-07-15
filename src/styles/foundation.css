@@ -1,0 +1,4 @@
+:root {
+  /* 20px at the browser's default 16px, while respecting user font settings. */
+  font-size: 125%;
+}
