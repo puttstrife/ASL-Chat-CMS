@@ -320,7 +320,10 @@ export function CallScreen({ context, onPrivateChat }) {
             <h1 className="call-name">Marisol</h1>
             <p className="call-status">{endedReason === 'completed' ? 'Call complete' : endedReason === 'declined' ? 'Call declined' : 'Call ended'}{endedReason === 'declined' ? '' : ` · ${formatDuration(seconds)}`}</p>
           </div>
-          <PrimaryButton onClick={onPrivateChat}>Continue to private chat</PrimaryButton>
+          <PrimaryButton className="call-private-chat-button" onClick={onPrivateChat}>
+            <MessageCircle aria-hidden="true" />
+            Continue to private chat
+          </PrimaryButton>
         </div>
       </section>
     );
