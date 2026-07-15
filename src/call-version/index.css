@@ -16,7 +16,8 @@
   --color-5: 90 100% 63%;
 }
 
-html, body, #root { height: 100%; }
+html { height:100%; font-size:20px; }
+body, #root { height:100%; }
 body {
   margin: 0;
   overflow: hidden;
