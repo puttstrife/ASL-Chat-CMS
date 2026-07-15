@@ -170,6 +170,12 @@ button { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 639px) {
   .call-shell { padding: 0; }
   .call-frame { height: 100dvh; max-width: none; padding: 0; border: 0; border-radius: 0; }
+  .call-intro-overlay { padding: 1rem; }
+  .call-intro-glass { width: min(100%, 19rem); border-radius: .9rem; padding: 1.35rem 1rem 1.05rem; }
+  .call-intro-kicker { margin-bottom: .5rem; font-size: .55rem; letter-spacing: .09em; }
+  .call-intro-glass h1 { max-width: 14rem; margin-bottom: 1.05rem; font-size: 1.2rem; line-height: 1.12; }
+  .call-intro-button { min-height: 2.6rem; padding: .6rem .8rem; gap: .4rem; font-size: .7rem; white-space: nowrap; }
+  .call-intro-button svg { width: .9rem; height: .9rem; flex: none; }
   .call-active-main { gap: 18px; padding-inline: 24px; }
   .call-avatar-large { width: 132px; height: 132px; }
 }
