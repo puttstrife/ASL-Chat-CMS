@@ -1,0 +1,7 @@
+node_modules/
+.env
+elevenlabs
+.DS_Store
+server/.cache/
+dist/
+web v4/

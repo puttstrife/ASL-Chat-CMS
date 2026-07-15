@@ -1,0 +1,38 @@
+{
+  "name": "marisol-chat",
+  "version": "1.0.0",
+  "description": "Standalone Interactive VSL chat for Marisol — React + ElevenLabs voice + optional live call.",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "serve": "npm run build && node server/index.js",
+    "dev:api": "node --watch server/index.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "@radix-ui/react-slot": "^1.3.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "lucide-react": "^1.24.0",
+    "motion": "^11.15.0",
+    "radix-ui": "^1.6.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-icons": "^5.4.0",
+    "react-voicemail-player": "^0.0.10",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.61.1",
+    "tailwindcss": "^4.3.2",
+    "vite": "^6.0.7"
+  }
+}
