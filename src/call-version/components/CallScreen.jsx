@@ -65,7 +65,7 @@ export function CallScreen({ context, onPrivateChat }) {
   const [lineIndex, setLineIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [audioFailed, setAudioFailed] = useState(false);
-  const [micMuted, setMicMuted] = useState(false);
+  const [micMuted, setMicMuted] = useState(true);
   const [outputMuted, setOutputMuted] = useState(false);
   const [endedReason, setEndedReason] = useState('completed');
   const [platform] = useState(detectMobilePlatform);
