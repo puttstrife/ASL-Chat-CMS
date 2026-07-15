@@ -22,10 +22,15 @@ function detectMobilePlatform() {
 
 function IOSAnswerSlider({ onAnswer }) {
   const [value, setValue] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const sliderRef = useRef(null);
+  const inputRef = useRef(null);
+  const valueRef = useRef(0);
+  const draggingRef = useRef(false);
   const answeredRef = useRef(false);
 
-  const updateValue = (event) => {
-    const nextValue = Number(event.target.value);
+  const setSliderValue = (nextValue) => {
+    valueRef.current = nextValue;
     setValue(nextValue);
     if (nextValue >= 92 && !answeredRef.current) {
       answeredRef.current = true;
@@ -33,8 +38,44 @@ function IOSAnswerSlider({ onAnswer }) {
     }
   };
 
+  const updateFromPointer = (clientX) => {
+    const rect = sliderRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const knobCenter = 36;
+    const travel = Math.max(1, rect.width - 72);
+    const nextValue = Math.max(0, Math.min(100, ((clientX - rect.left - knobCenter) / travel) * 100));
+    setSliderValue(nextValue);
+  };
+
+  const stopDragging = () => {
+    draggingRef.current = false;
+    setDragging(false);
+    if (!answeredRef.current && valueRef.current < 92) setSliderValue(0);
+  };
+
   return (
-    <div className="ios-answer-slider" style={{ '--slide-progress': `${value}%` }}>
+    <div
+      ref={sliderRef}
+      className={`ios-answer-slider ${dragging ? 'is-dragging' : ''}`}
+      style={{ '--slide-progress': `${value}%` }}
+      onPointerDown={(event) => {
+        if (answeredRef.current) return;
+        const rect = sliderRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const knobLeft = rect.left + 4 + ((rect.width - 72) * valueRef.current) / 100;
+        if (event.clientX < knobLeft - 8 || event.clientX > knobLeft + 72) return;
+        draggingRef.current = true;
+        setDragging(true);
+        inputRef.current?.focus({ preventScroll: true });
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        updateFromPointer(event.clientX);
+      }}
+      onPointerMove={(event) => {
+        if (draggingRef.current) updateFromPointer(event.clientX);
+      }}
+      onPointerUp={stopDragging}
+      onPointerCancel={stopDragging}
+    >
       <span className="ios-answer-label" style={{ opacity: 1 - value / 100 }} aria-hidden="true">slide to answer</span>
       <span
         className="ios-answer-knob"
@@ -44,16 +85,16 @@ function IOSAnswerSlider({ onAnswer }) {
         <Phone />
       </span>
       <input
+        ref={inputRef}
         type="range"
         min="0"
         max="100"
         step="1"
         value={value}
         aria-label="Slide to answer"
-        onChange={updateValue}
-        onPointerUp={() => { if (!answeredRef.current) setValue(0); }}
+        onChange={(event) => setSliderValue(Number(event.target.value))}
         onKeyUp={(event) => {
-          if (event.key === 'Escape' && !answeredRef.current) setValue(0);
+          if (event.key === 'Escape' && !answeredRef.current) setSliderValue(0);
         }}
       />
     </div>
