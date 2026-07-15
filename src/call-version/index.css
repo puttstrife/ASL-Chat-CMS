@@ -56,6 +56,13 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-control-accept { background: #30a46c; box-shadow: 0 10px 30px rgba(48,164,108,.4); animation: call-ring-control 1.65s ease-in-out infinite; }
 .call-control-decline:hover { background: #ee565b; }
 .call-control-accept:hover { background: #39b978; }
+.ios-answer-slider { position: relative; width: min(100%, 340px); height: 72px; margin: 0 auto; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: linear-gradient(90deg, rgba(48,164,108,.34) var(--slide-progress), rgba(255,255,255,.16) var(--slide-progress)); box-shadow: inset 0 1px 1px rgba(255,255,255,.08); }
+.ios-answer-label { position: absolute; inset: 0 16px 0 76px; display: grid; place-items: center; color: rgba(255,255,255,.82); font-family: "Lato", sans-serif; font-size: 17px; font-weight: 400; letter-spacing: .01em; pointer-events: none; }
+.ios-answer-knob { position: absolute; z-index: 1; top: 4px; display: grid; width: 64px; height: 64px; place-items: center; border-radius: 50%; background: #fff; color: #20c76f; box-shadow: 0 2px 8px rgba(0,0,0,.32); pointer-events: none; transition: left .12s ease-out; }
+.ios-answer-knob svg { width: 29px; height: 29px; fill: none; stroke-width: 2.7; }
+.ios-answer-slider input { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; margin: 0; cursor: grab; opacity: 0; }
+.ios-answer-slider input:active { cursor: grabbing; }
+.ios-answer-slider:focus-within { outline: 2px solid #c084fc; outline-offset: 3px; }
 .call-center-stack { display: flex; flex-direction: column; align-items: center; gap: 22px; }
 .call-name { margin: 0; color: var(--call-gold); font-family: "Allura", cursive; font-size: 54px; line-height: .9; }
 .call-status { margin: 8px 0 0; color: rgba(255,255,255,.72); font-family: "Lato", sans-serif; font-size: 14px; }

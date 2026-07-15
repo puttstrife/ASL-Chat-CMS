@@ -20,6 +20,46 @@ function detectMobilePlatform() {
   return 'android';
 }
 
+function IOSAnswerSlider({ onAnswer }) {
+  const [value, setValue] = useState(0);
+  const answeredRef = useRef(false);
+
+  const updateValue = (event) => {
+    const nextValue = Number(event.target.value);
+    setValue(nextValue);
+    if (nextValue >= 92 && !answeredRef.current) {
+      answeredRef.current = true;
+      onAnswer();
+    }
+  };
+
+  return (
+    <div className="ios-answer-slider" style={{ '--slide-progress': `${value}%` }}>
+      <span className="ios-answer-label" style={{ opacity: 1 - value / 100 }} aria-hidden="true">slide to answer</span>
+      <span
+        className="ios-answer-knob"
+        style={{ left: `calc(4px + ${value}% - ${value * 0.72}px)` }}
+        aria-hidden="true"
+      >
+        <Phone />
+      </span>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value={value}
+        aria-label="Slide to answer"
+        onChange={updateValue}
+        onPointerUp={() => { if (!answeredRef.current) setValue(0); }}
+        onKeyUp={(event) => {
+          if (event.key === 'Escape' && !answeredRef.current) setValue(0);
+        }}
+      />
+    </div>
+  );
+}
+
 export function CallScreen({ context, onPrivateChat }) {
   const [phase, setPhase] = useState('ringing');
   const [lineIndex, setLineIndex] = useState(0);
@@ -196,16 +236,20 @@ export function CallScreen({ context, onPrivateChat }) {
             <p className="call-ringing-detail">Private audio call</p>
           </div>
         </div>
-        <div className="call-ringing-actions">
-          <div className="call-ringing-action">
-            <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
-            <span>Decline</span>
+        {platform === 'ios' ? (
+          <IOSAnswerSlider onAnswer={acceptCall} />
+        ) : (
+          <div className="call-ringing-actions">
+            <div className="call-ringing-action">
+              <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
+              <span>Decline</span>
+            </div>
+            <div className="call-ringing-action">
+              <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
+              <span>Accept</span>
+            </div>
           </div>
-          <div className="call-ringing-action">
-            <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
-            <span>Accept</span>
-          </div>
-        </div>
+        )}
       </section>
     );
   }
