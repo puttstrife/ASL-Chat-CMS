@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX } from 'lucide-react';
+import { AlarmClock, MessageCircle, Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX } from 'lucide-react';
 import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
@@ -230,26 +230,31 @@ export function CallScreen({ context, onPrivateChat }) {
     return (
       <section className="call-screen call-ringing" aria-label="Incoming call from Marisol">
         <div className="call-ringing-content">
-          <MarisolAvatar size="large" ping />
           <div className="call-caller-identity">
             <h1 className="call-name">Marisol</h1>
             <p className="call-ringing-detail">Private audio call</p>
           </div>
         </div>
-        {platform === 'ios' ? (
-          <IOSAnswerSlider onAnswer={acceptCall} />
-        ) : (
-          <div className="call-ringing-actions">
-            <div className="call-ringing-action">
-              <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
-              <span>Decline</span>
-            </div>
-            <div className="call-ringing-action">
-              <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
-              <span>Accept</span>
-            </div>
+        <div className="call-incoming-footer">
+          <div className="call-incoming-utilities" aria-hidden="true">
+            <div><AlarmClock /><span>Remind Me</span></div>
+            <div><MessageCircle /><span>Message</span></div>
           </div>
-        )}
+          {platform === 'ios' ? (
+            <IOSAnswerSlider onAnswer={acceptCall} />
+          ) : (
+            <div className="call-ringing-actions">
+              <div className="call-ringing-action">
+                <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
+                <span>Decline</span>
+              </div>
+              <div className="call-ringing-action">
+                <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
+                <span>Accept</span>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
     );
   }
