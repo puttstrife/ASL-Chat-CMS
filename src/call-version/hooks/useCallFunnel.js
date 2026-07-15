@@ -61,7 +61,7 @@ export function useCallFunnel(context) {
     await sleep(Math.max(500, Math.min(1450, 300 + text.length * 13)));
     if (!aliveRef.current) return;
     remove(typingId);
-    push({ who: 'marisol', text });
+    push({ who: 'marisol', text, name: context.name });
     await sleep(240);
   }, [context, push, remove]);
 
@@ -70,7 +70,7 @@ export function useCallFunnel(context) {
     const text = await fetchCallReading(context, answersRef.current);
     if (!aliveRef.current) return;
     remove(pendingId);
-    if (text) push({ who: 'marisol', text });
+    if (text) push({ who: 'marisol', text, name: context.name });
   }, [context, push, remove]);
 
   const runStage = useCallback(async (stageId) => {

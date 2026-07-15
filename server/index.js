@@ -235,8 +235,8 @@ app.get('/api/voice-token', async (_req, res) => {
 // SPA fallback — serve the built index.html for any non-API GET.
 app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api')) {
-    const entry = req.path === '/call' || req.path.startsWith('/call/')
-      ? path.join(DIST_DIR, 'call', 'index.html')
+    const entry = req.path === '/chat' || req.path.startsWith('/chat/')
+      ? path.join(DIST_DIR, 'chat', 'index.html')
       : path.join(DIST_DIR, 'index.html');
     return res.sendFile(entry);
   }

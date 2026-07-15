@@ -82,6 +82,9 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-control:hover { background: rgba(255,255,255,.11); transform: translateY(-1px); }
 .call-control.is-muted { background: rgba(255,255,255,.16); color: #fff; }
 .call-control svg { width: 21px; height: 21px; }
+.call-control-end { width: 66px; height: 66px; border: 0; background: #e5484d; color: #fff; box-shadow: 0 10px 30px rgba(229,72,77,.38); }
+.call-control-end:hover { background: #ee565b; }
+.call-control-end svg { width: 26px; height: 26px; }
 .call-audio-bars { display: flex; height: 25px; align-items: end; justify-content: center; gap: 3px; }
 .call-audio-bars span { width: 4px; height: 7px; border-radius: 99px; background: var(--call-purple); opacity: .3; }
 .call-audio-bars.is-active span { opacity: 1; animation: call-bar .85s ease-in-out infinite; }
@@ -103,6 +106,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .chat-bubble { width: fit-content; max-width: 82%; border: 1px solid transparent; border-radius: 18px; padding: 10px 15px; font-family: "Lato", sans-serif; font-size: 16px; line-height: 1.55; overflow-wrap: anywhere; animation: call-rise .3s ease; }
 .chat-bubble-marisol { align-self: flex-start; border-top-left-radius: 5px; background: rgba(255,255,255,.08); }
 .chat-bubble-user { align-self: flex-end; border-top-right-radius: 5px; background: #6d28d9; }
+.call-aurora-name { font-weight: 700; }
+.animate-aurora { animation: call-aurora 10s linear infinite; }
+.call-sparkles-text { position: relative; display: inline-block; color: #f5dc9a; font-weight: 700; }
+.call-sparkles-visual { position: relative; display: inline-block; isolation: isolate; text-shadow: 0 0 13px rgba(242,213,138,.28); }
+.call-sparkle { position: absolute; z-index: 1; left: var(--sparkle-x); top: var(--sparkle-y); color: #e9c8ff; font-size: .55em; line-height: 1; opacity: 0; pointer-events: none; transform: translate(-50%,-50%) scale(var(--sparkle-scale)); animation: call-sparkle 2.4s var(--sparkle-delay) ease-in-out infinite; text-shadow: 0 0 6px rgba(192,132,252,.72); }
 .chat-bubble.has-reaction { position: relative; margin-bottom: 13px; }
 .chat-reaction { position: absolute; right: 10px; bottom: -16px; display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; background: #161720; box-shadow: 0 0 0 3px var(--call-panel); font-size: 15px; line-height: 1; animation: call-rise .3s ease; }
 .chat-typing { display: inline-flex; align-self: flex-start; gap: 5px; border-radius: 16px 16px 16px 5px; padding: 13px 15px; background: rgba(255,255,255,.08); }
@@ -133,6 +141,8 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes call-rise { from { opacity:0; transform:translateY(7px) } to { opacity:1; transform:none } }
 @keyframes call-typing { 0%,60%,100% { opacity:.3; transform:none } 30% { opacity:1; transform:translateY(-3px) } }
 @keyframes rainbow { 0% { background-position:0% } 100% { background-position:200% } }
+@keyframes call-aurora { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
+@keyframes call-sparkle { 0%,100% { opacity:0; transform:translate(-50%,-50%) scale(0) rotate(0deg) } 45%,60% { opacity:.9; transform:translate(-50%,-50%) scale(var(--sparkle-scale)) rotate(90deg) } }
 @keyframes call-status-pulse { 0%,100% { opacity:.78 } 50% { opacity:1 } }
 @keyframes call-ring-control { 0%,100% { transform:scale(1); box-shadow:0 10px 30px rgba(48,164,108,.4),0 0 0 0 rgba(48,164,108,.45) } 50% { transform:scale(1.04); box-shadow:0 10px 30px rgba(48,164,108,.4),0 0 0 14px rgba(48,164,108,0) } }
 

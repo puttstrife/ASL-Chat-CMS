@@ -181,6 +181,13 @@ export function CallScreen({ context, onPrivateChat }) {
     setPhase('ended');
   };
 
+  const endCall = () => {
+    audioRef.current?.pause();
+    setNeedsTap(false);
+    setEndedReason('manual');
+    setPhase('ended');
+  };
+
   if (phase === 'ringing') {
     return (
       <section className="call-screen call-ringing" aria-label="Incoming call from Marisol">
@@ -252,6 +259,9 @@ export function CallScreen({ context, onPrivateChat }) {
         <div className="call-controls">
           <button className={`call-control ${micMuted ? 'is-muted' : ''}`} onClick={() => setMicMuted((muted) => !muted)} aria-label={micMuted ? 'Unmute microphone' : 'Mute microphone'} aria-pressed={micMuted}>
             {micMuted ? <MicOff /> : <Mic />}
+          </button>
+          <button className="call-control call-control-end" onClick={endCall} aria-label="End call">
+            <PhoneOff />
           </button>
           <button className={`call-control ${outputMuted ? 'is-muted' : ''}`} onClick={() => setOutputMuted((muted) => !muted)} aria-label={outputMuted ? 'Turn on call audio' : 'Mute call audio'} aria-pressed={outputMuted}>
             {outputMuted ? <VolumeX /> : <Volume2 />}

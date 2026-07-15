@@ -12,8 +12,8 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(process.cwd(), 'index.html'),
-        call: resolve(process.cwd(), 'call/index.html'),
+        main: resolve(process.cwd(), 'index.html'), // call version (root)
+        chat: resolve(process.cwd(), 'chat/index.html'), // original chat funnel
       },
     },
   },

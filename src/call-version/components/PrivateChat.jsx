@@ -3,6 +3,17 @@ import { FiSend } from 'react-icons/fi';
 import { useCallFunnel } from '../hooks/useCallFunnel.js';
 import { PrimaryButton } from './UI.jsx';
 import { RainbowButton } from '../../components/RainbowButton.jsx';
+import { AuroraText } from '../../components/AuroraText.jsx';
+import { SparklesText } from './SparklesText.jsx';
+
+const SPARKLE_PHRASES = [
+  'certain desires are ready to surface',
+  'truly meant to reach you',
+  'the thing you want is still there',
+  'There is something I can do for you',
+  'Thirteen openings',
+  'what’s meant for you finally finds its way through',
+];
 
 export function PrivateChat({ context }) {
   const funnel = useCallFunnel(context);
@@ -50,10 +61,43 @@ function Message({ message }) {
   }
   return (
     <div className={`chat-bubble chat-bubble-${message.who} ${message.reaction ? 'has-reaction' : ''}`}>
-      {message.text}
+      {message.who === 'marisol'
+        ? <MarisolText text={message.text} name={message.name} />
+        : message.text}
       {message.reaction && <span className="chat-reaction" aria-label={`Marisol reacted ${message.reaction}`}>{message.reaction}</span>}
     </div>
   );
+}
+
+function MarisolText({ text, name }) {
+  const decorations = [
+    ...(name ? [{ type: 'name', value: name }] : []),
+    ...SPARKLE_PHRASES.map((value) => ({ type: 'sparkles', value })),
+  ];
+  const parts = [];
+  let cursor = 0;
+
+  while (cursor < text.length) {
+    let match = null;
+    for (const decoration of decorations) {
+      const index = text.indexOf(decoration.value, cursor);
+      if (index !== -1 && (!match || index < match.index || (index === match.index && decoration.value.length > match.value.length))) {
+        match = { ...decoration, index };
+      }
+    }
+
+    if (!match) {
+      parts.push(text.slice(cursor));
+      break;
+    }
+    if (match.index > cursor) parts.push(text.slice(cursor, match.index));
+    parts.push(match.type === 'name'
+      ? <AuroraText key={`${match.index}-${match.value}`} className="call-aurora-name">{match.value}</AuroraText>
+      : <SparklesText key={`${match.index}-${match.value}`}>{match.value}</SparklesText>);
+    cursor = match.index + match.value.length;
+  }
+
+  return parts;
 }
 
 function Dock({ dock, onChoose, onSubmit, onAdvance }) {
