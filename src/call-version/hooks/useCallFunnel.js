@@ -70,7 +70,14 @@ export function useCallFunnel(context) {
     const text = await fetchCallReading(context, answersRef.current);
     if (!aliveRef.current) return;
     remove(pendingId);
-    if (text) push({ who: 'marisol', text, name: context.name });
+    if (text) {
+      push({
+        who: 'marisol',
+        text,
+        name: context.name,
+        auroraValues: [answersRef.current.change, answersRef.current.desire].filter(Boolean),
+      });
+    }
   }, [context, push, remove]);
 
   const runStage = useCallback(async (stageId) => {

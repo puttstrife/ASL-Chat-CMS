@@ -62,16 +62,17 @@ function Message({ message }) {
   return (
     <div className={`chat-bubble chat-bubble-${message.who} ${message.reaction ? 'has-reaction' : ''}`}>
       {message.who === 'marisol'
-        ? <MarisolText text={message.text} name={message.name} />
+        ? <MarisolText text={message.text} name={message.name} auroraValues={message.auroraValues} />
         : message.text}
       {message.reaction && <span className="chat-reaction" aria-label={`Marisol reacted ${message.reaction}`}>{message.reaction}</span>}
     </div>
   );
 }
 
-function MarisolText({ text, name }) {
+function MarisolText({ text, name, auroraValues = [] }) {
   const decorations = [
     ...(name ? [{ type: 'name', value: name }] : []),
+    ...auroraValues.map((value) => ({ type: 'name', value })),
     ...SPARKLE_PHRASES.map((value) => ({ type: 'sparkles', value })),
   ];
   const parts = [];

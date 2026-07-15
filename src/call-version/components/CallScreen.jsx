@@ -6,13 +6,8 @@ import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
 
 const IOS_RINGTONE = new URL('../../../COMCell_Ouverture ringtone iphone (ID 1699)_BigSoundBank.com.wav', import.meta.url).href;
 const ANDROID_RINGTONE = new URL('../../../kettle.mp3', import.meta.url).href;
-
-const CONNECT_STEPS = [
-  'Connecting to Marisol…',
-  'Initializing your reading…',
-  'Securing a private line…',
-  'Connected.',
-];
+const BUTTON_CLICK_SOUND = new URL('../../../506054__mellau__button-click-1.wav', import.meta.url).href;
+const SILENT_AUDIO = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgICA';
 
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
@@ -27,10 +22,8 @@ function detectMobilePlatform() {
 
 export function CallScreen({ context, onPrivateChat }) {
   const [phase, setPhase] = useState('ringing');
-  const [connectStep, setConnectStep] = useState(0);
   const [lineIndex, setLineIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  const [needsTap, setNeedsTap] = useState(false);
   const [audioFailed, setAudioFailed] = useState(false);
   const [micMuted, setMicMuted] = useState(false);
   const [outputMuted, setOutputMuted] = useState(false);
@@ -39,10 +32,24 @@ export function CallScreen({ context, onPrivateChat }) {
   const audioRef = useRef(null);
   const urlRef = useRef(null);
   const ringtoneRef = useRef(null);
+  const buttonClickRef = useRef(null);
 
   const chunks = useMemo(() => CALL_CHUNKS.map((chunk) => interpolate(chunk, context)), [context]);
   const caption = chunks[lineIndex] || chunks[chunks.length - 1];
-  const speaking = phase === 'active' && !needsTap && !audioFailed && !outputMuted;
+  const speaking = phase === 'active' && !audioFailed && !outputMuted;
+
+  useEffect(() => {
+    const buttonClick = new Audio(BUTTON_CLICK_SOUND);
+    buttonClick.preload = 'auto';
+    buttonClick.volume = 0.62;
+    buttonClick.load();
+    buttonClickRef.current = buttonClick;
+
+    return () => {
+      buttonClick.pause();
+      if (buttonClickRef.current === buttonClick) buttonClickRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (phase !== 'ringing') return undefined;
@@ -68,16 +75,6 @@ export function CallScreen({ context, onPrivateChat }) {
   }, [phase, platform]);
 
   useEffect(() => {
-    if (phase !== 'connecting') return undefined;
-    if (connectStep < CONNECT_STEPS.length - 1) {
-      const timeout = setTimeout(() => setConnectStep((step) => step + 1), 800);
-      return () => clearTimeout(timeout);
-    }
-    const timeout = setTimeout(() => setPhase('active'), 550);
-    return () => clearTimeout(timeout);
-  }, [connectStep, phase]);
-
-  useEffect(() => {
     if (phase !== 'active') return undefined;
     const interval = setInterval(() => setSeconds((value) => value + 1), 1000);
     return () => clearInterval(interval);
@@ -86,9 +83,10 @@ export function CallScreen({ context, onPrivateChat }) {
   useEffect(() => {
     if (phase !== 'active' || audioFailed) return undefined;
     let cancelled = false;
+    const controller = new AbortController();
 
     const loadAndPlay = async () => {
-      const blob = await fetchTTS(chunks[lineIndex]);
+      const blob = await fetchTTS(chunks[lineIndex], controller.signal);
       if (cancelled) return;
       if (!blob) {
         setAudioFailed(true);
@@ -98,7 +96,9 @@ export function CallScreen({ context, onPrivateChat }) {
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
-      const audio = new Audio(url);
+      const audio = audioRef.current || new Audio();
+      audio.pause();
+      audio.src = url;
       audio.muted = outputMuted;
       audioRef.current = audio;
       audio.onended = () => {
@@ -112,16 +112,16 @@ export function CallScreen({ context, onPrivateChat }) {
       };
       audio.onerror = () => {
         if (!cancelled) {
-          setNeedsTap(false);
           setAudioFailed(true);
         }
       };
-      audio.play().then(() => setNeedsTap(false)).catch(() => setNeedsTap(true));
+      audio.play().catch(() => setAudioFailed(true));
     };
 
     loadAndPlay();
     return () => {
       cancelled = true;
+      controller.abort();
       if (audioRef.current) {
         audioRef.current.onended = null;
         audioRef.current.onerror = null;
@@ -154,15 +154,6 @@ export function CallScreen({ context, onPrivateChat }) {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
   }, []);
 
-  const connectAudio = () => {
-    audioRef.current?.play()
-      .then(() => setNeedsTap(false))
-      .catch(() => {
-        setNeedsTap(false);
-        setAudioFailed(true);
-      });
-  };
-
   const stopRinging = () => {
     ringtoneRef.current?.pause();
     if (ringtoneRef.current) ringtoneRef.current.currentTime = 0;
@@ -170,9 +161,17 @@ export function CallScreen({ context, onPrivateChat }) {
   };
 
   const acceptCall = () => {
+    if (buttonClickRef.current) {
+      buttonClickRef.current.currentTime = 0;
+      buttonClickRef.current.play().catch(() => {});
+    }
+    const voiceAudio = audioRef.current || new Audio();
+    voiceAudio.src = SILENT_AUDIO;
+    voiceAudio.muted = false;
+    voiceAudio.play().catch(() => {});
+    audioRef.current = voiceAudio;
     stopRinging();
-    setConnectStep(0);
-    setPhase('connecting');
+    setPhase('active');
   };
 
   const declineCall = () => {
@@ -183,7 +182,6 @@ export function CallScreen({ context, onPrivateChat }) {
 
   const endCall = () => {
     audioRef.current?.pause();
-    setNeedsTap(false);
     setEndedReason('manual');
     setPhase('ended');
   };
@@ -192,11 +190,10 @@ export function CallScreen({ context, onPrivateChat }) {
     return (
       <section className="call-screen call-ringing" aria-label="Incoming call from Marisol">
         <div className="call-ringing-content">
-          <p className="call-eyebrow">Incoming private call</p>
           <MarisolAvatar size="large" ping />
-          <div>
+          <div className="call-caller-identity">
             <h1 className="call-name">Marisol</h1>
-            <p className="call-ringing-status">Marisol is calling…</p>
+            <p className="call-ringing-detail">Private audio call</p>
           </div>
         </div>
         <div className="call-ringing-actions">
@@ -207,21 +204,6 @@ export function CallScreen({ context, onPrivateChat }) {
           <div className="call-ringing-action">
             <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
             <span>Accept</span>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (phase === 'connecting') {
-    return (
-      <section className="call-screen call-connecting" aria-label="Connecting call">
-        <div className="call-center-stack">
-          <MarisolAvatar size="large" ping />
-          <div><h1 className="call-name">Marisol</h1><p className="call-status">Private audio call</p></div>
-          <div className="call-connect-progress">
-            <div className="call-connect-track"><div className="call-connect-fill" style={{ width: `${((connectStep + 1) / CONNECT_STEPS.length) * 100}%` }} /></div>
-            <p className="call-connect-label" key={connectStep}><span className="call-spinner" />{CONNECT_STEPS[connectStep]}</p>
           </div>
         </div>
       </section>
@@ -269,11 +251,6 @@ export function CallScreen({ context, onPrivateChat }) {
         </div>
       </footer>
 
-      {needsTap && (
-        <button className="call-audio-gate" onClick={connectAudio}>
-          <span><Volume2 size={20} /> Tap to connect audio</span>
-        </button>
-      )}
     </section>
   );
 }

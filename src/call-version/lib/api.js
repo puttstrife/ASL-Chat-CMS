@@ -1,12 +1,14 @@
-export async function fetchTTS(text) {
+export async function fetchTTS(text, signal) {
   try {
     const response = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
+      signal,
     });
     return response.ok ? response.blob() : null;
-  } catch {
+  } catch (error) {
+    if (error?.name === 'AbortError') return null;
     return null;
   }
 }

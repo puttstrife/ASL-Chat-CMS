@@ -42,11 +42,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-stars span { position: absolute; border-radius: 999px; background: #fff; animation: call-twinkle var(--star-duration, 3s) infinite ease-in-out; }
 
 .call-screen { position: relative; display: grid; height: 100%; background: var(--call-panel); }
-.call-connecting, .call-ended { place-items: center; padding: 24px; text-align: center; }
+.call-ended { place-items: center; padding: 24px; text-align: center; animation: call-phase-fade .34s ease-out both; }
 .call-ringing { grid-template-rows: minmax(0,1fr) auto; padding: 34px 28px calc(40px + env(safe-area-inset-bottom)); text-align: center; }
-.call-ringing-content { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; }
-.call-eyebrow { margin: 0; color: rgba(255,255,255,.72); font-family: "Lato", sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
-.call-ringing-status { margin: 9px 0 0; color: rgba(255,255,255,.82); font-family: "Lato", sans-serif; font-size: 16px; animation: call-status-pulse 1.5s ease-in-out infinite; }
+.call-ringing-content { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 19px; }
+.call-caller-identity { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.call-caller-identity .call-name { font-family: "Lato", sans-serif; font-size: 30px; font-weight: 400; line-height: 1.15; }
+.call-ringing-detail { margin: 0; color: #64b5ff; font-family: "Lato", sans-serif; font-size: 15px; font-weight: 700; }
 .call-ringing-actions { display: flex; align-items: flex-start; justify-content: center; gap: 90px; }
 .call-ringing-action { display: flex; flex-direction: column; align-items: center; gap: 9px; color: rgba(255,255,255,.76); font-family: "Lato", sans-serif; font-size: 13px; }
 .call-ringing-action .call-control { width: 68px; height: 68px; border: 0; color: #fff; }
@@ -58,12 +59,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-center-stack { display: flex; flex-direction: column; align-items: center; gap: 22px; }
 .call-name { margin: 0; color: var(--call-gold); font-family: "Allura", cursive; font-size: 54px; line-height: .9; }
 .call-status { margin: 8px 0 0; color: rgba(255,255,255,.72); font-family: "Lato", sans-serif; font-size: 14px; }
-.call-connect-progress { width: 250px; }
-.call-connect-track { height: 4px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.1); }
-.call-connect-fill { height: 100%; border-radius: inherit; background: var(--call-purple); transition: width .65s ease; }
-.call-connect-label { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 0; color: rgba(255,255,255,.72); font-family: "Lato", sans-serif; font-size: 14px; }
-.call-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.18); border-top-color: var(--call-purple); border-radius: 50%; animation: call-spin .8s linear infinite; }
-
 .call-avatar-wrap { position: relative; flex: none; }
 .call-avatar-wrap img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: center 18%; box-shadow: 0 0 44px rgba(190,108,255,.6); outline: 2px solid rgba(201,162,75,.5); }
 .call-avatar-wrap img.is-active { animation: call-avatar-breathe 1.8s ease-in-out infinite; }
@@ -71,7 +66,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-avatar-medium { width: 116px; height: 116px; }
 .call-avatar-ping { position: absolute; inset: 0; border-radius: 50%; background: rgba(182,118,255,.22); animation: call-ping 2.2s ease-out infinite; }
 
-.call-active { grid-template-rows: auto minmax(0,1fr) auto; }
+.call-active { grid-template-rows: auto minmax(0,1fr) auto; animation: call-phase-fade .34s ease-out both; }
 .call-active-header { padding-top: 28px; text-align: center; }
 .call-active-header .call-name { font-size: 43px; }
 .call-active-header .call-status { margin-top: 3px; font-variant-numeric: tabular-nums; }
@@ -91,9 +86,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-primary-button { position: relative; display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 2px solid transparent; border-radius: 14px; padding: 10px 28px; cursor: pointer; color: #0c0d14; font-family: "Lato", sans-serif; font-size: 16px; font-weight: 700; background: linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ff6b6b,#d28cff,#62c2ff,#61e2ce,#f6cf65) border-box; box-shadow: 0 8px 30px rgba(182,118,255,.24); }
 .call-primary-button:focus-visible, .call-control:focus-visible, .call-option:focus-visible, .call-input:focus-visible { outline: 2px solid #c084fc; outline-offset: 3px; }
 .call-primary-wide { width: min(100%, 330px); }
-.call-audio-gate { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; border: 0; background: rgba(5,2,8,.82); color: #fff; cursor: pointer; backdrop-filter: blur(8px); }
-.call-audio-gate span { display: inline-flex; align-items: center; gap: 9px; border: 1px solid rgba(201,162,75,.4); border-radius: 99px; padding: 12px 20px; background: rgba(255,255,255,.06); font-family: "Lato", sans-serif; font-size: 15px; font-weight: 700; }
-
 .private-chat { display: grid; height: 100%; grid-template-rows: auto minmax(0,1fr) auto; background: var(--call-panel); }
 .private-chat-header { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.08); padding: 10px 13px; background: rgba(12,13,20,.96); }
 .private-chat-header img { width: 48px; height: 48px; flex: none; border-radius: 50%; object-fit: cover; object-position: center 18%; box-shadow: 0 0 16px rgba(190,108,255,.5); }
@@ -134,7 +126,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-terminal { padding: 7px 0; color: rgba(255,255,255,.68); font-family: "Lato", sans-serif; font-size: 13px; font-style: italic; text-align: center; }
 
 @keyframes call-twinkle { 0%,100% { opacity:.25; transform:scale(.8) } 50% { opacity:.9; transform:scale(1.2) } }
-@keyframes call-spin { to { transform: rotate(360deg) } }
 @keyframes call-ping { 75%,100% { transform:scale(1.45); opacity:0 } }
 @keyframes call-avatar-breathe { 0%,100% { transform:scale(1) } 50% { transform:scale(1.035) } }
 @keyframes call-bar { 0%,100% { height:7px } 50% { height:25px } }
@@ -143,7 +134,7 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes rainbow { 0% { background-position:0% } 100% { background-position:200% } }
 @keyframes call-aurora { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
 @keyframes call-sparkle { 0%,100% { opacity:0; transform:translate(-50%,-50%) scale(0) rotate(0deg) } 45%,60% { opacity:.9; transform:translate(-50%,-50%) scale(var(--sparkle-scale)) rotate(90deg) } }
-@keyframes call-status-pulse { 0%,100% { opacity:.78 } 50% { opacity:1 } }
+@keyframes call-phase-fade { from { opacity:0 } to { opacity:1 } }
 @keyframes call-ring-control { 0%,100% { transform:scale(1); box-shadow:0 10px 30px rgba(48,164,108,.4),0 0 0 0 rgba(48,164,108,.45) } 50% { transform:scale(1.04); box-shadow:0 10px 30px rgba(48,164,108,.4),0 0 0 14px rgba(48,164,108,0) } }
 
 @media (max-width: 639px) {
