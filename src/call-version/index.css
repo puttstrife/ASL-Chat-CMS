@@ -43,7 +43,7 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .call-screen { position: relative; display: grid; height: 100%; background: var(--call-panel); }
 .call-ended { place-items: center; padding: 24px; text-align: center; animation: call-phase-fade .34s ease-out both; }
-.call-ringing { grid-template-rows:minmax(0,1fr) auto; padding:48px 28px calc(38px + env(safe-area-inset-bottom)); text-align:center; background-image:linear-gradient(rgba(5,6,9,.28), rgba(5,6,9,.34)), url('/images/chat/marisol.png'); background-size:cover; background-position:center 36%; }
+.call-ringing { grid-template-rows:minmax(0,1fr) auto; padding:48px 28px calc(38px + env(safe-area-inset-bottom)); text-align:center; background-image:linear-gradient(rgba(5,6,9,.28), rgba(5,6,9,.34)), url('/images/chat/marisol.webp'), url('data:image/webp;base64,UklGRhABAABXRUJQVlA4IAQBAABQBgCdASoYACsAPxFwr1CsJiQisBVdUYAiCUAW2QVFHTud9TKekSvId/SpNyLPTBMNkYZJfQ6gddcLIAD+8tANVA9fcNnahFiAkQOxRiLaW2Buf1T5iLqM0k+cJpucPD7P2If97147WJIH6paK5OwpQCAamE7WJ1jfO6b0YljXnpRQXPacLAvZwoXmIb8uevFPY36kaDClsIN7Ev2ToEfanEKGdDla6JbcrHKDfbwABTNCjNTuJGYhr2Boj6IYev0Rqp2hc0CPd8s7Ycl+AajgTFpLdLhv/mzn2TZ8Mr2f2itm8qtzj/zoWoMEYY2J/KsOGsDMoFbv8lMxbEhygvkkSGAAAA=='); background-size:cover; background-position:center 36%; }
 .call-ringing-content { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:19px; }
 .call-caller-identity { display: flex; flex-direction: column; align-items: center; gap: 7px; }
 .call-caller-identity .call-name { color:#fff; font-family:"Lato", sans-serif; font-size:32px; font-weight:400; line-height:1.15; text-shadow:0 2px 14px rgba(0,0,0,.65); }

@@ -4,9 +4,9 @@ import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
 
-const IOS_RINGTONE = new URL('../../../COMCell_Ouverture ringtone iphone (ID 1699)_BigSoundBank.com.wav', import.meta.url).href;
-const ANDROID_RINGTONE = new URL('../../../kettle.mp3', import.meta.url).href;
-const BUTTON_CLICK_SOUND = new URL('../../../506054__mellau__button-click-1.wav', import.meta.url).href;
+const IOS_RINGTONE = '/audio/iphone-ringtone.mp3';
+const ANDROID_RINGTONE = '/audio/android-ringtone.mp3';
+const BUTTON_CLICK_SOUND = '/audio/button-click.mp3';
 const SILENT_AUDIO = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgICA';
 
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
