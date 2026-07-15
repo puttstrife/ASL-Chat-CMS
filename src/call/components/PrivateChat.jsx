@@ -134,7 +134,10 @@ function Message({ message }) {
 function MarisolText({ text, name, auroraValues = [] }) {
   const decorations = [
     ...(name ? [{ type: 'name', value: name }] : []),
-    ...auroraValues.map((value) => ({ type: 'name', value })),
+    ...auroraValues.flatMap((value) => [
+      { type: 'answer', value: `“${value}”`, displayValue: value },
+      { type: 'answer', value: `"${value}"`, displayValue: value },
+    ]),
     ...SPARKLE_PHRASES.map((value) => ({ type: 'sparkles', value })),
   ];
   const parts = [];
@@ -154,9 +157,19 @@ function MarisolText({ text, name, auroraValues = [] }) {
       break;
     }
     if (match.index > cursor) parts.push(text.slice(cursor, match.index));
-    parts.push(match.type === 'name'
-      ? <AuroraText key={`${match.index}-${match.value}`} className="call-aurora-name">{match.value}</AuroraText>
-      : <SparklesText key={`${match.index}-${match.value}`}>{match.value}</SparklesText>);
+    if (match.type === 'answer') {
+      parts.push(match.value[0]);
+      parts.push(
+        <AuroraText key={`${match.index}-${match.value}`} className="call-aurora-name">
+          {match.displayValue}
+        </AuroraText>
+      );
+      parts.push(match.value[match.value.length - 1]);
+    } else {
+      parts.push(match.type === 'name'
+        ? <AuroraText key={`${match.index}-${match.value}`} className="call-aurora-name">{match.value}</AuroraText>
+        : <SparklesText key={`${match.index}-${match.value}`}>{match.value}</SparklesText>);
+    }
     cursor = match.index + match.value.length;
   }
 
