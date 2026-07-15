@@ -96,8 +96,17 @@ export function CallScreen({ context, onPrivateChat }) {
     const ringtone = new Audio(platform === 'ios' ? IOS_RINGTONE : ANDROID_RINGTONE);
     ringtone.loop = true;
     ringtone.volume = 0.68;
+    ringtone.preload = 'auto';
+    ringtone.playsInline = true;
     ringtoneRef.current = ringtone;
-    ringtone.play().catch(() => {});
+    ringtone.load();
+
+    const playRingtone = () => {
+      if (ringtone.paused) ringtone.play().catch(() => {});
+    };
+    playRingtone();
+    window.addEventListener('pointerdown', playRingtone, { once: true, capture: true });
+    window.addEventListener('keydown', playRingtone, { once: true, capture: true });
 
     const vibrationPattern = [550, 350, 550, 1200];
     if (platform === 'android') navigator.vibrate?.(vibrationPattern);
@@ -107,6 +116,8 @@ export function CallScreen({ context, onPrivateChat }) {
 
     return () => {
       if (vibrationInterval) clearInterval(vibrationInterval);
+      window.removeEventListener('pointerdown', playRingtone, { capture: true });
+      window.removeEventListener('keydown', playRingtone, { capture: true });
       ringtone.pause();
       ringtone.currentTime = 0;
       if (ringtoneRef.current === ringtone) ringtoneRef.current = null;
