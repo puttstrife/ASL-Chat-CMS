@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./styles/foundation.css";
+@import "../shared/styles/foundation.css";
 
 /* Required by AIGradientBorder — masks the inner glow spill to an ellipse. */
 .ai-glow-spill-mask {

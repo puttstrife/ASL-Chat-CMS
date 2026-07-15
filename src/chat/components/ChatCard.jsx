@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { FiPhone, FiSend } from 'react-icons/fi';
 import { LiveOverlay } from './LiveOverlay.jsx';
-import { RainbowButton } from './RainbowButton.jsx';
+import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 import { VoiceScreen } from './VoiceScreen.jsx';
 

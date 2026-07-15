@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { FiSend } from 'react-icons/fi';
 import { useCallFunnel } from '../hooks/useCallFunnel.js';
 import { PrimaryButton } from './UI.jsx';
-import { RainbowButton } from '../../components/RainbowButton.jsx';
-import { AuroraText } from '../../components/AuroraText.jsx';
+import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
+import { AuroraText } from '../../shared/components/AuroraText.jsx';
 import { SparklesText } from './SparklesText.jsx';
 
 import { BUTTON_CLICK_SOUND, CHAT_ACTION_REVEAL_SOUND } from '../lib/sfx.js';

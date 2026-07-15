@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PhoneOff, Mic, MicOff, Volume2, Loader2 } from 'lucide-react';
 import { fetchTTS } from '../lib/api.js';
-import { RainbowButton } from './RainbowButton.jsx';
+import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { AudioActivity, MarisolAvatar, MarisolIdentity } from './VoiceCallComponents.jsx';
 
 // Stage 0 — VSL phone-call opener (demo artifact).

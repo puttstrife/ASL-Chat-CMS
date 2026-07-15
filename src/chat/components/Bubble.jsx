@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { Slot } from '@radix-ui/react-slot';
-import { cn } from '../lib/utils.js';
+import { cn } from '../../shared/lib/utils.js';
 
 // Official shadcn "Bubble" component (registry: new-york-v4/ui/bubble),
 // ported to JSX. `radix-ui` Slot.Root → @radix-ui/react-slot Slot.
