@@ -8,6 +8,7 @@ const IOS_RINGTONE = '/audio/iphone-ringtone.mp3';
 const ANDROID_RINGTONE = '/audio/android-ringtone.mp3';
 const BUTTON_CLICK_SOUND = '/audio/button-click.mp3';
 const SILENT_AUDIO = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgICA';
+const FIRST_TTS_DELAY_MS = 900;
 
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
@@ -114,6 +115,7 @@ export function CallScreen({ context, onPrivateChat }) {
   const urlRef = useRef(null);
   const ringtoneRef = useRef(null);
   const buttonClickRef = useRef(null);
+  const acceptedAtRef = useRef(0);
 
   const chunks = useMemo(() => CALL_CHUNKS.map((chunk) => interpolate(chunk, context)), [context]);
   const caption = chunks[lineIndex] || chunks[chunks.length - 1];
@@ -185,6 +187,12 @@ export function CallScreen({ context, onPrivateChat }) {
         return;
       }
 
+      if (lineIndex === 0) {
+        const remainingDelay = Math.max(0, FIRST_TTS_DELAY_MS - (Date.now() - acceptedAtRef.current));
+        if (remainingDelay) await new Promise((resolve) => setTimeout(resolve, remainingDelay));
+        if (cancelled) return;
+      }
+
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
@@ -253,6 +261,7 @@ export function CallScreen({ context, onPrivateChat }) {
   };
 
   const acceptCall = () => {
+    acceptedAtRef.current = Date.now();
     if (buttonClickRef.current) {
       buttonClickRef.current.currentTime = 0;
       buttonClickRef.current.play().catch(() => {});
