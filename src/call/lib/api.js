@@ -6,7 +6,7 @@ export async function fetchTTS(text, signal) {
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, variant: 'call' }),
         signal,
       });
       if (response.ok) return response.blob();
