@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MessageCircle, Mic, MicOff, Phone, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, Mic, MicOff, Phone, Volume2, VolumeX } from 'lucide-react';
 import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
@@ -166,7 +166,6 @@ export function CallScreen({ context, onPrivateChat }) {
       <section className="call-screen call-entry call-connecting" aria-label="Connecting a private call with Marisol">
         <div className="call-connecting-card">
           <MarisolAvatar size="medium" ping />
-          <ShieldCheck className="call-connecting-shield" aria-hidden="true" />
           <div aria-live="polite">
             <h1 className="call-name">Marisol</h1>
             <p className="call-connecting-status">{CONNECTION_STEPS[connectionStep]}</p>
