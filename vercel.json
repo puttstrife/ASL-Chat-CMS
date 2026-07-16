@@ -4,6 +4,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/call", "destination": "/index.html" },
+    { "source": "/call/", "destination": "/index.html" },
     { "source": "/call/:path*", "destination": "/index.html" },
     { "source": "/chat", "destination": "/chat/index.html" }
   ]
