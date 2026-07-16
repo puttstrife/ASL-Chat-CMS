@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MessageCircle, Mic, MicOff, Phone, PhoneOff, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, Mic, MicOff, Phone, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
 import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
@@ -24,7 +24,6 @@ export function CallScreen({ context, onPrivateChat }) {
   const [audioFailed, setAudioFailed] = useState(false);
   const [micMuted, setMicMuted] = useState(true);
   const [outputMuted, setOutputMuted] = useState(false);
-  const [endedReason, setEndedReason] = useState('completed');
   const audioRef = useRef(null);
   const urlRef = useRef(null);
   const acceptedAtRef = useRef(0);
@@ -84,7 +83,6 @@ export function CallScreen({ context, onPrivateChat }) {
       audio.onended = () => {
         if (cancelled) return;
         if (lineIndex >= chunks.length - 1) {
-          setEndedReason('completed');
           setPhase('ended');
         } else {
           setLineIndex((index) => index + 1);
@@ -125,7 +123,6 @@ export function CallScreen({ context, onPrivateChat }) {
     const duration = Math.max(2600, 900 + caption.length * 42);
     const timeout = setTimeout(() => {
       if (lineIndex >= chunks.length - 1) {
-        setEndedReason('completed');
         setPhase('ended');
       } else {
         setLineIndex((index) => index + 1);
@@ -146,20 +143,6 @@ export function CallScreen({ context, onPrivateChat }) {
     clickAudio.play().catch(() => {});
     setConnectionStep(0);
     setPhase('connecting');
-  };
-
-  const endCall = () => {
-    audioRef.current?.pause();
-    setEndedReason('manual');
-    setPhase('ended');
-  };
-
-  const reconnect = () => {
-    setLineIndex(0);
-    setSeconds(0);
-    setAudioFailed(false);
-    setEndedReason('completed');
-    beginConnection();
   };
 
   if (phase === 'intro') {
@@ -205,19 +188,12 @@ export function CallScreen({ context, onPrivateChat }) {
           <MarisolAvatar size="medium" />
           <div>
             <h1 className="call-name">Marisol</h1>
-            <p className="call-status">{endedReason === 'completed' ? 'Call complete' : 'Call ended before completion'} · {formatDuration(seconds)}</p>
+            <p className="call-status">Call complete · {formatDuration(seconds)}</p>
           </div>
-          {endedReason === 'completed' ? (
-            <PrimaryButton className="call-private-chat-button" onClick={onPrivateChat}>
-              <MessageCircle aria-hidden="true" />
-              Continue to private chat
-            </PrimaryButton>
-          ) : (
-            <PrimaryButton className="call-private-chat-button" onClick={reconnect}>
-              <Phone aria-hidden="true" />
-              Reconnect with Marisol
-            </PrimaryButton>
-          )}
+          <PrimaryButton className="call-private-chat-button" onClick={onPrivateChat}>
+            <MessageCircle aria-hidden="true" />
+            Continue to private chat
+          </PrimaryButton>
         </div>
       </section>
     );
@@ -250,15 +226,6 @@ export function CallScreen({ context, onPrivateChat }) {
         </div>
         <AudioBars active={speaking} />
       </div>
-
-      <footer className="call-active-footer">
-        <div className="call-control-item call-control-item-end">
-          <button className="call-control call-control-end" onClick={endCall} aria-label="End call">
-            <PhoneOff />
-          </button>
-          <span>end</span>
-        </div>
-      </footer>
 
     </section>
   );
