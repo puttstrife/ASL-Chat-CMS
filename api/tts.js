@@ -11,16 +11,11 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   if (!flags.ttsEnabled) return res.status(503).json({ error: 'tts_disabled' });
 
-  const body = readBody(req);
-  const text = String(body?.text || '').trim();
+  const text = String(readBody(req)?.text || '').trim();
   if (!text) return res.status(400).json({ error: 'empty_text' });
   if (text.length > 3000) return res.status(400).json({ error: 'text_too_long' });
-  const voiceId = body?.variant === 'call' && env.ELEVENLABS_CALL_VOICE_ID
-    ? env.ELEVENLABS_CALL_VOICE_ID
-    : env.ELEVENLABS_VOICE_ID;
-  if (!voiceId) return res.status(503).json({ error: 'tts_voice_unavailable' });
 
-  const key = crypto.createHash('sha1').update(`${voiceId}:${env.ELEVENLABS_MODEL_ID}:${text}`).digest('hex');
+  const key = crypto.createHash('sha1').update(`${env.ELEVENLABS_VOICE_ID}:${env.ELEVENLABS_MODEL_ID}:${text}`).digest('hex');
   const cachePath = path.join(os.tmpdir(), `tts-${key}.mp3`);
   try {
     if (fs.existsSync(cachePath)) {
@@ -32,7 +27,7 @@ export default async function handler(req, res) {
 
   try {
     const upstream = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${env.ELEVENLABS_VOICE_ID}/stream`,
       {
         method: 'POST',
         headers: {
