@@ -20,7 +20,7 @@ export function GradientFrame({ children }) {
   );
 }
 
-export function MarisolAvatar({ size = 'large', active = false, ping = false }) {
+export function MarisolAvatar({ size = 'medium', active = false, ping = false }) {
   return (
     <div className={`call-avatar-wrap call-avatar-${size}`}>
       {ping && <span className="call-avatar-ping" />}

@@ -64,7 +64,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-avatar-wrap { position: relative; flex: none; }
 .call-avatar-wrap img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: center 18%; box-shadow: 0 0 44px rgba(190,108,255,.6); outline: 2px solid rgba(201,162,75,.5); }
 .call-avatar-wrap img.is-active { animation: call-avatar-breathe 1.8s ease-in-out infinite; }
-.call-avatar-large { width: 148px; height: 148px; }
 .call-avatar-medium { width: 116px; height: 116px; }
 .call-avatar-small { width: 62px; height: 62px; }
 .call-avatar-ping { position: absolute; inset: 0; border-radius: 50%; background: rgba(182,118,255,.22); animation: call-ping 2.2s ease-out infinite; }
@@ -163,7 +162,6 @@ button { -webkit-tap-highlight-color: transparent; }
   .call-intro-button { min-height: 2.6rem; padding: .6rem .8rem; gap: .4rem; font-size: .7rem; white-space: nowrap; }
   .call-intro-button svg { width: .9rem; height: .9rem; flex: none; }
   .call-active-main { gap: 18px; padding-inline: 24px; }
-  .call-avatar-large { width: 132px; height: 132px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
