@@ -1,120 +1,32 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlarmClock, MessageCircle, Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, Mic, MicOff, Phone, PhoneOff, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
 import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
 
 import { BUTTON_CLICK_SOUND } from '../lib/sfx.js';
 
-const IOS_RINGTONE = '/audio/iphone-ringtone.mp3';
-const ANDROID_RINGTONE = '/audio/android-ringtone.mp3';
 const FIRST_TTS_DELAY_MS = 900;
+const CONNECTION_STEPS = [
+  'Initializing private call…',
+  'Securing connection…',
+  'Connecting to Marisol…',
+];
+const CONNECTION_STEP_MS = 1100;
 
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
-function detectMobilePlatform() {
-  const uaPlatform = navigator.userAgentData?.platform || navigator.platform || '';
-  const userAgent = navigator.userAgent || '';
-  const isIPadOS = uaPlatform === 'MacIntel' && navigator.maxTouchPoints > 1;
-  if (/iPhone|iPad|iPod/i.test(userAgent) || /iOS/i.test(uaPlatform) || isIPadOS) return 'ios';
-  if (/Android/i.test(userAgent) || /Android/i.test(uaPlatform)) return 'android';
-  return 'android';
-}
-
-function IOSAnswerSlider({ onAnswer }) {
-  const [value, setValue] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const sliderRef = useRef(null);
-  const inputRef = useRef(null);
-  const valueRef = useRef(0);
-  const draggingRef = useRef(false);
-  const answeredRef = useRef(false);
-
-  const setSliderValue = (nextValue) => {
-    valueRef.current = nextValue;
-    setValue(nextValue);
-    if (nextValue >= 92 && !answeredRef.current) {
-      answeredRef.current = true;
-      onAnswer();
-    }
-  };
-
-  const updateFromPointer = (clientX) => {
-    const rect = sliderRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const knobCenter = 36;
-    const travel = Math.max(1, rect.width - 72);
-    const nextValue = Math.max(0, Math.min(100, ((clientX - rect.left - knobCenter) / travel) * 100));
-    setSliderValue(nextValue);
-  };
-
-  const stopDragging = () => {
-    draggingRef.current = false;
-    setDragging(false);
-    if (!answeredRef.current && valueRef.current < 92) setSliderValue(0);
-  };
-
-  return (
-    <div
-      ref={sliderRef}
-      className={`ios-answer-slider ${dragging ? 'is-dragging' : ''}`}
-      style={{ '--slide-progress': `${value}%` }}
-      onPointerDown={(event) => {
-        if (answeredRef.current) return;
-        const rect = sliderRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const knobLeft = rect.left + 4 + ((rect.width - 72) * valueRef.current) / 100;
-        if (event.clientX < knobLeft - 8 || event.clientX > knobLeft + 72) return;
-        draggingRef.current = true;
-        setDragging(true);
-        inputRef.current?.focus({ preventScroll: true });
-        event.currentTarget.setPointerCapture?.(event.pointerId);
-        updateFromPointer(event.clientX);
-      }}
-      onPointerMove={(event) => {
-        if (draggingRef.current) updateFromPointer(event.clientX);
-      }}
-      onPointerUp={stopDragging}
-      onPointerCancel={stopDragging}
-    >
-      <span className="ios-answer-label" style={{ opacity: 1 - value / 100 }} aria-hidden="true">slide to answer</span>
-      <span
-        className="ios-answer-knob"
-        style={{ left: `calc(4px + ${value}% - ${value * 0.72}px)` }}
-        aria-hidden="true"
-      >
-        <Phone />
-      </span>
-      <input
-        ref={inputRef}
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        value={value}
-        aria-label="Slide to answer"
-        onChange={(event) => setSliderValue(Number(event.target.value))}
-        onKeyUp={(event) => {
-          if (event.key === 'Escape' && !answeredRef.current) setSliderValue(0);
-        }}
-      />
-    </div>
-  );
-}
-
 export function CallScreen({ context, onPrivateChat }) {
-  const [phase, setPhase] = useState('ringing');
-  const [callStarted, setCallStarted] = useState(false);
+  const [phase, setPhase] = useState('intro');
+  const [connectionStep, setConnectionStep] = useState(0);
   const [lineIndex, setLineIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [audioFailed, setAudioFailed] = useState(false);
   const [micMuted, setMicMuted] = useState(true);
   const [outputMuted, setOutputMuted] = useState(false);
   const [endedReason, setEndedReason] = useState('completed');
-  const [platform] = useState(detectMobilePlatform);
   const audioRef = useRef(null);
   const urlRef = useRef(null);
-  const ringtoneRef = useRef(null);
   const acceptedAtRef = useRef(0);
 
   const chunks = useMemo(() => CALL_CHUNKS.map((chunk) => interpolate(chunk, context)), [context]);
@@ -122,46 +34,18 @@ export function CallScreen({ context, onPrivateChat }) {
   const speaking = phase === 'active' && !audioFailed && !outputMuted;
 
   useEffect(() => {
-    if (phase !== 'ringing') return undefined;
-    const ringtone = new Audio(platform === 'ios' ? IOS_RINGTONE : ANDROID_RINGTONE);
-    ringtone.loop = true;
-    ringtone.volume = 0.68;
-    ringtone.preload = 'auto';
-    ringtone.playsInline = true;
-    ringtoneRef.current = ringtone;
-    ringtone.load();
-
-    return () => {
-      ringtone.pause();
-      ringtone.currentTime = 0;
-      if (ringtoneRef.current === ringtone) ringtoneRef.current = null;
-      navigator.vibrate?.(0);
-    };
-  }, [phase, platform]);
-
-  useEffect(() => {
-    if (phase !== 'ringing' || !callStarted) return undefined;
-    const playRingtone = () => {
-      const ringtone = ringtoneRef.current;
-      if (ringtone?.paused) ringtone.play().catch(() => {});
-    };
-    playRingtone();
-    window.addEventListener('pointerdown', playRingtone, { once: true, capture: true });
-    window.addEventListener('keydown', playRingtone, { once: true, capture: true });
-
-    const vibrationPattern = [550, 350, 550, 1200];
-    if (platform === 'android') navigator.vibrate?.(vibrationPattern);
-    const vibrationInterval = platform === 'android'
-      ? setInterval(() => navigator.vibrate?.(vibrationPattern), 2800)
-      : null;
-
-    return () => {
-      if (vibrationInterval) clearInterval(vibrationInterval);
-      window.removeEventListener('pointerdown', playRingtone, { capture: true });
-      window.removeEventListener('keydown', playRingtone, { capture: true });
-      navigator.vibrate?.(0);
-    };
-  }, [callStarted, phase, platform]);
+    if (phase !== 'connecting') return undefined;
+    setConnectionStep(0);
+    const timers = CONNECTION_STEPS.map((_, index) => setTimeout(() => {
+      if (index < CONNECTION_STEPS.length - 1) {
+        setConnectionStep(index + 1);
+        return;
+      }
+      acceptedAtRef.current = Date.now();
+      setPhase('active');
+    }, CONNECTION_STEP_MS * (index + 1)));
+    return () => timers.forEach(clearTimeout);
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== 'active') return undefined;
@@ -255,35 +139,13 @@ export function CallScreen({ context, onPrivateChat }) {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
   }, []);
 
-  const stopRinging = () => {
-    ringtoneRef.current?.pause();
-    if (ringtoneRef.current) ringtoneRef.current.currentTime = 0;
-    navigator.vibrate?.(0);
-  };
-
-  const startIncomingCall = () => {
-    // Start inside the click gesture so mobile browsers permit ringtone audio.
-    ringtoneRef.current?.play().catch(() => {});
-    setCallStarted(true);
-  };
-
-  const acceptCall = () => {
-    acceptedAtRef.current = Date.now();
-    const voiceAudio = audioRef.current || new Audio();
-    voiceAudio.src = BUTTON_CLICK_SOUND;
-    voiceAudio.volume = 0.62;
-    voiceAudio.muted = false;
-    voiceAudio.playsInline = true;
-    voiceAudio.play().catch(() => {});
-    audioRef.current = voiceAudio;
-    stopRinging();
-    setPhase('active');
-  };
-
-  const declineCall = () => {
-    stopRinging();
-    setEndedReason('declined');
-    setPhase('ended');
+  const beginConnection = () => {
+    const clickAudio = new Audio(BUTTON_CLICK_SOUND);
+    clickAudio.volume = 0.62;
+    clickAudio.playsInline = true;
+    clickAudio.play().catch(() => {});
+    setConnectionStep(0);
+    setPhase('connecting');
   };
 
   const endCall = () => {
@@ -292,50 +154,46 @@ export function CallScreen({ context, onPrivateChat }) {
     setPhase('ended');
   };
 
-  if (phase === 'ringing') {
+  const reconnect = () => {
+    setLineIndex(0);
+    setSeconds(0);
+    setAudioFailed(false);
+    setEndedReason('completed');
+    beginConnection();
+  };
+
+  if (phase === 'intro') {
     return (
-      <section className="call-screen call-ringing" aria-label="Incoming call from Marisol">
-        {callStarted ? (
-          <>
-            <div className="call-ringing-content">
-              <div className="call-caller-identity">
-                <h1 className="call-name">Marisol</h1>
-                <p className="call-ringing-detail">Private audio call</p>
-              </div>
-            </div>
-            <div className="call-incoming-footer">
-              <div className="call-incoming-utilities" aria-hidden="true">
-                <div><AlarmClock /><span>Remind Me</span></div>
-                <div><MessageCircle /><span>Message</span></div>
-              </div>
-              {platform === 'ios' ? (
-                <IOSAnswerSlider onAnswer={acceptCall} />
-              ) : (
-                <div className="call-ringing-actions">
-                  <div className="call-ringing-action">
-                    <button className="call-control call-control-decline" onClick={declineCall} aria-label="Decline call"><PhoneOff /></button>
-                    <span>Decline</span>
-                  </div>
-                  <div className="call-ringing-action">
-                    <button className="call-control call-control-accept" onClick={acceptCall} aria-label="Accept call"><Phone /></button>
-                    <span>Accept</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="call-intro-overlay" role="dialog" aria-modal="true" aria-labelledby="call-intro-title">
-            <div className="call-intro-glass">
-              <p className="call-intro-kicker">A private message is waiting</p>
-              <h1 id="call-intro-title">Marisol has something personal to share.</h1>
-              <PrimaryButton className="call-intro-button" onClick={startIncomingCall}>
-                <Phone aria-hidden="true" />
-                I’m ready for Marisol’s call
-              </PrimaryButton>
-            </div>
+      <section className="call-screen call-entry" aria-label="Start a private call with Marisol">
+        <div className="call-intro-overlay" role="dialog" aria-modal="true" aria-labelledby="call-intro-title">
+          <div className="call-intro-glass">
+            <h1 id="call-intro-title">Marisol has something personal to share.</h1>
+            <PrimaryButton className="call-intro-button" onClick={beginConnection}>
+              <Phone aria-hidden="true" />
+              I’m ready for Marisol’s call
+            </PrimaryButton>
           </div>
-        )}
+        </div>
+      </section>
+    );
+  }
+
+  if (phase === 'connecting') {
+    return (
+      <section className="call-screen call-entry call-connecting" aria-label="Connecting a private call with Marisol">
+        <div className="call-connecting-card">
+          <MarisolAvatar size="medium" ping />
+          <ShieldCheck className="call-connecting-shield" aria-hidden="true" />
+          <div aria-live="polite">
+            <h1 className="call-name">Marisol</h1>
+            <p className="call-connecting-status">{CONNECTION_STEPS[connectionStep]}</p>
+          </div>
+          <div className="call-connection-progress" aria-hidden="true">
+            {CONNECTION_STEPS.map((step, index) => (
+              <span key={step} className={index <= connectionStep ? 'is-complete' : ''} />
+            ))}
+          </div>
+        </div>
       </section>
     );
   }
@@ -347,12 +205,19 @@ export function CallScreen({ context, onPrivateChat }) {
           <MarisolAvatar size="medium" />
           <div>
             <h1 className="call-name">Marisol</h1>
-            <p className="call-status">{endedReason === 'completed' ? 'Call complete' : endedReason === 'declined' ? 'Call declined' : 'Call ended'}{endedReason === 'declined' ? '' : ` · ${formatDuration(seconds)}`}</p>
+            <p className="call-status">{endedReason === 'completed' ? 'Call complete' : 'Call ended before completion'} · {formatDuration(seconds)}</p>
           </div>
-          <PrimaryButton className="call-private-chat-button" onClick={onPrivateChat}>
-            <MessageCircle aria-hidden="true" />
-            Continue to private chat
-          </PrimaryButton>
+          {endedReason === 'completed' ? (
+            <PrimaryButton className="call-private-chat-button" onClick={onPrivateChat}>
+              <MessageCircle aria-hidden="true" />
+              Continue to private chat
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton className="call-private-chat-button" onClick={reconnect}>
+              <Phone aria-hidden="true" />
+              Reconnect with Marisol
+            </PrimaryButton>
+          )}
         </div>
       </section>
     );

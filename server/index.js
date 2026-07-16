@@ -16,6 +16,7 @@ const {
   PORT = 3000,
   ELEVENLABS_API_KEY,
   ELEVENLABS_VOICE_ID,
+  ELEVENLABS_CALL_VOICE_ID,
   ELEVENLABS_MODEL_ID = 'eleven_turbo_v2_5',
   ELEVENLABS_AGENT_ID,
   ANTHROPIC_API_KEY,
@@ -43,10 +44,14 @@ app.post('/api/tts', async (req, res) => {
   const text = String(req.body?.text || '').trim();
   if (!text) return res.status(400).json({ error: 'empty_text' });
   if (text.length > 3000) return res.status(400).json({ error: 'text_too_long' });
+  const voiceId = req.body?.variant === 'call' && ELEVENLABS_CALL_VOICE_ID
+    ? ELEVENLABS_CALL_VOICE_ID
+    : ELEVENLABS_VOICE_ID;
+  if (!voiceId) return res.status(503).json({ error: 'tts_voice_unavailable' });
 
   const key = crypto
     .createHash('sha1')
-    .update(`${ELEVENLABS_VOICE_ID}:${ELEVENLABS_MODEL_ID}:${text}`)
+    .update(`${voiceId}:${ELEVENLABS_MODEL_ID}:${text}`)
     .digest('hex');
   const cachePath = path.join(CACHE_DIR, `${key}.mp3`);
 
@@ -57,7 +62,7 @@ app.post('/api/tts', async (req, res) => {
 
   try {
     const upstream = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}/stream`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
       {
         method: 'POST',
         headers: {
