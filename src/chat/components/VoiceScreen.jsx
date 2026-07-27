@@ -5,7 +5,7 @@ import VoicemailPlayer from 'react-voicemail-player';
 import 'react-voicemail-player/dist/react-voicemail-player.css';
 import { fetchTTS } from '../lib/api.js';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
-import { AudioActivity, SeleneAvatar, SeleneIdentity } from './VoiceCallComponents.jsx';
+import { AudioActivity, SeleneAvatar, SeleneIdentity } from './VoiceComponents.jsx';
 
 // Stage 3: the chat collapses into this full voice-memo view — Selene's
 // avatar + autoplaying voicemail player, with the burden input at the bottom.

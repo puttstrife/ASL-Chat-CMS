@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { FiPhone, FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi';
-import { LiveOverlay } from './LiveOverlay.jsx';
+import { FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 import { VoiceScreen } from './VoiceScreen.jsx';
 
 export function ChatCard({ funnel }) {
-  const { messages, dock, config, chooseButton, submitInput, advance, memoModal, submitMemo } = funnel;
+  const { messages, dock, chooseButton, submitInput, advance, memoModal, submitMemo } = funnel;
   const scrollRef = useRef(null);
-  const [live, setLive] = useState(false);
   const [muted, setMuted] = useState(false); // placeholder — no audio wired up yet
 
   useEffect(() => {
@@ -46,22 +44,15 @@ export function ChatCard({ funnel }) {
             Following your pattern
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setMuted((m) => !m)}
-            aria-label={muted ? 'Unmute audio' : 'Mute audio'}
-            aria-pressed={muted}
-            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10"
-          >
-            {muted ? <FiVolumeX className="size-4.5" /> : <FiVolume2 className="size-4.5" />}
-          </button>
-          {config.liveEnabled && (
-            <RainbowButton onClick={() => setLive(true)} aria-label="Talk to Selene live" className="font-sans h-10 gap-1.5 rounded-full px-4 text-sm">
-              <FiPhone className="size-4" /> Live
-            </RainbowButton>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() => setMuted((m) => !m)}
+          aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+          aria-pressed={muted}
+          className="grid size-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10"
+        >
+          {muted ? <FiVolumeX className="size-4.5" /> : <FiVolume2 className="size-4.5" />}
+        </button>
       </header>
 
       {/* Messages */}
@@ -73,8 +64,6 @@ export function ChatCard({ funnel }) {
       <div className="shrink-0 border-t border-white/8 bg-[#0c0d14]/96 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
         <Dock dock={dock} onButton={chooseButton} onSubmit={submitInput} onContinue={advance} />
       </div>
-
-      {live && <LiveOverlay onClose={() => setLive(false)} />}
     </section>
   );
 }

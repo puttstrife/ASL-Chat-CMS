@@ -17,13 +17,11 @@ const {
   ELEVENLABS_API_KEY,
   ELEVENLABS_VOICE_ID,
   ELEVENLABS_MODEL_ID = 'eleven_turbo_v2_5',
-  ELEVENLABS_AGENT_ID,
   ANTHROPIC_API_KEY,
   ANTHROPIC_MODEL = 'claude-haiku-4-5',
 } = process.env;
 
 const ttsEnabled = Boolean(ELEVENLABS_API_KEY && ELEVENLABS_VOICE_ID);
-const liveEnabled = Boolean(ELEVENLABS_API_KEY && ELEVENLABS_AGENT_ID);
 const readingEnabled = Boolean(ANTHROPIC_API_KEY);
 
 fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -32,9 +30,9 @@ const app = express();
 app.use(express.json({ limit: '32kb' }));
 app.use(express.static(DIST_DIR));
 
-// ── Feature flags so the client can hide voice / live-call when keys are absent ──
+// ── Feature flags so the client can hide voice when keys are absent ──
 app.get('/api/config', (_req, res) => {
-  res.json({ ttsEnabled, liveEnabled, readingEnabled });
+  res.json({ ttsEnabled, readingEnabled });
 });
 
 // ── Scripted TTS: ElevenLabs text-to-speech, disk-cached by text hash ──
@@ -152,93 +150,10 @@ app.post('/api/reading', async (req, res) => {
   }
 });
 
-// ── Call-first variant: reflect the three private-chat answers at Stage 7. ──
-// This endpoint is intentionally separate from /api/reading so the original
-// chat journey and its prompt remain unchanged.
-const cleanReadingFragment = (value, fallback) =>
-  String(value || fallback).replace(/\s+/g, ' ').trim().replace(/[.!?]+$/, '');
-
-const callReadingFallback = (name, area, change, desire) =>
-  `What you shared about ${area || 'what feels heaviest'} connects closely with the change you have been hoping for, ${name}. ` +
-  `You described it this way: “${cleanReadingFragment(change, 'something important finally shifting')}.” ` +
-  `Underneath it, you said you want “${cleanReadingFragment(desire, 'the thing you want most')}.” That desire still feels present, not lost. ` +
-  'Something old has been sitting in its path and softening its momentum before it can fully reach you. ' +
-  'I want to be clear: it does not feel gone, only blocked.';
-
-app.post('/api/call-reading', async (req, res) => {
-  const name = String(req.body?.name || 'friend').trim().slice(0, 60);
-  const area = String(req.body?.area || '').trim().slice(0, 80);
-  const change = String(req.body?.change || '').trim().slice(0, 800);
-  const desire = String(req.body?.desire || '').trim().slice(0, 800);
-  const fallback = callReadingFallback(name, area, change, desire);
-
-  if (!readingEnabled || (!area && !change && !desire)) {
-    return res.json({ text: fallback, source: 'fallback' });
-  }
-
-  try {
-    const { default: Anthropic } = await import('@anthropic-ai/sdk');
-    const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
-    const system =
-      "You are Selene, a warm and unhurried intuitive reader in a fictional scripted experience. " +
-      "The user selected an area that feels heavy and described what they hope changes and what they want most. " +
-      "Reflect their own words in one short paragraph of 3-5 sentences. Continue naturally after Selene has said " +
-      "'Yes... I can feel it.' Say that the desire still feels present but has been blocked by an old pattern or weight. " +
-      "Do not diagnose, prescribe, provide medical/financial/legal advice, intensify fear or urgency, promise an outcome, " +
-      "or claim supernatural certainty. If the area is health, stay emotional and general and explicitly avoid health conclusions. " +
-      `Address the user as ${name}. Keep the response under 100 words.`;
-
-    const message = await client.messages.create({
-      model: ANTHROPIC_MODEL,
-      max_tokens: 280,
-      temperature: 0.65,
-      system,
-      messages: [{
-        role: 'user',
-        content: `Area: ${area || 'unspecified'}\nHoped-for change: ${change || 'unspecified'}\nDeepest desire: ${desire || 'unspecified'}`,
-      }],
-    });
-
-    const text = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('')
-      .trim();
-    return res.json({ text: text || fallback, source: text ? 'llm' : 'fallback' });
-  } catch (error) {
-    console.error('Call reading failure', error);
-    return res.json({ text: fallback, source: 'fallback' });
-  }
-});
-
-// ── Live call: mint a signed URL for the ElevenLabs Conversational AI agent ──
-app.get('/api/voice-token', async (_req, res) => {
-  if (!liveEnabled) return res.status(503).json({ error: 'live_disabled' });
-  try {
-    const upstream = await fetch(
-      `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${ELEVENLABS_AGENT_ID}`,
-      { headers: { 'xi-api-key': ELEVENLABS_API_KEY } }
-    );
-    if (!upstream.ok) {
-      const detail = await upstream.text().catch(() => '');
-      console.error('ElevenLabs signed-url error', upstream.status, detail);
-      return res.status(502).json({ error: 'signed_url_error' });
-    }
-    const data = await upstream.json();
-    res.json({ signedUrl: data.signed_url });
-  } catch (err) {
-    console.error('voice-token failure', err);
-    res.status(502).json({ error: 'voice_token_failure' });
-  }
-});
-
 // SPA fallback — serve the built index.html for any non-API GET.
 app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api')) {
-    const entry = req.path === '/chat' || req.path.startsWith('/chat/')
-      ? path.join(DIST_DIR, 'chat', 'index.html')
-      : path.join(DIST_DIR, 'index.html');
-    return res.sendFile(entry);
+    return res.sendFile(path.join(DIST_DIR, 'index.html'));
   }
   next();
 });
@@ -246,8 +161,6 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Selene chat → http://localhost:${PORT}`);
   console.log(
-    `  TTS: ${ttsEnabled ? 'on' : 'off'} · live call: ${liveEnabled ? 'on' : 'off'} · reading LLM: ${
-      readingEnabled ? 'on' : 'off'
-    }`
+    `  TTS: ${ttsEnabled ? 'on' : 'off'} · reading LLM: ${readingEnabled ? 'on' : 'off'}`
   );
 });

@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { AIGradientBorder } from './components/AIGradientBorder.jsx';
 import { ChatCard } from './components/ChatCard.jsx';
-import { CallScreen } from './components/CallScreen.jsx';
 import { useFunnel } from './hooks/useFunnel.js';
 
 function Starfield() {
@@ -35,13 +34,6 @@ function Starfield() {
 
 export default function App() {
   const funnel = useFunnel();
-  // Demo toggle: ?screen=call shows the Stage 0 call opener standalone.
-  const isCall = new URLSearchParams(location.search).get('screen') === 'call';
-  const goToChat = () => {
-    const p = new URLSearchParams(location.search);
-    p.delete('screen');
-    location.search = p.toString();
-  };
   return (
     <>
       {/* ambient */}
@@ -53,7 +45,7 @@ export default function App() {
         <AIGradientBorder
           className="h-dvh w-full max-w-[600px] rounded-none sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px]"
         >
-          {isCall ? <CallScreen onConnect={goToChat} /> : <ChatCard funnel={funnel} />}
+          <ChatCard funnel={funnel} />
         </AIGradientBorder>
       </main>
     </>

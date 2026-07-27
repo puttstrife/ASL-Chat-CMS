@@ -15,7 +15,7 @@ export function useFunnel() {
 
   const [messages, setMessages] = useState([]); // {id, who, text}
   const [dock, setDock] = useState({ type: 'none' });
-  const [config, setConfig] = useState({ ttsEnabled: false, liveEnabled: false, readingEnabled: false });
+  const [config, setConfig] = useState({ ttsEnabled: false, readingEnabled: false });
   const [memoModal, setMemoModal] = useState(null); // Stage 3 center popup: {text, enabled}
 
   const answers = useRef({});

@@ -5,7 +5,7 @@ export async function getConfig() {
     const r = await fetch('/api/config');
     return await r.json();
   } catch {
-    return { ttsEnabled: false, liveEnabled: false, readingEnabled: false };
+    return { ttsEnabled: false, readingEnabled: false };
   }
 }
 
@@ -31,11 +31,4 @@ export async function fetchReading(name, userText) {
   } catch {
     return null;
   }
-}
-
-export async function fetchVoiceToken() {
-  const r = await fetch('/api/voice-token');
-  if (!r.ok) throw new Error('voice_token');
-  const d = await r.json();
-  return d.signedUrl;
 }
