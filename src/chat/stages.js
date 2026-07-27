@@ -12,7 +12,7 @@
 //   input      { placeholder, key, next, cta }  free text, stored under `key`
 //   datePicker { key, next, cta }               month/day/year, stored as `key`
 //   select     { key, options[], next, cta }    pick one, then confirm
-//   buttons[]  { label, next?, action? }        act immediately on tap
+//   buttons[]  { label, next }                  act immediately on tap
 //   next                                        a "Continue" affordance
 
 export const START_STAGE = '0';
@@ -148,7 +148,6 @@ export const STAGES = {
     ],
     buttons: [
       { label: 'Continue to My Full Reading', next: 'done' },
-      { label: 'Save My Sketch', action: 'save' },
     ],
   },
 

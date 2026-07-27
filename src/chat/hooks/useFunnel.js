@@ -64,7 +64,7 @@ export function useFunnel() {
   // Sketch reveals use the portrait set matching the chosen preference.
   const revealSketch = async ({ sketch, caption }) => {
     const set = SKETCHES[answers.current.preference] || SKETCHES.anyone;
-    push({ who: 'sketch', src: set[sketch], caption, final: sketch === set.length - 1 });
+    push({ who: 'sketch', src: set[sketch], caption, locked: sketch === set.length - 1 });
     await sleep(700);
   };
 
@@ -96,7 +96,6 @@ export function useFunnel() {
 
   // ── Handlers ──
   const chooseButton = (b) => {
-    if (b.action === 'save') return; // "Save My Sketch" — wired up separately.
     const id = push({ who: 'user', text: b.label });
     scheduleReaction(id, b.label);
     if (b.next) runStage(b.next);

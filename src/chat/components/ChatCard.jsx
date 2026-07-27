@@ -6,12 +6,38 @@ import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 export function ChatCard({ funnel }) {
   const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance } = funnel;
   const scrollRef = useRef(null);
-  const [muted, setMuted] = useState(false); // placeholder — no audio wired up yet
+  const audioRef = useRef(null);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, dock]);
+
+  // Looping ambient bed. Browsers block autoplay until the page has been
+  // interacted with, so fall back to starting on the first user gesture.
+  useEffect(() => {
+    const audio = new Audio('/audio/ambient.mp3');
+    audio.loop = true;
+    audio.volume = 0.35;
+    audioRef.current = audio;
+
+    const start = () => audio.play().catch(() => {});
+    start();
+    window.addEventListener('pointerdown', start, { once: true });
+    window.addEventListener('keydown', start, { once: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('keydown', start);
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muted;
+  }, [muted]);
 
   return (
     <section className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
@@ -27,8 +53,9 @@ export function ChatCard({ funnel }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="font-script text-3xl leading-tight text-[var(--gold)]">Selene</p>
           <p className="font-sans inline-flex items-center gap-1.5 text-[.7rem] text-white/55">
-            <span className="grid size-4 place-items-center rounded-full bg-[#38c878] text-[.45rem] font-black text-[#04130a]">✓</span>
-            Following your pattern
+            <span className="live-dot size-2.5 shrink-0 rounded-full bg-[#38c878]" aria-hidden="true" />
+            <span className="sr-only">Live session. </span>
+            Astrology Sketch Artist
           </p>
         </div>
         <button
@@ -79,11 +106,21 @@ function Message({ m }) {
   if (m.who === 'sketch') {
     return (
       <figure className="bubble-in m-0 flex w-full max-w-[82%] flex-col gap-2 self-start">
-        <img
-          src={m.src}
-          alt={m.final ? 'Your completed soulmate sketch' : 'Your soulmate sketch, still forming'}
-          className="w-full rounded-2xl rounded-tl-md border border-white/10 bg-white/5 object-cover"
-        />
+        {/* The finished portrait stays blurred until the full reading is unlocked. */}
+        <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
+          <img
+            src={m.src}
+            alt={m.locked ? 'Your completed soulmate sketch, blurred until unlocked' : 'Your soulmate sketch, still forming'}
+            className={`block w-full object-cover ${m.locked ? 'blur-md scale-105' : ''}`}
+          />
+          {m.locked && (
+            <div className="absolute inset-0 grid place-items-center bg-gradient-to-b from-[#08070f]/40 to-[#08070f]/75 px-5 text-center">
+              <p className="font-sans m-0 text-[.8rem] font-semibold leading-snug text-white/90 drop-shadow">
+                Continue to Full Reading to Unlock the whole image
+              </p>
+            </div>
+          )}
+        </div>
         {m.caption && (
           <figcaption className="font-sans px-1 text-[.7rem] uppercase tracking-[0.14em] text-[#d8b4fe]/70">
             {m.caption}
