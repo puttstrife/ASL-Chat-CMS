@@ -9,7 +9,8 @@
 //   { reveal: { headline, body } } → the "Meet Your Soulmate" card
 //
 // After the beats, a stage ends in exactly one of:
-//   input      { placeholder, key, next, cta }  free text, stored under `key`
+//   input      { placeholder, key, next, cta, inputType? }  free text under `key`;
+//              inputType 'email' swaps in a validated email field
 //   datePicker { key, next, cta }               month/day/year, stored as `key`
 //   select     { key, options[], next, cta }    pick one, then confirm
 //   buttons[]  { label, next }                  act immediately on tap
@@ -48,7 +49,22 @@ export const STAGES = {
       'Nice to meet you, {name}.',
       'Now, tell me your date of birth. This helps me identify your zodiac signature and the features connected to it.',
     ],
-    datePicker: { key: 'dob', next: '2', cta: 'Continue' },
+    datePicker: { key: 'dob', next: 'email', cta: 'Continue' },
+  },
+
+  // 2b — Email capture
+  email: {
+    beats: [
+      'Before I start drawing—where should I send your finished sketch?',
+      'I’ll send the completed portrait there once it’s ready.',
+    ],
+    input: {
+      placeholder: 'you@example.com',
+      key: 'email',
+      inputType: 'email',
+      next: '2',
+      cta: 'Continue',
+    },
   },
 
   // 3 — Soulmate preference

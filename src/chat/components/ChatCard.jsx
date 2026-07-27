@@ -189,7 +189,14 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
     );
   }
   if (dock.type === 'input') {
-    return <InputRow placeholder={dock.placeholder} cta={dock.cta} onSend={(v) => onSubmit(dock.key, v, dock.next)} />;
+    return (
+      <InputRow
+        placeholder={dock.placeholder}
+        cta={dock.cta}
+        inputType={dock.inputType}
+        onSend={(v) => onSubmit(dock.key, v, dock.next)}
+      />
+    );
   }
   if (dock.type === 'date') {
     return <DateRow cta={dock.cta} onSend={(parts) => onDate(dock.key, parts, dock.next)} />;
@@ -269,14 +276,35 @@ function DateRow({ cta = 'Continue', onSend }) {
   );
 }
 
-function InputRow({ placeholder, cta, onSend }) {
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function InputRow({ placeholder, cta, inputType, onSend }) {
   const [value, setValue] = useState('');
   const taRef = useRef(null);
   useEffect(() => { taRef.current?.focus(); }, []);
   const grow = (el) => { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; };
-  const send = () => { const v = value.trim(); if (!v) return; setValue(''); onSend(v); };
 
-  const field = (
+  const isEmail = inputType === 'email';
+  const valid = isEmail ? EMAIL_RE.test(value.trim()) : Boolean(value.trim());
+  const send = () => { if (!valid) return; setValue(''); onSend(value.trim()); };
+
+  const fieldClass =
+    'no-scrollbar font-sans max-h-[120px] min-h-[48px] w-full flex-1 resize-none rounded-[999px] border border-[var(--gold)]/20 bg-white/5 px-4.5 py-3 text-[.9rem] leading-tight text-white/90 outline-none placeholder:font-semibold placeholder:text-white/60';
+
+  // Email gets a real input so mobile shows the right keyboard and the
+  // browser can autofill; everything else stays a growing textarea.
+  const field = isEmail ? (
+    <input
+      ref={taRef}
+      type="email"
+      inputMode="email"
+      autoComplete="email"
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => setValue(e.target.value)}
+      className={fieldClass}
+    />
+  ) : (
     <textarea
       ref={taRef}
       rows={1}
@@ -284,7 +312,7 @@ function InputRow({ placeholder, cta, onSend }) {
       placeholder={placeholder}
       onChange={(e) => { setValue(e.target.value); grow(e.target); }}
       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-      className="no-scrollbar font-sans max-h-[120px] min-h-[48px] w-full flex-1 resize-none rounded-[999px] border border-[var(--gold)]/20 bg-white/5 px-4.5 py-3 text-[.9rem] leading-tight text-white/90 outline-none placeholder:font-semibold placeholder:text-white/60"
+      className={fieldClass}
     />
   );
 
@@ -294,7 +322,7 @@ function InputRow({ placeholder, cta, onSend }) {
     return (
       <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex flex-col gap-2">
         {field}
-        <RainbowButton type="submit" disabled={!value.trim()} className="font-sans w-full">{cta}</RainbowButton>
+        <RainbowButton type="submit" disabled={!valid} className="font-sans w-full">{cta}</RainbowButton>
       </form>
     );
   }
