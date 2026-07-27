@@ -53,7 +53,6 @@ public/audio/         looping ambient track
 '4': {
   beats: [
     'The first feature coming through is the shape of their face.',   // a chat bubble
-    { status: 'Analyzing your zodiac signature…' },                    // a system status label
     { sketch: 0, caption: 'First details detected' },                  // reveal portrait step 0
     { reveal: { headline: '…', body: '…' } },                          // the reveal card
   ],
@@ -63,6 +62,17 @@ public/audio/         looping ambient track
 
 Beats play top to bottom with typing indicators and pacing handled for you. `{name}` and
 `{dob}` interpolate from the visitor's answers.
+
+There is deliberately **no separate "system status" UI**. Progress beats like "analyzing
+your zodiac signature" are written as ordinary lines Selene says, because the machine-style
+labels read as artificial.
+
+### Typing pacing
+
+`revealLine` in `useFunnel.js` simulates a person at a keyboard: a short pause to
+"consider", then a typing indicator held for roughly 20–32 ms per character — re-rolled per
+line, so the same message is never timed twice the same way — clamped to 0.7–5.4 s. Short
+replies land almost immediately; long paragraphs visibly take her a while.
 
 Dock types — a stage ends in one of:
 
@@ -77,9 +87,12 @@ Dock types — a stage ends in one of:
 ### Portraits
 
 `SKETCHES` in `stages.js` maps the soulmate preference to a `[jaw, hairline, full]` triple.
-The last step renders blurred behind an unlock prompt unless the beat sets
+The last step renders blurred behind a **Details Redacted** pill unless the beat sets
 `unlocked: true` — which is what stage `done` uses to re-send the portrait in the clear
-after the visitor taps *Continue to My Full Reading*.
+after the visitor taps *Show Me The Face*. The blurred copy stays in the transcript.
+
+The paywall CTA is a `buttons` entry with `variant: 'gold'` (and optional `arrow: true`);
+a stage may also carry `trust: [...]`, rendered as the reassurance row beneath the button.
 
 ### Audio
 
@@ -120,8 +133,12 @@ without benefit.
    derived from any input.
 3. **Nothing persists.** Refreshing restarts the funnel. Answers live in a ref and are lost
    on reload — no analytics, no storage, no lead capture.
-4. **The final CTA is a dead end.** *Continue to My Full Reading* re-sends the portrait and
-   prints one closing line. There is no checkout, upsell or next destination wired up.
+4. **The paywall is cosmetic.** *Show Me The Face* re-sends the portrait unblurred and
+   prints a closing line — there is no checkout, payment or gating behind it, and the
+   full-resolution image is already in the page, so the blur is trivially bypassed in
+   devtools. The trust badges ("30-Day Money-Back Guarantee", "Delivered in 24 Hours",
+   "Secure Checkout") are **claims with nothing implementing them**; they must not ship in
+   front of real traffic until a real checkout exists.
 5. **No tests, no error boundary.** A throw inside the funnel blanks the card with nothing
    in the UI to explain it.
 6. **No analytics or tracking.** The brand site runs GTM, Meta Pixel and Clarity; this app

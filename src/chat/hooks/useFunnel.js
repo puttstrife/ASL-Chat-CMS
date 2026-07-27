@@ -45,20 +45,26 @@ export function useFunnel() {
   };
   const scheduleReaction = (id, text) => setTimeout(() => updateMsg(id, { reaction: pickReaction(text) }), 550);
 
-  // Reveal one Selene bubble: typing indicator → bubble.
-  const revealLine = async (text) => {
-    const typingId = push({ who: 'typing' });
-    const readMs = Math.min(2200, 500 + interpolate(text).length * 22);
-    await sleep(Math.max(650, readMs * 0.5));
-    remove(typingId);
-    push({ who: 'selene', text: interpolate(text) });
-    await sleep(360);
-  };
+  // Reveal one Selene bubble: a beat of thought, then typing, then the bubble.
+  // Duration scales with message length and varies per line, so short replies
+  // land fast and long ones visibly take her a while — as a person would.
+  const between = (min, max) => min + Math.random() * (max - min);
 
-  // A status label sits on screen while its "work" happens, then settles.
-  const revealStatus = async (label) => {
-    push({ who: 'status', text: label });
-    await sleep(1500);
+  const revealLine = async (text) => {
+    const body = interpolate(text);
+
+    // She reads/considers before the indicator even appears.
+    await sleep(between(240, 700));
+
+    const typingId = push({ who: 'typing' });
+    // ~20-32ms per character, re-rolled each line, clamped so a very long
+    // message never stalls the funnel and a two-word one still registers.
+    const perChar = between(20, 32);
+    await sleep(Math.min(5400, Math.max(700, 380 + body.length * perChar)));
+
+    remove(typingId);
+    push({ who: 'selene', text: body });
+    await sleep(between(220, 520));
   };
 
   // Sketch reveals use the portrait set matching the chosen preference.
@@ -81,12 +87,11 @@ export function useFunnel() {
 
     for (const beat of stage.beats || []) {
       if (typeof beat === 'string') await revealLine(beat);
-      else if (beat.status) await revealStatus(beat.status);
       else if (beat.sketch !== undefined) await revealSketch(beat);
       else if (beat.reveal) { push({ who: 'reveal', ...beat.reveal }); await sleep(300); }
     }
 
-    if (stage.buttons) setDock({ type: 'buttons', buttons: stage.buttons });
+    if (stage.buttons) setDock({ type: 'buttons', buttons: stage.buttons, trust: stage.trust });
     else if (stage.input) setDock({ type: 'input', ...stage.input });
     else if (stage.datePicker) setDock({ type: 'date', ...stage.datePicker });
     else if (stage.select) setDock({ type: 'select', ...stage.select });

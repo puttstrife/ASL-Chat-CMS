@@ -83,14 +83,6 @@ export function ChatCard({ funnel }) {
 }
 
 function Message({ m }) {
-  if (m.who === 'status') {
-    return (
-      <div className="font-sans mx-auto my-1 inline-flex items-center gap-2 text-[.6rem] font-bold uppercase tracking-[0.2em] text-[#d8b4fe]/85">
-        <span className="size-1.5 rounded-full bg-[#c084fc] shadow-[0_0_12px_#c084fc]" style={{ animation: 'dotPulse 1.2s ease-in-out infinite' }} />
-        {m.text}
-      </div>
-    );
-  }
   if (m.who === 'typing') {
     return (
       <div className="flex max-w-max flex-col gap-1 self-start">
@@ -118,10 +110,10 @@ function Message({ m }) {
             className={`block w-full object-cover transition-all duration-700 ${m.locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
           />
           {m.locked && (
-            <div className="absolute inset-0 grid place-items-center bg-gradient-to-b from-[#08070f]/40 to-[#08070f]/75 px-5 text-center">
-              <p className="font-sans m-0 text-[.8rem] font-semibold leading-snug text-white/90 drop-shadow">
-                Continue to Full Reading to Unlock the whole image
-              </p>
+            <div className="absolute inset-0 flex items-end justify-center pb-6">
+              <span className="font-sans rounded-md bg-black/55 px-3.5 py-1.5 text-[.7rem] font-medium uppercase tracking-[0.18em] text-[var(--gold)] backdrop-blur-sm">
+                Details Redacted
+              </span>
             </div>
           )}
         </div>
@@ -163,7 +155,16 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
     return (
       <div className="flex flex-col gap-2">
         {dock.buttons.map((b, i) =>
-          i === 0 ? (
+          b.variant === 'gold' ? (
+            <button
+              key={i}
+              onClick={() => onButton(b)}
+              className="font-sans inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-8 text-[1rem] font-bold text-[#1a1408] shadow-[0_0_28px_rgba(223,167,58,0.35)] transition-[filter,transform] hover:brightness-105 active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0d14]"
+            >
+              {b.label}
+              {b.arrow && <span aria-hidden="true">→</span>}
+            </button>
+          ) : i === 0 ? (
             <RainbowButton key={i} onClick={() => onButton(b)} className="font-sans w-full">
               {b.label}
             </RainbowButton>
@@ -176,6 +177,11 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
               {b.label}
             </button>
           )
+        )}
+        {dock.trust && (
+          <ul className="font-sans m-0 flex list-none flex-wrap items-center justify-center gap-x-3 gap-y-1 p-0 pt-1 text-[.62rem] text-white/45">
+            {dock.trust.map((t) => <li key={t}>{t}</li>)}
+          </ul>
         )}
       </div>
     );

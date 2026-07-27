@@ -4,7 +4,6 @@
 //
 // A stage's `beats` play in order. Each beat is either:
 //   'a string'                     → one of Selene's chat bubbles
-//   { status: '…' }                → a system status label ("Analyzing…")
 //   { sketch: n, caption, unlocked? } → reveal portrait step `n` (see SKETCHES);
 //                                    the last step blurs unless `unlocked`
 //   { reveal: { headline, body } } → the "Meet Your Soulmate" card
@@ -68,10 +67,9 @@ export const STAGES = {
   '3': {
     beats: [
       'Thank you, {name}. I have everything I need.',
-      'I’m reading the zodiac alignment connected to {dob} now.',
-      { status: 'Analyzing your zodiac signature…' },
-      'There’s a strong pattern beginning to appear. Give me a moment while I translate it into facial features.',
-      { status: 'Mapping facial structure…' },
+      'Give me a second—I’m reading the zodiac alignment connected to {dob}.',
+      'There’s a strong pattern beginning to appear.',
+      'Hold on. Let me translate it into facial structure.',
     ],
     next: '4',
   },
@@ -91,12 +89,12 @@ export const STAGES = {
     beats: [
       'There’s a quiet confidence around this person.',
       'They may seem reserved when you first meet them. Not distant—just careful about who they allow into their inner world.',
-      { status: 'Reading emotional energy…' },
+      'Let me sit with their emotional energy for a moment.',
       'They appear soft-spoken and thoughtful. The kind of person who listens closely before responding.',
       'You may feel unusually comfortable around them, even before you know them well.',
       'I’m beginning to sense a creative side too.',
       'They may express themselves through ideas, music, design, writing, or something they prefer to keep private.',
-      { status: 'Interpreting appearance and personality…' },
+      'Give me a moment—I’m still reading their appearance and personality.',
       'The upper outline is becoming clearer now.',
     ],
     next: '6',
@@ -117,17 +115,17 @@ export const STAGES = {
     beats: [
       'We’re getting closer, {name}.',
       'Their eyes are the strongest part of this reading.',
-      { status: 'Drawing their eyes and expression…' },
+      'Let me draw their eyes and expression. This part takes care.',
       'They have thoughtful eyes—the kind that make you feel they understand more than they say.',
       'At first, they may appear serious or difficult to read. But beneath that reserved nature, their energy feels warm and reassuring.',
       'This person doesn’t open up immediately.',
       'But once they trust you, they become deeply attentive, affectionate, and emotionally present.',
-      { status: 'Connecting your zodiac energies…' },
+      'Hold on. I’m connecting your energy to theirs.',
       'There’s also something familiar about their presence.',
       'Meeting them may not feel dramatic. It may feel calm—almost as though you’ve known them before.',
       'The final details are forming now: their eyes, expression, and the way their energy appears through the portrait.',
       'Some people recognize someone immediately. Others meet them much later.',
-      { status: 'Completing your soulmate portrait…' },
+      'Almost there. I’m finishing the portrait now.',
     ],
     next: '8',
   },
@@ -148,8 +146,9 @@ export const STAGES = {
       'You may recognize someone you already know—or remember this face when someone new enters your life.',
     ],
     buttons: [
-      { label: 'Continue to My Full Reading', next: 'done' },
+      { label: 'Show Me The Face', next: 'done', variant: 'gold', arrow: true },
     ],
+    trust: ['🛡 30-Day Money-Back Guarantee', '⚡ Delivered in 24 Hours', '🔒 Secure Checkout'],
   },
 
   // Selene re-sends the portrait, this time in the clear.
