@@ -19,7 +19,7 @@ export function ChatCard({ funnel }) {
   useEffect(() => {
     const audio = new Audio('/audio/ambient.mp3');
     audio.loop = true;
-    audio.volume = 0.35;
+    audio.volume = 0.12; // ambient bed — sits well under the reading
     audioRef.current = audio;
 
     const start = () => audio.play().catch(() => {});
@@ -111,7 +111,7 @@ function Message({ m }) {
           <img
             src={m.src}
             alt={m.locked ? 'Your completed soulmate sketch, blurred until unlocked' : 'Your soulmate sketch, still forming'}
-            className={`block w-full object-cover ${m.locked ? 'blur-md scale-105' : ''}`}
+            className={`block w-full object-cover transition-all duration-700 ${m.locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
           />
           {m.locked && (
             <div className="absolute inset-0 grid place-items-center bg-gradient-to-b from-[#08070f]/40 to-[#08070f]/75 px-5 text-center">

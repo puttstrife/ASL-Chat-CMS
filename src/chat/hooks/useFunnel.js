@@ -96,6 +96,8 @@ export function useFunnel() {
 
   // ── Handlers ──
   const chooseButton = (b) => {
+    // Paying the CTA forward unblurs the finished portrait.
+    if (b.unlock) setMessages((m) => m.map((x) => (x.who === 'sketch' ? { ...x, locked: false } : x)));
     const id = push({ who: 'user', text: b.label });
     scheduleReaction(id, b.label);
     if (b.next) runStage(b.next);
