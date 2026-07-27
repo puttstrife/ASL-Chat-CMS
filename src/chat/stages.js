@@ -6,9 +6,6 @@
 //
 // Per stage:
 //   lines[]        Selene's chat bubbles, in order.
-//   label          Optional on-screen label (e.g. "SELENE SPEAKING").
-//   memo           true  → render as the Stage 3 voice memo (auto-plays TTS).
-//   voice          true  → speak each bubble via TTS when sound is on.
 //   buttons[]      { label, next } branch choices shown after the bubbles.
 //   input          { placeholder, key, next } free-text; stored under `key`.
 //   personalizeAfter / personalizeInput → insert an LLM-personalized bubble
@@ -20,7 +17,6 @@ export const START_STAGE = '0';
 
 export const STAGES = {
   '0': {
-    voice: true,
     lines: [
       'Hi {name}...',
       "We weren't supposed to meet yet.",
@@ -35,7 +31,6 @@ export const STAGES = {
   },
 
   '1': {
-    voice: true,
     lines: [
       'My name is Selene.',
       'I don’t call myself a psychic the way most do. I follow people, not moments.',
@@ -50,7 +45,6 @@ export const STAGES = {
   },
 
   '2': {
-    voice: true,
     lines: [
       'What I need to tell you, {name}... it isn’t for this space.',
       'There are things I only say once someone has stepped fully into the quiet with me.',
@@ -62,9 +56,6 @@ export const STAGES = {
   },
 
   '3': {
-    label: 'Selene speaking',
-    memo: true,
-    voice: true,
     lines: [
       'Hey, {name}.',
       'I made this specifically for you. Not for anyone else who might come across it.',
@@ -84,7 +75,6 @@ export const STAGES = {
   },
 
   '4': {
-    voice: true,
     lines: [
       'Thank you for coming back to me, {name}.',
       'What I’m about to share has been sitting with me since I first felt your reading come through.',
@@ -98,7 +88,6 @@ export const STAGES = {
   },
 
   '5': {
-    voice: true,
     lines: [
       'Tell me, {name}. What have you been hoping to hear an answer to?',
       'You don’t need to explain it perfectly. Just tell me plainly, as it sits in you right now.',
@@ -107,7 +96,6 @@ export const STAGES = {
   },
 
   '6': {
-    voice: true,
     personalizeAfter: 0,
     personalizeInput: 'hope',
     lines: [
@@ -120,7 +108,6 @@ export const STAGES = {
   },
 
   '7': {
-    voice: true,
     lines: [
       'There is something I can do for you, {name}. A ritual, one I use to release what’s been blocking this from reaching you fully.',
       'But I want to be honest about how I work, because it matters.',
@@ -135,7 +122,6 @@ export const STAGES = {
   },
 
   '8': {
-    voice: true,
     lines: [
       'Can I ask you something, before we go further?',
       'When a door like this finally opens for you, after everything that’s been sitting blocked, after everything you’ve quietly waited for...',
@@ -146,7 +132,6 @@ export const STAGES = {
   },
 
   '9': {
-    voice: true,
     lines: [
       'I don’t want to rush you, {name}. That has never been how I work.',
       'But I need to be honest about the timing, because it matters more than I wish it did.',
@@ -159,7 +144,6 @@ export const STAGES = {
   },
 
   '10': {
-    voice: true,
     lines: [
       'If you’re ready, {name}, I can begin the ritual for you now.',
       'It’s a small offering. Not a payment in the way you might think of one, but enough to mark that you’re ready, enough to keep this thread open between us in the way it needs to stay open.',
@@ -172,7 +156,6 @@ export const STAGES = {
   },
 
   '11': {
-    voice: true,
     lines: [
       'There’s no risk in trying this, {name}.',
       'If it doesn’t feel right to you, in any way, it comes back to you, in full.',
@@ -182,7 +165,6 @@ export const STAGES = {
   },
 
   later: {
-    voice: true,
     lines: [
       'That’s alright, {name}. The thread stays open.',
       'When you’re ready, I’ll be here. Nothing closes between us just because you needed a little more time.',
@@ -191,7 +173,6 @@ export const STAGES = {
   },
 
   done: {
-    voice: true,
     terminal: true,
     lines: [
       'It’s done, {name}. I’ll begin now, and I’ll reveal your first window the moment it opens.',

@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
-import { VoiceScreen } from './VoiceScreen.jsx';
 
 export function ChatCard({ funnel }) {
-  const { messages, dock, chooseButton, submitInput, advance, memoModal, submitMemo } = funnel;
+  const { messages, dock, chooseButton, submitInput, advance } = funnel;
   const scrollRef = useRef(null);
   const [muted, setMuted] = useState(false); // placeholder — no audio wired up yet
 
@@ -14,22 +13,10 @@ export function ChatCard({ funnel }) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, dock]);
 
-  // Stage 3: chat collapses into the full voice-memo view.
-  if (memoModal) {
-    return (
-      <VoiceScreen
-        text={memoModal.text}
-        enabled={memoModal.enabled}
-        placeholder={memoModal.input?.placeholder}
-        onSubmit={submitMemo}
-      />
-    );
-  }
-
   return (
     <section className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
       {/* Header */}
-      <header className="flex items-center gap-3 bg-[#0c0d14]/95 px-3 py-2.5">
+      <header className="flex items-center gap-3 rounded-b-3xl bg-[#0c0d14]/95 px-3 py-2.5">
         <img
           src="/images/chat/selene-avatar.png"
           alt="Selene"
@@ -69,7 +56,7 @@ export function ChatCard({ funnel }) {
 }
 
 function Message({ m }) {
-  if (m.who === 'memo-label') {
+  if (m.who === 'status') {
     return (
       <div className="font-sans mx-auto my-1 inline-flex items-center gap-2 text-[.6rem] font-bold uppercase tracking-[0.2em] text-[#d8b4fe]/85">
         <span className="size-1.5 rounded-full bg-[#c084fc] shadow-[0_0_12px_#c084fc]" style={{ animation: 'dotPulse 1.2s ease-in-out infinite' }} />

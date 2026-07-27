@@ -16,7 +16,6 @@ export function useFunnel() {
   const [messages, setMessages] = useState([]); // {id, who, text}
   const [dock, setDock] = useState({ type: 'none' });
   const [config, setConfig] = useState({ ttsEnabled: false, readingEnabled: false });
-  const [memoModal, setMemoModal] = useState(null); // Stage 3 center popup: {text, enabled}
 
   const answers = useRef({});
   const idRef = useRef(0);
@@ -57,7 +56,7 @@ export function useFunnel() {
   // Selene "reacts" a beat after the user sends.
   const scheduleReaction = (id, text) => setTimeout(() => updateMsg(id, { reaction: pickReaction(text) }), 550);
 
-  // Reveal one Selene bubble: typing indicator → bubble. (Voice is Stage 3 only.)
+  // Reveal one Selene bubble: typing indicator → bubble.
   const revealLine = async (text) => {
     const typingId = push({ who: 'typing' });
     const readMs = Math.min(2200, 500 + interpolate(text).length * 22);
@@ -83,18 +82,7 @@ export function useFunnel() {
     const stage = STAGES[id];
     if (!stage) { runningRef.current = false; return; }
 
-    if (stage.label && !stage.memo) push({ who: 'memo-label', text: stage.label });
-
     const lines = usableLines(stage.lines);
-
-    // Voice-memo stage (Stage 3): collapse the chat into a full voice-memo
-    // view (avatar + player + burden input). No dock while it's up.
-    if (stage.memo) {
-      const combined = lines.map(interpolate).join('  ');
-      setMemoModal({ text: combined, enabled: configRef.current.ttsEnabled, input: stage.input });
-      runningRef.current = false;
-      return;
-    }
 
     for (let i = 0; i < lines.length; i++) {
       await revealLine(lines[i]);
@@ -120,15 +108,6 @@ export function useFunnel() {
     runStage(next);
   };
   const advance = (next) => runStage(next);
-  const submitMemo = (value) => {
-    const inp = memoModal?.input;
-    setMemoModal(null);
-    if (!inp) return;
-    answers.current[inp.key] = value;
-    const id = push({ who: 'user', text: value });
-    scheduleReaction(id, value);
-    runStage(inp.next);
-  };
 
   // ── Boot ──
   useEffect(() => {
@@ -142,5 +121,5 @@ export function useFunnel() {
     })();
   }, [runStage]);
 
-  return { ctx, messages, dock, config, chooseButton, submitInput, advance, memoModal, submitMemo };
+  return { ctx, messages, dock, config, chooseButton, submitInput, advance };
 }

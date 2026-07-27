@@ -75,18 +75,3 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
-/* Mystic theming for react-voicemail-player (Stage 3 voice memo) */
-.selene-voicemail .VoicemailPlayer-root {
-  --primary-color: #b676ff;                    /* play button + played peaks */
-  --secondary-color: rgba(216, 180, 254, 0.42); /* unplayed peaks */
-  --disabled-color: rgba(255, 255, 255, 0.20);
-  font-family: 'Inter', sans-serif;             /* match the chat font */
-  font-size: .75rem;
-  color: rgba(255, 255, 255, 0.82);
-}
-.selene-voicemail .VoicemailPlayer-playButton {
-  width: 46px;
-  height: 46px;
-  background: linear-gradient(135deg, #c084fc, #7c3aed);
-  box-shadow: 0 0 20px rgba(176, 108, 255, 0.6);
-}
