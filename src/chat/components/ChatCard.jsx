@@ -117,11 +117,6 @@ function Message({ m }) {
             </div>
           )}
         </div>
-        {m.caption && (
-          <figcaption className="font-sans px-1 text-[.7rem] uppercase tracking-[0.14em] text-[#d8b4fe]/70">
-            {m.caption}
-          </figcaption>
-        )}
       </figure>
     );
   }

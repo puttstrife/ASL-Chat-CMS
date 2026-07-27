@@ -4,7 +4,7 @@
 //
 // A stage's `beats` play in order. Each beat is either:
 //   'a string'                     → one of Selene's chat bubbles
-//   { sketch: n, caption, unlocked? } → reveal portrait step `n` (see SKETCHES);
+//   { sketch: n, unlocked? }       → reveal portrait step `n` (see SKETCHES);
 //                                    the last step blurs unless `unlocked`
 //   { reveal: { headline, body } } → the "Meet Your Soulmate" card
 //
@@ -79,7 +79,7 @@ export const STAGES = {
     beats: [
       'The first feature coming through is the shape of their face.',
       'Their jawline suggests someone with a calm, grounded presence. They may not demand attention, but you’ll naturally notice when they enter the room.',
-      { sketch: 0, caption: 'First details detected' },
+      { sketch: 0 },
     ],
     next: '5',
   },
@@ -105,7 +105,7 @@ export const STAGES = {
     beats: [
       'I can see their hair and overall silhouette beginning to form.',
       'This may be one of the first physical details you notice about them.',
-      { sketch: 1, caption: 'Your soulmate is taking shape' },
+      { sketch: 1 },
     ],
     next: '7',
   },

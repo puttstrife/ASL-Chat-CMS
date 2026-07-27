@@ -69,10 +69,10 @@ export function useFunnel() {
 
   // Sketch reveals use the portrait set matching the chosen preference.
   // The finished portrait arrives blurred; `unlocked` re-sends it in the clear.
-  const revealSketch = async ({ sketch, caption, unlocked }) => {
+  const revealSketch = async ({ sketch, unlocked }) => {
     const set = SKETCHES[answers.current.preference] || SKETCHES.anyone;
     const complete = sketch === set.length - 1;
-    push({ who: 'sketch', src: set[sketch], caption, complete, locked: complete && !unlocked });
+    push({ who: 'sketch', src: set[sketch], complete, locked: complete && !unlocked });
     await sleep(700);
   };
 
