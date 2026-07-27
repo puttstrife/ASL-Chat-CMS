@@ -51,11 +51,11 @@ export function ChatCard({ funnel }) {
           style={{ objectPosition: 'center 18%' }}
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <p className="font-script text-3xl leading-tight text-[var(--gold)]">Selene</p>
+          <p className="font-sans text-xl font-semibold leading-tight text-[var(--gold)]">Selene</p>
           <p className="font-sans inline-flex items-center gap-1.5 text-[.7rem] text-white/55">
             <span className="live-dot size-2.5 shrink-0 rounded-full bg-[#38c878]" aria-hidden="true" />
             <span className="sr-only">Live session. </span>
-            Astrology Sketch Artist
+            Astrological Portrait Reader
           </p>
         </div>
         <button
@@ -110,7 +110,11 @@ function Message({ m }) {
         <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
           <img
             src={m.src}
-            alt={m.locked ? 'Your completed soulmate sketch, blurred until unlocked' : 'Your soulmate sketch, still forming'}
+            alt={
+              m.locked ? 'Your completed soulmate sketch, blurred until unlocked'
+                : m.complete ? 'Your completed soulmate sketch'
+                : 'Your soulmate sketch, still forming'
+            }
             className={`block w-full object-cover transition-all duration-700 ${m.locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
           />
           {m.locked && (

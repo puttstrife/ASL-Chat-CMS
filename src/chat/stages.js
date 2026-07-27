@@ -5,15 +5,15 @@
 // A stage's `beats` play in order. Each beat is either:
 //   'a string'                     → one of Selene's chat bubbles
 //   { status: '…' }                → a system status label ("Analyzing…")
-//   { sketch: n, caption }         → reveal portrait step `n` (see SKETCHES)
+//   { sketch: n, caption, unlocked? } → reveal portrait step `n` (see SKETCHES);
+//                                    the last step blurs unless `unlocked`
 //   { reveal: { headline, body } } → the "Meet Your Soulmate" card
 //
 // After the beats, a stage ends in exactly one of:
 //   input      { placeholder, key, next, cta }  free text, stored under `key`
 //   datePicker { key, next, cta }               month/day/year, stored as `key`
 //   select     { key, options[], next, cta }    pick one, then confirm
-//   buttons[]  { label, next, unlock? }         act immediately on tap;
-//                                               `unlock` unblurs the portrait
+//   buttons[]  { label, next }                  act immediately on tap
 //   next                                        a "Continue" affordance
 
 export const START_STAGE = '0';
@@ -148,11 +148,16 @@ export const STAGES = {
       'You may recognize someone you already know—or remember this face when someone new enters your life.',
     ],
     buttons: [
-      { label: 'Continue to My Full Reading', next: 'done', unlock: true },
+      { label: 'Continue to My Full Reading', next: 'done' },
     ],
   },
 
+  // Selene re-sends the portrait, this time in the clear.
   done: {
-    beats: ['I’ll take you through the full reading now, {name}.'],
+    beats: [
+      'Here they are, {name} — nothing held back this time.',
+      { sketch: 2, unlocked: true },
+      'I’ll take you through the full reading now.',
+    ],
   },
 };

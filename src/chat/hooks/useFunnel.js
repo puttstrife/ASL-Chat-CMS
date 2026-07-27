@@ -62,9 +62,11 @@ export function useFunnel() {
   };
 
   // Sketch reveals use the portrait set matching the chosen preference.
-  const revealSketch = async ({ sketch, caption }) => {
+  // The finished portrait arrives blurred; `unlocked` re-sends it in the clear.
+  const revealSketch = async ({ sketch, caption, unlocked }) => {
     const set = SKETCHES[answers.current.preference] || SKETCHES.anyone;
-    push({ who: 'sketch', src: set[sketch], caption, locked: sketch === set.length - 1 });
+    const complete = sketch === set.length - 1;
+    push({ who: 'sketch', src: set[sketch], caption, complete, locked: complete && !unlocked });
     await sleep(700);
   };
 
@@ -96,8 +98,6 @@ export function useFunnel() {
 
   // ── Handlers ──
   const chooseButton = (b) => {
-    // Paying the CTA forward unblurs the finished portrait.
-    if (b.unlock) setMessages((m) => m.map((x) => (x.who === 'sketch' ? { ...x, locked: false } : x)));
     const id = push({ who: 'user', text: b.label });
     scheduleReaction(id, b.label);
     if (b.next) runStage(b.next);
