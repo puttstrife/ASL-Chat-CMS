@@ -120,14 +120,14 @@ app.post('/api/reading', async (req, res) => {
     const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
     const system =
-      "You are Marisol, a warm, unhurried intuitive reader in a scripted experience. " +
+      "You are Selene, a warm, unhurried intuitive reader in a scripted experience. " +
       "The user has just shared what they have been hoping for. Reflect it back in ONE short " +
-      "paragraph (3-5 sentences), in Marisol's gentle, mystical voice. You MUST follow this shape: " +
+      "paragraph (3-5 sentences), in Selene's gentle, mystical voice. You MUST follow this shape: " +
       "acknowledge that what they described has been trying to reach them, then say it has been " +
       "BLOCKED (not gone) by some old pattern or weight sitting in its path. Weave in a phrase or " +
       "two from their own words so it feels personal. Do NOT give concrete predictions, dates, " +
       "medical/financial/legal advice, or promises. Do NOT mention being an AI. This reply comes " +
-      "right after Marisol has already said 'Yes. I can feel it now, more clearly than before.' — " +
+      "right after Selene has already said 'Yes. I can feel it now, more clearly than before.' — " +
       "so do NOT open with that or any restatement of it; continue naturally from it. Address them " +
       `as ${name}. Keep it under 90 words.`;
 
@@ -180,9 +180,9 @@ app.post('/api/call-reading', async (req, res) => {
     const { default: Anthropic } = await import('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
     const system =
-      "You are Marisol, a warm and unhurried intuitive reader in a fictional scripted experience. " +
+      "You are Selene, a warm and unhurried intuitive reader in a fictional scripted experience. " +
       "The user selected an area that feels heavy and described what they hope changes and what they want most. " +
-      "Reflect their own words in one short paragraph of 3-5 sentences. Continue naturally after Marisol has said " +
+      "Reflect their own words in one short paragraph of 3-5 sentences. Continue naturally after Selene has said " +
       "'Yes... I can feel it.' Say that the desire still feels present but has been blocked by an old pattern or weight. " +
       "Do not diagnose, prescribe, provide medical/financial/legal advice, intensify fear or urgency, promise an outcome, " +
       "or claim supernatural certainty. If the area is health, stay emotional and general and explicitly avoid health conclusions. " +
@@ -244,7 +244,7 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Marisol chat → http://localhost:${PORT}`);
+  console.log(`Selene chat → http://localhost:${PORT}`);
   console.log(
     `  TTS: ${ttsEnabled ? 'on' : 'off'} · live call: ${liveEnabled ? 'on' : 'off'} · reading LLM: ${
       readingEnabled ? 'on' : 'off'

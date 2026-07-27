@@ -1,4 +1,4 @@
-export function MarisolAvatar({
+export function SeleneAvatar({
   sizeClass = 'size-32',
   active = false,
   ping = false,
@@ -14,8 +14,8 @@ export function MarisolAvatar({
         />
       )}
       <img
-        src="/images/chat/marisol-avatar.png"
-        alt="Marisol"
+        src="/images/chat/selene-avatar.png"
+        alt="Selene"
         onError={(event) => {
           event.currentTarget.onerror = null;
           event.currentTarget.src = '/images/chat/sabrina-avatar.png';
@@ -27,10 +27,10 @@ export function MarisolAvatar({
   );
 }
 
-export function MarisolIdentity({ status, statusClassName = '', nameClassName = 'text-5xl' }) {
+export function SeleneIdentity({ status, statusClassName = '', nameClassName = 'text-5xl' }) {
   return (
     <div className="text-center">
-      <p className={`font-script leading-none text-[var(--gold)] ${nameClassName}`}>Marisol</p>
+      <p className={`font-script leading-none text-[var(--gold)] ${nameClassName}`}>Selene</p>
       {status && (
         <p className={`font-sans mt-2 text-[.7rem] text-white/55 ${statusClassName}`}>
           {status}

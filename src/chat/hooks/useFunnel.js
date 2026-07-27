@@ -54,16 +54,16 @@ export function useFunnel() {
     if (/\?|what|when|how|will|why|should|whether/.test(t)) return rand(REACTIONS.question);
     return rand(REACTIONS.default);
   };
-  // Marisol "reacts" a beat after the user sends.
+  // Selene "reacts" a beat after the user sends.
   const scheduleReaction = (id, text) => setTimeout(() => updateMsg(id, { reaction: pickReaction(text) }), 550);
 
-  // Reveal one Marisol bubble: typing indicator → bubble. (Voice is Stage 3 only.)
+  // Reveal one Selene bubble: typing indicator → bubble. (Voice is Stage 3 only.)
   const revealLine = async (text) => {
     const typingId = push({ who: 'typing' });
     const readMs = Math.min(2200, 500 + interpolate(text).length * 22);
     await sleep(Math.max(650, readMs * 0.5));
     remove(typingId);
-    push({ who: 'marisol', text: interpolate(text) });
+    push({ who: 'selene', text: interpolate(text) });
     await sleep(360);
   };
 
@@ -71,7 +71,7 @@ export function useFunnel() {
     const pendingId = push({ who: 'reading-pending' });
     const text = await fetchReading(ctx.name, userText);
     remove(pendingId);
-    if (text) push({ who: 'marisol', text });
+    if (text) push({ who: 'selene', text });
   };
 
   // ── State machine ──

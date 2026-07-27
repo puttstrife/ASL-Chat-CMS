@@ -2,7 +2,7 @@
 // the original chat/voice-chat journey from drifting when this variant changes.
 
 export const CALL_CHUNKS = [
-  "Hi {name}... it’s Marisol. I wasn’t sure the connection would hold, so I’m glad I reached you.",
+  "Hi {name}... it’s Selene. I wasn’t sure the connection would hold, so I’m glad I reached you.",
   'I had to call you. Something told me not to wait. I was meant to reach you earlier, but this feels like the right moment.',
   'And I need to be careful, because what I’m about to tell you is confidential. It feels important... and I don’t want to leave it half-spoken.',
   'The connection doesn’t feel completely stable, so I don’t think we have much time.',
@@ -31,7 +31,7 @@ export const CHAT_STAGES = {
   },
   '2': {
     lines: [
-      'My name is Marisol.',
+      'My name is Selene.',
       'I study the lunar patterns.',
       'And I reveal when certain desires are ready to surface.',
       'Most people only look once.',

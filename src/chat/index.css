@@ -14,7 +14,7 @@
   --gold: #dfa73a;
   --gold-btn: #dfa73a;
 
-  /* shadcn tokens (dark), themed for Marisol — used by the Bubble component */
+  /* shadcn tokens (dark), themed for Selene — used by the Bubble component */
   --background: #120f1f;
   --foreground: #f4f2f8;
   --card: #18142a;
@@ -76,7 +76,7 @@ body {
 .no-scrollbar { scrollbar-width: none; }
 
 /* Mystic theming for react-voicemail-player (Stage 3 voice memo) */
-.marisol-voicemail .VoicemailPlayer-root {
+.selene-voicemail .VoicemailPlayer-root {
   --primary-color: #b676ff;                    /* play button + played peaks */
   --secondary-color: rgba(216, 180, 254, 0.42); /* unplayed peaks */
   --disabled-color: rgba(255, 255, 255, 0.20);
@@ -84,7 +84,7 @@ body {
   font-size: .75rem;
   color: rgba(255, 255, 255, 0.82);
 }
-.marisol-voicemail .VoicemailPlayer-playButton {
+.selene-voicemail .VoicemailPlayer-playButton {
   width: 46px;
   height: 46px;
   background: linear-gradient(135deg, #c084fc, #7c3aed);

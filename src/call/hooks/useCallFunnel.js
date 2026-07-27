@@ -61,7 +61,7 @@ export function useCallFunnel(context) {
     await sleep(Math.max(500, Math.min(1450, 300 + text.length * 13)));
     if (!aliveRef.current) return;
     remove(typingId);
-    push({ who: 'marisol', text, name: context.name });
+    push({ who: 'selene', text, name: context.name });
     await sleep(240);
   }, [context, push, remove]);
 
@@ -72,7 +72,7 @@ export function useCallFunnel(context) {
     remove(pendingId);
     if (text) {
       push({
-        who: 'marisol',
+        who: 'selene',
         text,
         name: context.name,
         auroraValues: [answersRef.current.change, answersRef.current.desire].filter(Boolean),

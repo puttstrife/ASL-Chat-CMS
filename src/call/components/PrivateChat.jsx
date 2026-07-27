@@ -76,18 +76,18 @@ export function PrivateChat({ context }) {
   }, [funnel.messages, funnel.dock]);
 
   return (
-    <section className="private-chat" aria-label="Private chat with Marisol">
+    <section className="private-chat" aria-label="Private chat with Selene">
       <header className="private-chat-header">
         <img
-          src="/images/chat/marisol-avatar.png"
-          alt="Marisol"
+          src="/images/chat/selene-avatar.png"
+          alt="Selene"
           onError={(event) => {
             event.currentTarget.onerror = null;
             event.currentTarget.src = '/images/chat/sabrina-avatar.png';
           }}
         />
         <div className="private-chat-title">
-          <h1>Marisol</h1>
+          <h1>Selene</h1>
           <p><span>✓</span> Private thread connected</p>
         </div>
       </header>
@@ -116,22 +116,22 @@ export function PrivateChat({ context }) {
 
 function Message({ message }) {
   if (message.who === 'typing') {
-    return <div className="chat-typing" aria-label="Marisol is typing"><span /><span /><span /></div>;
+    return <div className="chat-typing" aria-label="Selene is typing"><span /><span /><span /></div>;
   }
   if (message.who === 'reading') {
     return <div className="chat-reading">Sitting with your words</div>;
   }
   return (
     <div className={`chat-bubble chat-bubble-${message.who} ${message.reaction ? 'has-reaction' : ''}`}>
-      {message.who === 'marisol'
-        ? <MarisolText text={message.text} name={message.name} auroraValues={message.auroraValues} />
+      {message.who === 'selene'
+        ? <SeleneText text={message.text} name={message.name} auroraValues={message.auroraValues} />
         : message.text}
-      {message.reaction && <span className="chat-reaction" aria-label={`Marisol reacted ${message.reaction}`}>{message.reaction}</span>}
+      {message.reaction && <span className="chat-reaction" aria-label={`Selene reacted ${message.reaction}`}>{message.reaction}</span>}
     </div>
   );
 }
 
-function MarisolText({ text, name, auroraValues = [] }) {
+function SeleneText({ text, name, auroraValues = [] }) {
   const decorations = [
     ...(name ? [{ type: 'name', value: name }] : []),
     ...auroraValues.flatMap((value) => [
@@ -201,7 +201,7 @@ function Dock({ dock, onChoose, onSubmit, onAdvance, onClickSound }) {
   if (dock.type === 'terminal') {
     return <div className="call-terminal">This private thread remains open.</div>;
   }
-  return <div className="call-terminal">Marisol is with you…</div>;
+  return <div className="call-terminal">Selene is with you…</div>;
 }
 
 function ChatInput({ placeholder, onSend, onClickSound }) {

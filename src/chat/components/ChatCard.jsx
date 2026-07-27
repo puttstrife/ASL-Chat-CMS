@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FiPhone, FiSend } from 'react-icons/fi';
+import { FiPhone, FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { LiveOverlay } from './LiveOverlay.jsx';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
@@ -9,6 +9,7 @@ export function ChatCard({ funnel }) {
   const { messages, dock, config, chooseButton, submitInput, advance, memoModal, submitMemo } = funnel;
   const scrollRef = useRef(null);
   const [live, setLive] = useState(false);
+  const [muted, setMuted] = useState(false); // placeholder — no audio wired up yet
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -32,26 +33,35 @@ export function ChatCard({ funnel }) {
       {/* Header */}
       <header className="flex items-center gap-3 border-b border-white/8 bg-[#0c0d14]/95 px-3 py-2.5">
         <img
-          src="/images/chat/marisol-avatar.png"
-          alt="Marisol"
+          src="/images/chat/selene-avatar.png"
+          alt="Selene"
           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/chat/sabrina-avatar.png'; }}
           className="size-12 shrink-0 rounded-full object-cover shadow-[0_0_16px_rgba(190,108,255,0.5)]"
           style={{ objectPosition: 'center 18%' }}
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <p className="font-script text-3xl leading-tight text-[var(--gold)]">Marisol</p>
+          <p className="font-script text-3xl leading-tight text-[var(--gold)]">Selene</p>
           <p className="font-sans inline-flex items-center gap-1.5 text-[.7rem] text-white/55">
             <span className="grid size-4 place-items-center rounded-full bg-[#38c878] text-[.45rem] font-black text-[#04130a]">✓</span>
             Following your pattern
           </p>
         </div>
-        {config.liveEnabled && (
-          <div className="flex shrink-0 items-center">
-            <RainbowButton onClick={() => setLive(true)} aria-label="Talk to Marisol live" className="font-sans h-10 gap-1.5 rounded-full px-4 text-sm">
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMuted((m) => !m)}
+            aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+            aria-pressed={muted}
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10"
+          >
+            {muted ? <FiVolumeX className="size-4.5" /> : <FiVolume2 className="size-4.5" />}
+          </button>
+          {config.liveEnabled && (
+            <RainbowButton onClick={() => setLive(true)} aria-label="Talk to Selene live" className="font-sans h-10 gap-1.5 rounded-full px-4 text-sm">
               <FiPhone className="size-4" /> Live
             </RainbowButton>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       {/* Messages */}

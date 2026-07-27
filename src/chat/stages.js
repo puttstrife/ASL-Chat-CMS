@@ -1,12 +1,12 @@
-// Scripted funnel for Marisol — one entry per stage of
-// "(Interactive VSL) Marisol Chat Sequence.md".
+// Scripted funnel for Selene — one entry per stage of
+// "(Interactive VSL) Selene Chat Sequence.md".
 //
 // {name} and {city} are interpolated at runtime from URL params
 // (?name=Elena&city=General%20Santos). Defaults: name "Elena".
 //
 // Per stage:
-//   lines[]        Marisol's chat bubbles, in order.
-//   label          Optional on-screen label (e.g. "MARISOL SPEAKING").
+//   lines[]        Selene's chat bubbles, in order.
+//   label          Optional on-screen label (e.g. "SELENE SPEAKING").
 //   memo           true  → render as the Stage 3 voice memo (auto-plays TTS).
 //   voice          true  → speak each bubble via TTS when sound is on.
 //   buttons[]      { label, next } branch choices shown after the bubbles.
@@ -37,7 +37,7 @@ export const STAGES = {
   '1': {
     voice: true,
     lines: [
-      'My name is Marisol.',
+      'My name is Selene.',
       'I don’t call myself a psychic the way most do. I follow people, not moments.',
       'Most readers look once. A chart. A card. A single breath of time... and they call that the whole of a person.',
       'I don’t work that way.',
@@ -62,7 +62,7 @@ export const STAGES = {
   },
 
   '3': {
-    label: 'Marisol speaking',
+    label: 'Selene speaking',
     memo: true,
     voice: true,
     lines: [

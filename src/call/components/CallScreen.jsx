@@ -2,13 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { MessageCircle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
-import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
+import { AudioBars, SeleneAvatar, PrimaryButton } from './UI.jsx';
 
 const FIRST_TTS_DELAY_MS = 900;
 const CONNECTION_STEPS = [
   'Initializing private call…',
   'Securing connection…',
-  'Connecting to Marisol…',
+  'Connecting to Selene…',
 ];
 const CONNECTION_STEP_MS = 1100;
 
@@ -136,11 +136,11 @@ export function CallScreen({ context, onPrivateChat }) {
 
   if (phase === 'connecting') {
     return (
-      <section className="call-screen call-entry call-connecting" aria-label="Connecting a private call with Marisol">
+      <section className="call-screen call-entry call-connecting" aria-label="Connecting a private call with Selene">
         <div className="call-connecting-card">
-          <MarisolAvatar size="medium" ping />
+          <SeleneAvatar size="medium" ping />
           <div aria-live="polite">
-            <h1 className="call-name">Marisol</h1>
+            <h1 className="call-name">Selene</h1>
             <p className="call-connecting-status">{CONNECTION_STEPS[connectionStep]}</p>
           </div>
           <div className="call-connection-progress" aria-hidden="true">
@@ -157,9 +157,9 @@ export function CallScreen({ context, onPrivateChat }) {
     return (
       <section className="call-screen call-ended" aria-label="Call ended">
         <div className="call-center-stack">
-          <MarisolAvatar size="medium" />
+          <SeleneAvatar size="medium" />
           <div>
-            <h1 className="call-name">Marisol</h1>
+            <h1 className="call-name">Selene</h1>
             <p className="call-status">Call complete · {formatDuration(seconds)}</p>
           </div>
           <PrimaryButton className="call-private-chat-button" onClick={onPrivateChat}>
@@ -172,11 +172,11 @@ export function CallScreen({ context, onPrivateChat }) {
   }
 
   return (
-    <section className="call-screen call-active" aria-label="Private audio call with Marisol">
+    <section className="call-screen call-active" aria-label="Private audio call with Selene">
       <header className="call-active-header">
-        <MarisolAvatar size="small" active={speaking} />
+        <SeleneAvatar size="small" active={speaking} />
         <div className="call-active-identity">
-          <h1 className="call-name">Marisol</h1>
+          <h1 className="call-name">Selene</h1>
           <p className="call-status">{formatDuration(seconds)} · connected</p>
         </div>
       </header>

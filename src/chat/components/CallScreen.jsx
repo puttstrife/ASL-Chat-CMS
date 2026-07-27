@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { PhoneOff, Mic, MicOff, Volume2, Loader2 } from 'lucide-react';
 import { fetchTTS } from '../lib/api.js';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
-import { AudioActivity, MarisolAvatar, MarisolIdentity } from './VoiceCallComponents.jsx';
+import { AudioActivity, SeleneAvatar, SeleneIdentity } from './VoiceCallComponents.jsx';
 
 // Stage 0 — VSL phone-call opener (demo artifact).
 // Flow: loading/connecting sequence → call auto-starts (scripted voice) → hand off to chat.
 const LINES = [
-  "Hi Elena... it's Marisol.",
+  "Hi Elena... it's Selene.",
   "I wasn't sure the connection would hold, so I'm glad I reached you.",
   'I had to call you. Something told me not to wait.',
   'What I’m about to tell you is confidential... and I don’t want to leave it half-spoken.',
@@ -19,7 +19,7 @@ const LINES = [
   'That way I can continue with you properly... and tell you everything without interruption.',
 ];
 
-const CONNECT_STEPS = ['Connecting to Marisol…', 'Initializing your reading…', 'Securing a private line…', 'Connected.'];
+const CONNECT_STEPS = ['Connecting to Selene…', 'Initializing your reading…', 'Securing a private line…', 'Connected.'];
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
@@ -84,8 +84,8 @@ export function CallScreen({ onConnect }) {
     return (
       <section className="grid h-full place-items-center bg-[#080910] px-6 text-center">
         <div className="flex flex-col items-center gap-7">
-          <MarisolAvatar sizeClass="size-32" ping dim />
-          <MarisolIdentity />
+          <SeleneAvatar sizeClass="size-32" ping dim />
+          <SeleneIdentity />
           <div className="flex w-[240px] flex-col items-center gap-3">
             <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-[#b676ff] transition-all duration-700 ease-out" style={{ width: `${((step + 1) / CONNECT_STEPS.length) * 100}%` }} />
@@ -104,8 +104,8 @@ export function CallScreen({ onConnect }) {
     return (
       <section className="grid h-full place-items-center bg-[#080910] px-6 text-center">
         <div className="flex flex-col items-center gap-5">
-          <MarisolAvatar sizeClass="size-28" />
-          <MarisolIdentity status={`Call ended · ${fmt(seconds)}`} statusClassName="text-white/45" />
+          <SeleneAvatar sizeClass="size-28" />
+          <SeleneIdentity status={`Call ended · ${fmt(seconds)}`} statusClassName="text-white/45" />
           <RainbowButton onClick={() => onConnect?.()} className="font-sans px-6">Continue to private chat</RainbowButton>
         </div>
       </section>
@@ -116,11 +116,11 @@ export function CallScreen({ onConnect }) {
   return (
     <section className="relative grid h-full grid-rows-[auto_1fr_auto] bg-[#080910]">
       <div className="pt-8">
-        <MarisolIdentity status={`${fmt(seconds)} · connected`} nameClassName="text-4xl" statusClassName="mt-1 tabular-nums text-white/45" />
+        <SeleneIdentity status={`${fmt(seconds)} · connected`} nameClassName="text-4xl" statusClassName="mt-1 tabular-nums text-white/45" />
       </div>
 
       <div className="flex flex-col items-center justify-center gap-6 px-8 text-center">
-        <MarisolAvatar sizeClass="size-36" active={speaking} />
+        <SeleneAvatar sizeClass="size-36" active={speaking} />
         <AudioActivity active={speaking} />
         <p className="font-sans min-h-[3.6em] max-w-[300px] text-[.85rem] leading-relaxed text-white/85" key={lineIdx} style={{ animation: 'bubbleIn .4s ease' }}>
           {LINES[lineIdx]}

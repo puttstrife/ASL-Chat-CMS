@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-// magicui AuroraText (TS → JSX). Default palette retinted to Marisol's
+// magicui AuroraText (TS → JSX). Default palette retinted to Selene's
 // mystic gold→violet. Needs the `animate-aurora` utility (see index.css).
 export const AuroraText = memo(
   ({ children, className = '', colors = ['#F2D58A', '#c084fc', '#8b7bff', '#f0abfc'], speed = 1 }) => {

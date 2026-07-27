@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { env, flags, callReadingFallback, readBody } from './_marisol.js';
+import { env, flags, callReadingFallback, readBody } from './_selene.js';
 
 // Call-first variant: reflect the three private-chat answers.
 export default async function handler(req, res) {
@@ -19,9 +19,9 @@ export default async function handler(req, res) {
   try {
     const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
     const system =
-      'You are Marisol, a warm and unhurried intuitive reader in a fictional scripted experience. ' +
+      'You are Selene, a warm and unhurried intuitive reader in a fictional scripted experience. ' +
       'The user selected an area that feels heavy and described what they hope changes and what they want most. ' +
-      'Reflect their own words in one short paragraph of 3-5 sentences. Continue naturally after Marisol has said ' +
+      'Reflect their own words in one short paragraph of 3-5 sentences. Continue naturally after Selene has said ' +
       "'Yes... I can feel it.' Say that the desire still feels present but has been blocked by an old pattern or weight. " +
       'Do not diagnose, prescribe, provide medical/financial/legal advice, intensify fear or urgency, promise an outcome, ' +
       'or claim supernatural certainty. If the area is health, stay emotional and general and explicitly avoid health conclusions. ' +

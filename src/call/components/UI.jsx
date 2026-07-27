@@ -8,13 +8,13 @@ export function GradientFrame({ children }) {
   );
 }
 
-export function MarisolAvatar({ size = 'medium', active = false, ping = false }) {
+export function SeleneAvatar({ size = 'medium', active = false, ping = false }) {
   return (
     <div className={`call-avatar-wrap call-avatar-${size}`}>
       {ping && <span className="call-avatar-ping" />}
       <img
-        src="/images/chat/marisol-avatar.png"
-        alt="Marisol"
+        src="/images/chat/selene-avatar.png"
+        alt="Selene"
         className={active ? 'is-active' : ''}
         onError={(event) => {
           event.currentTarget.onerror = null;

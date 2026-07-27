@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { env, flags, readBody } from './_marisol.js';
+import { env, flags, readBody } from './_selene.js';
 
 // ElevenLabs TTS proxy (keeps the API key server-side).
 // Caches clips in /tmp — persists across warm invocations on the same

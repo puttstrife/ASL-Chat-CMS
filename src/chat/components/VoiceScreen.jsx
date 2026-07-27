@@ -5,9 +5,9 @@ import VoicemailPlayer from 'react-voicemail-player';
 import 'react-voicemail-player/dist/react-voicemail-player.css';
 import { fetchTTS } from '../lib/api.js';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
-import { AudioActivity, MarisolAvatar, MarisolIdentity } from './VoiceCallComponents.jsx';
+import { AudioActivity, SeleneAvatar, SeleneIdentity } from './VoiceCallComponents.jsx';
 
-// Stage 3: the chat collapses into this full voice-memo view — Marisol's
+// Stage 3: the chat collapses into this full voice-memo view — Selene's
 // avatar + autoplaying voicemail player, with the burden input at the bottom.
 // Submitting returns to chat mode (Stage 4).
 export function VoiceScreen({ text, enabled = true, placeholder, onSubmit }) {
@@ -54,20 +54,20 @@ export function VoiceScreen({ text, enabled = true, placeholder, onSubmit }) {
   return (
     <section className="grid h-full grid-rows-[minmax(0,1fr)_auto] bg-[#080910]">
       <div className="flex flex-col items-center justify-center gap-5 px-6 py-6 text-center">
-        <MarisolAvatar sizeClass="size-32" active={!ended && Boolean(src)} ping />
+        <SeleneAvatar sizeClass="size-32" active={!ended && Boolean(src)} ping />
 
-        <MarisolIdentity
+        <SeleneIdentity
           status={(
             <span className="inline-flex items-center gap-2 text-[.65rem] font-bold uppercase tracking-[0.24em] text-[#d8b4fe]/90">
             <span className="size-2 rounded-full bg-[#c084fc] shadow-[0_0_10px_#c084fc]" style={{ animation: 'dotPulse 1.2s ease-in-out infinite' }} />
-            Marisol speaking
+            Selene speaking
             </span>
           )}
         />
 
         <AudioActivity active={!ended && Boolean(src)} className="-my-1" />
 
-        <div className="marisol-voicemail w-full max-w-[360px]">
+        <div className="selene-voicemail w-full max-w-[360px]">
           {src ? (
             <VoicemailPlayer>
               {(ref) => (
@@ -100,7 +100,7 @@ export function VoiceScreen({ text, enabled = true, placeholder, onSubmit }) {
             </RainbowButton>
           </form>
         ) : (
-          <p className="font-sans py-2 text-center text-[.75rem] italic text-white/45">Listening to Marisol…</p>
+          <p className="font-sans py-2 text-center text-[.75rem] italic text-white/45">Listening to Selene…</p>
         )}
       </div>
     </section>
