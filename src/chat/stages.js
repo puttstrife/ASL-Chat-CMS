@@ -55,8 +55,10 @@ export const STAGES = {
   // 2b — Email capture
   email: {
     beats: [
-      'Before I start drawing—where should I send your finished sketch?',
-      'I’ll send the completed portrait there once it’s ready.',
+      'One thing before I start drawing.',
+      'I work on paper, so what you’ll see here are just photos I take at my desk as it comes together.',
+      'The finished one I scan properly—that’s the copy worth keeping.',
+      'Where should I send it?',
     ],
     input: {
       placeholder: 'you@example.com',
