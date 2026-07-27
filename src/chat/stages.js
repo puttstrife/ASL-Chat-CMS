@@ -3,18 +3,17 @@
 // {name} and {dob} are interpolated at runtime from answers collected earlier.
 //
 // A stage's `beats` play in order. Each beat is either:
-//   'a string'              → one of Selene's chat bubbles
-//   { status: '…' }         → a system status label ("Analyzing…")
-//   { sketch: n, caption }  → reveal portrait step `n` (see SKETCHES)
+//   'a string'                     → one of Selene's chat bubbles
+//   { status: '…' }                → a system status label ("Analyzing…")
+//   { sketch: n, caption }         → reveal portrait step `n` (see SKETCHES)
+//   { reveal: { headline, body } } → the "Meet Your Soulmate" card
 //
 // After the beats, a stage ends in exactly one of:
 //   input      { placeholder, key, next, cta }  free text, stored under `key`
 //   datePicker { key, next, cta }               month/day/year, stored as `key`
 //   select     { key, options[], next, cta }    pick one, then confirm
 //   buttons[]  { label, next?, action? }        act immediately on tap
-//   next       auto-advance target, rendered as a "Continue" affordance
-//
-//   reveal     { headline, body }  optional card shown before the buttons
+//   next                                        a "Continue" affordance
 
 export const START_STAGE = '0';
 
@@ -76,23 +75,28 @@ export const STAGES = {
     next: '4',
   },
 
-  // 5 — First partial sketch (jaw)
+  // 5 — First partial sketch (jawline)
   '4': {
     beats: [
       'The first feature coming through is the shape of their face.',
-      'Their jawline carries a calm but confident energy. I’m adding it to your sketch now.',
+      'Their jawline suggests someone with a calm, grounded presence. They may not demand attention, but you’ll naturally notice when they enter the room.',
       { sketch: 0, caption: 'First details detected' },
     ],
     next: '5',
   },
 
-  // 6 — Filler conversation
+  // 6 — Filler conversation (personality reading)
   '5': {
     beats: [
-      'Interesting…',
-      'This person may appear reserved when you first meet them, but their presence will feel strangely familiar.',
-      'I’m now reading the upper part of their face.',
-      { status: 'Interpreting appearance and energy…' },
+      'There’s a quiet confidence around this person.',
+      'They may seem reserved when you first meet them. Not distant—just careful about who they allow into their inner world.',
+      { status: 'Reading emotional energy…' },
+      'They appear soft-spoken and thoughtful. The kind of person who listens closely before responding.',
+      'You may feel unusually comfortable around them, even before you know them well.',
+      'I’m beginning to sense a creative side too.',
+      'They may express themselves through ideas, music, design, writing, or something they prefer to keep private.',
+      { status: 'Interpreting appearance and personality…' },
+      'The upper outline is becoming clearer now.',
     ],
     next: '6',
   },
@@ -100,18 +104,27 @@ export const STAGES = {
   // 7 — Second partial sketch (hairline)
   '6': {
     beats: [
-      'I can see the outline more clearly now.',
-      'Their hair and overall silhouette may be one of the first things you notice about them.',
+      'I can see their hair and overall silhouette beginning to form.',
+      'This may be one of the first physical details you notice about them.',
       { sketch: 1, caption: 'Your soulmate is taking shape' },
     ],
     next: '7',
   },
 
-  // 8 — Final filler conversation
+  // 8 — Final filler conversation (eyes and energy)
   '7': {
     beats: [
-      'We’re very close, {name}.',
-      'The final details are forming now—their eyes, expression, and the energy they carry when they look at you.',
+      'We’re getting closer, {name}.',
+      'Their eyes are the strongest part of this reading.',
+      { status: 'Drawing their eyes and expression…' },
+      'They have thoughtful eyes—the kind that make you feel they understand more than they say.',
+      'At first, they may appear serious or difficult to read. But beneath that reserved nature, their energy feels warm and reassuring.',
+      'This person doesn’t open up immediately.',
+      'But once they trust you, they become deeply attentive, affectionate, and emotionally present.',
+      { status: 'Connecting your zodiac energies…' },
+      'There’s also something familiar about their presence.',
+      'Meeting them may not feel dramatic. It may feel calm—almost as though you’ve known them before.',
+      'The final details are forming now: their eyes, expression, and the way their energy appears through the portrait.',
       'Some people recognize someone immediately. Others meet them much later.',
       { status: 'Completing your soulmate portrait…' },
     ],
@@ -121,14 +134,18 @@ export const STAGES = {
   // 9 — Full reveal
   '8': {
     beats: [
-      'Your sketch is ready.',
+      'Your sketch is ready, {name}.',
       'This is the face connected to your zodiac signature.',
       { sketch: 2 },
+      {
+        reveal: {
+          headline: 'Meet Your Soulmate',
+          body: 'Created from the zodiac alignment connected to your date of birth.',
+        },
+      },
+      'Look closely at their features.',
+      'You may recognize someone you already know—or remember this face when someone new enters your life.',
     ],
-    reveal: {
-      headline: 'Meet Your Soulmate',
-      body: 'Created from the zodiac alignment connected to your date of birth.',
-    },
     buttons: [
       { label: 'Continue to My Full Reading', next: 'done' },
       { label: 'Save My Sketch', action: 'save' },

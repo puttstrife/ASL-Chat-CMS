@@ -81,11 +81,7 @@ export function useFunnel() {
       if (typeof beat === 'string') await revealLine(beat);
       else if (beat.status) await revealStatus(beat.status);
       else if (beat.sketch !== undefined) await revealSketch(beat);
-    }
-
-    if (stage.reveal) {
-      push({ who: 'reveal', ...stage.reveal });
-      await sleep(300);
+      else if (beat.reveal) { push({ who: 'reveal', ...beat.reveal }); await sleep(300); }
     }
 
     if (stage.buttons) setDock({ type: 'buttons', buttons: stage.buttons });
