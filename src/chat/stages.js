@@ -18,13 +18,19 @@
 export const START_STAGE = '0';
 
 // Portrait sets per soulmate preference: [jaw, hairline, full].
-// `woman` and `anyone` reuse the man set until their own artwork lands.
 const MAN = [
   '/images/sketch/man-1-jaw.webp',
   '/images/sketch/man-2-hairline.webp',
   '/images/sketch/man-3-full.webp',
 ];
-export const SKETCHES = { man: MAN, woman: MAN, anyone: MAN };
+const WOMAN = [
+  '/images/sketch/woman-1-jaw.webp',
+  '/images/sketch/woman-2-hairline.webp',
+  '/images/sketch/woman-3-full.webp',
+];
+// "Anyone / No preference" has no artwork of its own, so it picks one of the
+// two sets at random per session rather than always showing the same face.
+export const SKETCHES = { man: MAN, woman: WOMAN, anyone: Math.random() < 0.5 ? MAN : WOMAN };
 
 export const STAGES = {
   // 1 — Welcome

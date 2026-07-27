@@ -125,9 +125,9 @@ without benefit.
 
 ## Known limitations
 
-1. **Only the "man" portrait set exists.** `SKETCHES.woman` and `SKETCHES.anyone` alias the
-   man artwork, so choosing *A woman* or *Anyone* shows a man's portrait. This is visible
-   to any visitor who picks those options. Artwork for both is needed.
+1. **"Anyone / No preference" has no artwork of its own.** The man and woman sets are both
+   in place; *Anyone* picks one of the two at random per session. Fine as a default, but
+   worth a deliberate decision.
 2. **The reading is entirely static.** Every visitor gets identical copy; the date of birth
    is echoed back but never actually used to compute a zodiac sign, and the portrait is not
    derived from any input.
@@ -146,8 +146,8 @@ without benefit.
 7. **Ambient track licensing.** `ambient.mp3` was generated with Suno. Identifying metadata
    has been stripped, but Suno embeds inaudible watermarks that cannot be removed or
    verified here — confirm the Suno plan permits commercial use before launch.
-8. **Large unoptimised assets.** The audio is ~4.9 MB and the sketches ~200–270 KB each,
-   all loaded eagerly. Worth compressing before a paid traffic push.
+8. **Large unoptimised assets.** The audio is ~4.9 MB and the six sketches ~200–290 KB
+   each, all loaded eagerly. Worth compressing before a paid traffic push.
 9. **Repo cruft.** `(Interactive VSL) Marisol Chat Sequence.md` and `BACKEND_HANDOFF.docx`
    describe the previous "Marisol" product and are stale.
 10. **Desktop-first spacing.** The card is responsive and works on mobile, but spacing was
