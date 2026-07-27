@@ -1,7 +1,7 @@
 {
-  "name": "marisol-chat",
+  "name": "asl-interactive-chat",
   "version": "1.0.0",
-  "description": "Standalone Interactive VSL chat for Marisol — React + ElevenLabs voice + optional live call.",
+  "description": "ASL Interactive Chat — React + ElevenLabs voice interactive chat, branded for Astro Lover.",
   "type": "module",
   "main": "server/index.js",
   "scripts": {

@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MessageCircle, Mic, MicOff, Phone, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { CALL_CHUNKS, interpolate } from '../stages.js';
 import { fetchTTS } from '../lib/api.js';
 import { AudioBars, MarisolAvatar, PrimaryButton } from './UI.jsx';
-
-import { BUTTON_CLICK_SOUND } from '../lib/sfx.js';
 
 const FIRST_TTS_DELAY_MS = 900;
 const CONNECTION_STEPS = [
@@ -17,7 +15,7 @@ const CONNECTION_STEP_MS = 1100;
 const formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
 export function CallScreen({ context, onPrivateChat }) {
-  const [phase, setPhase] = useState('intro');
+  const [phase, setPhase] = useState('connecting');
   const [connectionStep, setConnectionStep] = useState(0);
   const [lineIndex, setLineIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -135,31 +133,6 @@ export function CallScreen({ context, onPrivateChat }) {
     audioRef.current?.pause();
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
   }, []);
-
-  const beginConnection = () => {
-    const clickAudio = new Audio(BUTTON_CLICK_SOUND);
-    clickAudio.volume = 0.62;
-    clickAudio.playsInline = true;
-    clickAudio.play().catch(() => {});
-    setConnectionStep(0);
-    setPhase('connecting');
-  };
-
-  if (phase === 'intro') {
-    return (
-      <section className="call-screen call-entry" aria-label="Start a private call with Marisol">
-        <div className="call-intro-overlay" role="dialog" aria-modal="true" aria-labelledby="call-intro-title">
-          <div className="call-intro-glass">
-            <h1 id="call-intro-title">Marisol has something personal to share.</h1>
-            <PrimaryButton className="call-intro-button" onClick={beginConnection}>
-              <Phone aria-hidden="true" />
-              I’m ready for Marisol’s call
-            </PrimaryButton>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   if (phase === 'connecting') {
     return (
