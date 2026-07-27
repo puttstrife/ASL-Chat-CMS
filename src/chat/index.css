@@ -26,20 +26,10 @@
   --border: rgba(255, 255, 255, 0.12);
   --destructive: #ef4444;
   --ring: #7c3aed;
-
-  /* Rainbow button palette (HSL triplets for hsl(var(--color-N))) + speed */
-  --color-1: 0 100% 63%;
-  --color-2: 270 100% 63%;
-  --color-3: 210 100% 63%;
-  --color-4: 195 100% 63%;
-  --color-5: 90 100% 63%;
-  --speed: 3s;
 }
 
-/* Map tokens into Tailwind v4 color utilities (bg-primary, border-border, …)
-   + the rainbow button animation utility. */
+/* Map tokens into Tailwind v4 color utilities (bg-primary, border-border, …). */
 @theme inline {
-  --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -51,10 +41,6 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-ring: var(--ring);
-}
-@keyframes rainbow {
-  0% { background-position: 0%; }
-  100% { background-position: 200%; }
 }
 
 html { height: 100%; }

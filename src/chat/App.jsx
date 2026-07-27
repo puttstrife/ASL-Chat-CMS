@@ -51,8 +51,7 @@ export default function App() {
 
       <main className="fixed inset-0 z-10 grid place-items-center sm:p-4">
         <AIGradientBorder
-          duration={14}
-          className="h-dvh w-full max-w-[600px] rounded-none border border-neutral-700/40 sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px]"
+          className="h-dvh w-full max-w-[600px] rounded-none sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px]"
         >
           {isCall ? <CallScreen onConnect={goToChat} /> : <ChatCard funnel={funnel} />}
         </AIGradientBorder>

@@ -1,20 +1,11 @@
 @import "tailwindcss";
 @import "../shared/styles/foundation.css";
 
-@theme inline {
-  --animate-rainbow: rainbow 3s infinite linear;
-}
-
 :root {
   --call-gold: #dfa73a;
   --call-purple: #b676ff;
   --call-panel: #080910;
   --call-panel-soft: #0c0d14;
-  --color-1: 0 100% 63%;
-  --color-2: 270 100% 63%;
-  --color-3: 210 100% 63%;
-  --color-4: 195 100% 63%;
-  --color-5: 90 100% 63%;
 }
 
 html { height:100%; }
@@ -32,11 +23,9 @@ button, textarea { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
 .call-shell { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px; }
-.call-frame { position: relative; width: 100%; max-width: 600px; height: min(800px, calc(100dvh - 32px)); padding: 1px; border: 1px solid rgba(82,82,91,.4); border-radius: 22px; }
-.call-frame-border { position: absolute; inset: 0; border-radius: inherit; }
+.call-frame { position: relative; width: 100%; max-width: 600px; height: min(800px, calc(100dvh - 32px)); border: 1px solid #4c1d95; border-radius: 22px; box-shadow: 0 0 40px rgba(76,29,149,.28); }
 .call-frame-clip { position: relative; height: 100%; overflow: clip; border-radius: inherit; }
 .call-frame-content { position: relative; z-index: 1; height: 100%; }
-.call-frame-glow { position: absolute; z-index: 10; inset: -40%; opacity: .7; filter: blur(24px); pointer-events: none; mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, #000 100%); }
 .call-ambient { position: fixed; z-index: 0; border-radius: 999px; filter: blur(90px); pointer-events: none; }
 .call-ambient-right { width: 700px; height: 700px; top: 55vh; right: -150px; background: radial-gradient(circle, rgba(72,38,160,.28), transparent 70%); }
 .call-ambient-left { width: 560px; height: 560px; top: 40vh; left: -120px; background: radial-gradient(circle, rgba(14,110,130,.24), transparent 70%); }
@@ -83,8 +72,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-audio-bars { display: flex; height: 25px; align-items: end; justify-content: center; gap: 3px; }
 .call-audio-bars span { width: 4px; height: 7px; border-radius: 99px; background: var(--call-purple); opacity: .3; }
 .call-audio-bars.is-active span { opacity: 1; animation: call-bar .85s ease-in-out infinite; }
-.call-primary-button { position: relative; display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 2px solid transparent; border-radius: 14px; padding: 10px 28px; cursor: pointer; color: #0c0d14; font-family: "Inter", sans-serif; font-size: 16px; font-weight: 700; background: linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ff6b6b,#d28cff,#62c2ff,#61e2ce,#f6cf65) border-box; box-shadow: 0 8px 30px rgba(182,118,255,.24); }
-.call-primary-button:focus-visible, .call-control:focus-visible, .call-option:focus-visible, .call-input:focus-visible { outline: 2px solid #c084fc; outline-offset: 3px; }
+.call-primary-button { position: relative; display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 2px solid #4c1d95; border-radius: 14px; padding: 10px 28px; cursor: pointer; color: #0c0d14; font-family: "Inter", sans-serif; font-size: 16px; font-weight: 700; background: #fff; box-shadow: 0 8px 24px rgba(76,29,149,.22); }
+.call-primary-button:focus-visible, .call-control:focus-visible, .call-option:focus-visible, .call-input:focus-visible { outline: 2px solid #4c1d95; outline-offset: 3px; }
 .call-primary-wide { width: min(100%, 330px); }
 .call-private-chat-button { gap:9px; }
 .call-private-chat-button svg { width:20px; height:20px; stroke-width:2.3; }
@@ -121,8 +110,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .call-input { box-sizing: border-box; min-height: 48px; max-height: 120px; flex: 1; resize: none; overflow-y: auto; border: 1px solid rgba(201,162,75,.22); border-radius: 24px; padding: 12px 17px; color: rgba(255,255,255,.92); outline: 0; background: rgba(255,255,255,.055); font-family: "Inter", sans-serif; font-size: .9rem; line-height: 1.25; scrollbar-width: none; }
 .call-input::-webkit-scrollbar { display: none; }
 .call-input::placeholder { color: rgba(255,255,255,.68); }
-.call-send { position: relative; display: grid; box-sizing: border-box; width: 48px; height: 48px; flex: none; place-items: center; border: 2px solid transparent; border-radius: 50%; color: #0c0d14; background: linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ff6b6b,#d28cff,#62c2ff,#61e2ce,#f6cf65) border-box; box-shadow: 0 0 20px rgba(182,118,255,.28); cursor: pointer; }
-.call-send::before { content: ""; position: absolute; z-index: -1; bottom: -5px; left: 50%; width: 65%; height: 9px; transform: translateX(-50%); border-radius: 50%; background: linear-gradient(90deg,#ff6b6b,#d28cff,#62c2ff,#61e2ce,#f6cf65); filter: blur(9px); }
+.call-send { position: relative; display: grid; box-sizing: border-box; width: 48px; height: 48px; flex: none; place-items: center; border: 2px solid #4c1d95; border-radius: 50%; color: #0c0d14; background: #fff; box-shadow: 0 0 16px rgba(76,29,149,.28); cursor: pointer; }
 .call-send svg { width: 20px; height: 20px; }
 .call-send:hover { filter: brightness(1.04); }
 .private-chat-dock .call-primary-wide { width: 100%; max-width: none; }
@@ -134,7 +122,6 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes call-bar { 0%,100% { height:7px } 50% { height:25px } }
 @keyframes call-rise { from { opacity:0; transform:translateY(7px) } to { opacity:1; transform:none } }
 @keyframes call-typing { 0%,60%,100% { opacity:.3; transform:none } 30% { opacity:1; transform:translateY(-3px) } }
-@keyframes rainbow { 0% { background-position:0% } 100% { background-position:200% } }
 @keyframes call-aurora { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
 @keyframes call-sparkle { 0%,100% { opacity:0; transform:translate(-50%,-50%) scale(0) rotate(0deg) } 45%,60% { opacity:.9; transform:translate(-50%,-50%) scale(var(--sparkle-scale)) rotate(90deg) } }
 @keyframes call-phase-fade { from { opacity:0 } to { opacity:1 } }
