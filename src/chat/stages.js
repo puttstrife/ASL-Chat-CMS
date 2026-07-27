@@ -7,6 +7,8 @@
 //   { sketch: n, unlocked? }       → reveal portrait step `n` (see SKETCHES);
 //                                    the last step blurs unless `unlocked`
 //   { reveal: { headline, body } } → the "Meet Your Soulmate" card
+//   { profile: true, unredacted? } → the case file (see PROFILES); redacted
+//                                    unless `unredacted`
 //
 // After the beats, a stage ends in exactly one of:
 //   input      { placeholder, key, next, cta, inputType? }  free text under `key`;
@@ -31,7 +33,38 @@ const WOMAN = [
 ];
 // "Anyone / No preference" has no artwork of its own, so it picks one of the
 // two sets at random per session rather than always showing the same face.
-export const SKETCHES = { man: MAN, woman: WOMAN, anyone: Math.random() < 0.5 ? MAN : WOMAN };
+const ANYONE_IS_MAN = Math.random() < 0.5;
+export const SKETCHES = { man: MAN, woman: WOMAN, anyone: ANYONE_IS_MAN ? MAN : WOMAN };
+
+// The case file shown beside the portrait. `[[…]]` wraps the withheld detail:
+// it renders as a redaction bar while the reading is locked and as the text
+// itself once unlocked, so both states share one source of truth.
+// `**…**` highlights in gold.
+const MAN_PROFILE = [
+  'He is [[tall and lean]] with sharp dark eyes that hold your attention [[longer than]] you expect.',
+  'Height: [[6′1″]]',
+  'Hair: [[dark, softly parted]]',
+  'Eyes: [[deep brown]] with an intensity that feels like he’s [[already decided]] something about you.',
+  'He is not loud about what he wants — but when he wants something, nothing stops him. He moves through rooms like someone who [[already knows where]] he’s going.',
+  'His first words to you will be [[an apology for something small]] and they will catch you **completely off guard**.',
+];
+
+const WOMAN_PROFILE = [
+  'She is [[slight and composed]] with steady eyes that settle on you [[before]] you notice.',
+  'Height: [[5′6″]]',
+  'Hair: [[long, loosely waved]]',
+  'Eyes: [[warm hazel]] with a steadiness that feels like she’s [[already forgiven]] something about you.',
+  'She does not announce what she wants — but once she decides, she does not waver. She enters a room like someone who [[has never had to ask if]] she belongs.',
+  'Her first words to you will be [[a question no one else thought to ask]] and they will catch you **completely off guard**.',
+];
+
+export const PROFILES = {
+  man: { caseNo: '2847', lines: MAN_PROFILE },
+  woman: { caseNo: '3106', lines: WOMAN_PROFILE },
+  anyone: ANYONE_IS_MAN
+    ? { caseNo: '2847', lines: MAN_PROFILE }
+    : { caseNo: '3106', lines: WOMAN_PROFILE },
+};
 
 export const STAGES = {
   // 1 — Welcome
@@ -166,6 +199,8 @@ export const STAGES = {
           body: 'Created from the zodiac alignment connected to your date of birth.',
         },
       },
+      'I wrote down everything else that came through while I drew.',
+      { profile: true },
       'Look closely at their features.',
       'You may recognize someone you already know—or remember this face when someone new enters your life.',
     ],
@@ -175,11 +210,13 @@ export const STAGES = {
     trust: ['🛡 30-Day Money-Back Guarantee', '⚡ Delivered in 24 Hours', '🔒 Secure Checkout'],
   },
 
-  // Selene re-sends the portrait, this time in the clear.
+  // Selene re-sends the portrait and the case file, this time in the clear.
   done: {
     beats: [
       'Here they are, {name} — nothing held back this time.',
       { sketch: 2, unlocked: true },
+      'And the rest of what I wrote down.',
+      { profile: true, unredacted: true },
       'I’ll take you through the full reading now.',
     ],
   },

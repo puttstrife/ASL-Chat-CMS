@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SKETCHES, STAGES, START_STAGE } from '../stages.js';
+import { PROFILES, SKETCHES, STAGES, START_STAGE } from '../stages.js';
 import { getConfig } from '../lib/api.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -89,6 +89,11 @@ export function useFunnel() {
       if (typeof beat === 'string') await revealLine(beat);
       else if (beat.sketch !== undefined) await revealSketch(beat);
       else if (beat.reveal) { push({ who: 'reveal', ...beat.reveal }); await sleep(300); }
+      else if (beat.profile) {
+        const profile = PROFILES[answers.current.preference] || PROFILES.anyone;
+        push({ who: 'profile', ...profile, revealed: Boolean(beat.unredacted) });
+        await sleep(700);
+      }
     }
 
     if (stage.buttons) setDock({ type: 'buttons', buttons: stage.buttons, trust: stage.trust });

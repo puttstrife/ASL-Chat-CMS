@@ -120,6 +120,25 @@ function Message({ m }) {
       </figure>
     );
   }
+  if (m.who === 'profile') {
+    return (
+      <div className="bubble-in w-full max-w-[92%] self-start rounded-2xl rounded-tl-md border border-white/10 bg-[#12131b] px-4 py-4">
+        <h3 className="font-script m-0 flex items-center gap-2 text-xl font-semibold text-white">
+          <span aria-hidden="true">📜</span> The Soulmate Profile
+        </h3>
+        <p className="mt-2.5 mb-3 font-mono text-[.62rem] uppercase tracking-[0.14em] text-white/35">
+          Case File #{m.caseNo} · {m.revealed ? 'Declassified' : 'Recipient Eyes Only'}
+        </p>
+        <div className="flex flex-col gap-2.5">
+          {m.lines.map((line, i) => (
+            <p key={i} className="m-0 font-mono text-[.78rem] leading-relaxed text-white/80">
+              <RedactedText text={line} revealed={m.revealed} />
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (m.who === 'reveal') {
     return (
       <div className="bubble-in w-full max-w-[82%] self-start rounded-2xl border border-[var(--gold)]/25 bg-[#0c0a16]/90 px-4 py-4 text-center shadow-[0_16px_48px_rgba(75,28,137,0.24)]">
@@ -143,6 +162,34 @@ function Message({ m }) {
       )}
     </Bubble>
   );
+}
+
+// Renders profile copy. `[[…]]` is a withheld detail — a bar sized to the
+// hidden text while locked, the text itself once revealed. `**…**` is gold.
+function RedactedText({ text, revealed }) {
+  const parts = text.split(/(\[\[[^\]]+\]\]|\*\*[^*]+\*\*)/g).filter(Boolean);
+  return parts.map((part, i) => {
+    const hidden = part.match(/^\[\[([^\]]+)\]\]$/);
+    if (hidden) {
+      if (revealed) {
+        return <span key={i} className="text-[var(--gold)]">{hidden[1]}</span>;
+      }
+      return (
+        <span
+          key={i}
+          role="img"
+          aria-label="redacted"
+          className="mx-0.5 inline-block translate-y-[0.14em] rounded-full bg-white/70"
+          style={{ width: `${Math.min(hidden[1].length, 22) * 0.55}em`, height: '1em' }}
+        />
+      );
+    }
+    const gold = part.match(/^\*\*([^*]+)\*\*$/);
+    if (gold) {
+      return <mark key={i} className="rounded bg-[var(--gold)]/20 px-1 text-[var(--gold)]">{gold[1]}</mark>;
+    }
+    return <span key={i}>{part}</span>;
+  });
 }
 
 function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {

@@ -94,6 +94,14 @@ after the visitor taps *Show Me The Face*. The blurred copy stays in the transcr
 The paywall CTA is a `buttons` entry with `variant: 'gold'` (and optional `arrow: true`);
 a stage may also carry `trust: [...]`, rendered as the reassurance row beneath the button.
 
+### The case file
+
+`PROFILES` in `stages.js` holds a per-preference "Soulmate Profile" — the redacted case
+file shown beside the blurred portrait, re-sent unredacted after the CTA. Copy is authored
+once per variant: `[[withheld detail]]` renders as a redaction bar sized to the hidden
+text while locked and as the text itself (in gold) once revealed, so both states can never
+drift apart. `**…**` highlights in gold in both states.
+
 ### Audio
 
 `public/audio/ambient.mp3` loops at volume `0.12`, wired to the speaker toggle in the
