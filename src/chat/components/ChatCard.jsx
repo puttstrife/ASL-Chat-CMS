@@ -79,10 +79,13 @@ function Message({ m }) {
   }
   if (m.who === 'typing') {
     return (
-      <div className="bubble-in inline-flex max-w-max items-center gap-1.5 self-start rounded-2xl rounded-tl-md border border-white/8 bg-white/8 px-3.5 py-3">
-        {[0, 1, 2].map((i) => (
-          <span key={i} className="size-2 rounded-full bg-white/60" style={{ animation: 'typingDot 1.2s infinite ease-in-out', animationDelay: `${i * 0.18}s` }} />
-        ))}
+      <div className="flex max-w-max flex-col gap-1 self-start">
+        <div className="bubble-in inline-flex items-center gap-1.5 rounded-2xl rounded-tl-md border border-white/8 bg-white/8 px-3.5 py-3">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="size-2 rounded-full bg-white/60" style={{ animation: 'typingDot 1.2s infinite ease-in-out', animationDelay: `${i * 0.18}s` }} />
+          ))}
+        </div>
+        <p className="font-sans px-1 text-[.7rem] text-white/45" role="status">Selene is typing</p>
       </div>
     );
   }
@@ -99,7 +102,8 @@ function Message({ m }) {
   const sent = m.who === 'user';
   return (
     <Bubble variant={sent ? 'default' : 'muted'} align={sent ? 'end' : 'start'} className={m.reaction ? 'mb-3' : ''}>
-      <BubbleContent>{m.text}</BubbleContent>
+      {/* Flat corner on the sender's side, mirroring the typing indicator. */}
+      <BubbleContent className={sent ? 'rounded-tr-md' : 'rounded-tl-md'}>{m.text}</BubbleContent>
       {m.reaction && (
         <BubbleReactions
           className="size-7 p-0 border border-white/10 bg-[#161720] text-[.75rem] leading-none ring-0"
