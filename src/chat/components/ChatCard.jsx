@@ -29,7 +29,7 @@ export function ChatCard({ funnel }) {
   return (
     <section className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
       {/* Header */}
-      <header className="flex items-center gap-3 border-b border-white/8 bg-[#0c0d14]/95 px-3 py-2.5">
+      <header className="flex items-center gap-3 bg-[#0c0d14]/95 px-3 py-2.5">
         <img
           src="/images/chat/selene-avatar.png"
           alt="Selene"
