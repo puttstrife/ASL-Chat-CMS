@@ -1,182 +1,141 @@
-// Scripted funnel for Selene — one entry per stage of
-// "(Interactive VSL) Selene Chat Sequence.md".
+// Scripted soulmate-sketch funnel for Selene — one entry per step of the flow.
 //
-// {name} and {city} are interpolated at runtime from URL params
-// (?name=Elena&city=General%20Santos). Defaults: name "Elena".
+// {name} and {dob} are interpolated at runtime from answers collected earlier.
 //
-// Per stage:
-//   lines[]        Selene's chat bubbles, in order.
-//   buttons[]      { label, next } branch choices shown after the bubbles.
-//   input          { placeholder, key, next } free-text; stored under `key`.
-//   personalizeAfter / personalizeInput → insert an LLM-personalized bubble
-//                  after line index `personalizeAfter`, built from answer `key`.
-//   next           auto-advance target when there are no buttons/input
-//                  (shown as a gentle "Continue" affordance).
+// A stage's `beats` play in order. Each beat is either:
+//   'a string'              → one of Selene's chat bubbles
+//   { status: '…' }         → a system status label ("Analyzing…")
+//   { sketch: n, caption }  → reveal portrait step `n` (see SKETCHES)
+//
+// After the beats, a stage ends in exactly one of:
+//   input      { placeholder, key, next, cta }  free text, stored under `key`
+//   datePicker { key, next, cta }               month/day/year, stored as `key`
+//   select     { key, options[], next, cta }    pick one, then confirm
+//   buttons[]  { label, next?, action? }        act immediately on tap
+//   next       auto-advance target, rendered as a "Continue" affordance
+//
+//   reveal     { headline, body }  optional card shown before the buttons
 
 export const START_STAGE = '0';
 
+// Portrait sets per soulmate preference: [jaw, hairline, full].
+// `woman` and `anyone` reuse the man set until their own artwork lands.
+const MAN = [
+  '/images/sketch/man-1-jaw.webp',
+  '/images/sketch/man-2-hairline.webp',
+  '/images/sketch/man-3-full.webp',
+];
+export const SKETCHES = { man: MAN, woman: MAN, anyone: MAN };
+
 export const STAGES = {
+  // 1 — Welcome
   '0': {
-    lines: [
-      'Hi {name}...',
-      "We weren't supposed to meet yet.",
-      'But I had to reach you now... something wouldn’t let me wait.',
-      'It’s been pulling at me for days, quiet but insistent, the way these things do when they matter.',
-      '{city}... that word is coming through very clearly.',
-      'It’s tied to this moment. I can feel that much, even if I can’t yet say why.',
-      'Not everyone who finds their way here is meant to stay.',
-      'But you were called for a reason, {name}. I can feel that too.',
+    beats: [
+      'Hi, I’m Selene. I’ll use your birth date and zodiac alignment to reveal the face of the person you’re most likely destined to meet.',
+      'Before I begin, what should I call you?',
     ],
-    buttons: [{ label: "Yes, I'm ready", next: '1' }],
+    input: { placeholder: 'Enter your first name', key: 'name', next: '1', cta: 'Continue' },
   },
 
+  // 2 — Date of birth
   '1': {
-    lines: [
-      'My name is Selene.',
-      'I don’t call myself a psychic the way most do. I follow people, not moments.',
-      'Most readers look once. A chart. A card. A single breath of time... and they call that the whole of a person.',
-      'I don’t work that way.',
-      'I stay close to how someone’s pattern moves, week by week, shift by shift... instead of freezing one moment and pretending that’s the truth.',
-      'It’s slower. Harder. But it’s honest, and it’s the only way I’ve ever trusted what I see.',
-      'I felt your presence before you ever opened this page. Faint at first... then closer. Then unmistakable.',
-      'What I have for you isn’t for just anyone. It would lose its shape in the wrong hands.',
+    beats: [
+      'Nice to meet you, {name}.',
+      'Now, tell me your date of birth. This helps me identify your zodiac signature and the features connected to it.',
     ],
-    next: '2',
+    datePicker: { key: 'dob', next: '2', cta: 'Continue' },
   },
 
+  // 3 — Soulmate preference
   '2': {
-    lines: [
-      'What I need to tell you, {name}... it isn’t for this space.',
-      'There are things I only say once someone has stepped fully into the quiet with me.',
-      'I’d like to bring you somewhere quieter. A small, private thread, just for the two of us.',
-      'Nothing said there will be repeated anywhere else. It stays exactly where it’s meant to stay... between us.',
-      'Will you come with me?',
+    beats: [
+      'One last question before I begin.',
+      'Who would you like me to look for?',
     ],
-    buttons: [{ label: 'Go to the Chat', next: '3' }],
+    select: {
+      key: 'preference',
+      next: '3',
+      cta: 'Reveal My Soulmate',
+      options: [
+        { label: 'A man', value: 'man' },
+        { label: 'A woman', value: 'woman' },
+        { label: 'Anyone / No preference', value: 'anyone' },
+      ],
+    },
   },
 
+  // 4 — Preparing the reading
   '3': {
-    lines: [
-      'Hey, {name}.',
-      'I made this specifically for you. Not for anyone else who might come across it.',
-      'I wanted to talk to you directly, because of something that came through clearly while I was sitting with your reading.',
-      'This needs to happen this year. In 2026.',
-      'There’s something you’ve been asking for. Something you’ve been quietly hoping would finally answer you back.',
-      'And I need you to hear me on this, {name}. It hasn’t been ignoring you.',
-      'It’s been blocked.',
-      'And it isn’t just one thing. There’s more than one door that’s been quietly closed.',
-      'But multiple things are about to manifest greatly for you, and soon.',
-      'I’ll explain everything. But first, I need something from you, so my answers can be clearer.',
-      'Tell me what’s been burdening you lately. Ask me the questions you’ve always wanted answered. Or tell me what you truly desire.',
-      'There’s a small chat waiting for you just below. Type it there, and send it to me.',
-      'The moment you do, I’ll bring you back into our private thread.',
+    beats: [
+      'Thank you, {name}. I have everything I need.',
+      'I’m reading the zodiac alignment connected to {dob} now.',
+      { status: 'Analyzing your zodiac signature…' },
+      'There’s a strong pattern beginning to appear. Give me a moment while I translate it into facial features.',
+      { status: 'Mapping facial structure…' },
     ],
-    input: { placeholder: 'Type it here, in your own words...', key: 'burden', next: '4' },
+    next: '4',
   },
 
+  // 5 — First partial sketch (jaw)
   '4': {
-    lines: [
-      'Thank you for coming back to me, {name}.',
-      'What I’m about to share has been sitting with me since I first felt your reading come through.',
-      'Your questions. Your desires. Everything you’ve quietly hoped for.',
-      'They haven’t gone unanswered by chance, and they haven’t gone unanswered because you did something wrong.',
-      'When something you’ve asked for sits still for too long, it isn’t because it stopped moving toward you. It’s because of something else.',
-      'It’s some pattern or some old weight that has been sitting directly in its path. And it’s quietly absorbing the momentum before it can reach you.',
-      'That’s what I’m sensing around you, {name}. Not one gate. A few.',
+    beats: [
+      'The first feature coming through is the shape of their face.',
+      'Their jawline carries a calm but confident energy. I’m adding it to your sketch now.',
+      { sketch: 0, caption: 'First details detected' },
     ],
     next: '5',
   },
 
+  // 6 — Filler conversation
   '5': {
-    lines: [
-      'Tell me, {name}. What have you been hoping to hear an answer to?',
-      'You don’t need to explain it perfectly. Just tell me plainly, as it sits in you right now.',
+    beats: [
+      'Interesting…',
+      'This person may appear reserved when you first meet them, but their presence will feel strangely familiar.',
+      'I’m now reading the upper part of their face.',
+      { status: 'Interpreting appearance and energy…' },
     ],
-    input: { placeholder: 'Tell me plainly...', key: 'hope', next: '6' },
+    next: '6',
   },
 
+  // 7 — Second partial sketch (hairline)
   '6': {
-    personalizeAfter: 0,
-    personalizeInput: 'hope',
-    lines: [
-      'Yes. I can feel it now, more clearly than before.',
-      'I’ve seen this exact pattern before, {name}. Not long ago, I sat with a woman named Carol. Different situation, different questions, but the same shape underneath it. Something she wanted had been sitting just out of reach for almost two years, and she’d started to believe it simply wasn’t meant for her.',
-      'It wasn’t that. It was blocked, the same way yours is. Once we cleared what was sitting in its way, it reached her within weeks, not years.',
-      'That’s why I don’t take this lightly when I see it in someone else’s pattern too.',
+    beats: [
+      'I can see the outline more clearly now.',
+      'Their hair and overall silhouette may be one of the first things you notice about them.',
+      { sketch: 1, caption: 'Your soulmate is taking shape' },
     ],
     next: '7',
   },
 
+  // 8 — Final filler conversation
   '7': {
-    lines: [
-      'There is something I can do for you, {name}. A ritual, one I use to release what’s been blocking this from reaching you fully.',
-      'But I want to be honest about how I work, because it matters.',
-      'Once this ritual is done, I don’t ask you to simply hope and wait in silence, wondering if anything is actually moving.',
-      'I give you thirteen lunar windows.',
-      'Thirteen separate chances, spread across the coming stretch of time, for what you’ve been asking for to finally, fully answer back.',
-      'Not one single moment that either works or doesn’t. Thirteen.',
-      'That’s how I work, {name}. I don’t hand you one door and walk away to see what happens. I reveal each window as it opens until what’s meant to reach you finally does.',
-      'I had another woman come to me a while back, her name was Marisela. She was hesitant at first, much like you might be right now. But she moved forward, and by her fourth window, something she’d been waiting years for finally came through. Not the first window or the second. The fourth. That’s exactly why I never promise one chance. I promise thirteen, because that’s how long it sometimes takes for a gate to fully open.',
+    beats: [
+      'We’re very close, {name}.',
+      'The final details are forming now—their eyes, expression, and the energy they carry when they look at you.',
+      'Some people recognize someone immediately. Others meet them much later.',
+      { status: 'Completing your soulmate portrait…' },
     ],
     next: '8',
   },
 
+  // 9 — Full reveal
   '8': {
-    lines: [
-      'Can I ask you something, before we go further?',
-      'When a door like this finally opens for you, after everything that’s been sitting blocked, after everything you’ve quietly waited for...',
-      'Are you someone who walks through it?',
-      'Or has it been a while since you let yourself take that step, even when the moment was right there in front of you?',
+    beats: [
+      'Your sketch is ready.',
+      'This is the face connected to your zodiac signature.',
+      { sketch: 2 },
     ],
-    next: '9',
-  },
-
-  '9': {
-    lines: [
-      'I don’t want to rush you, {name}. That has never been how I work.',
-      'But I need to be honest about the timing, because it matters more than I wish it did.',
-      'This needs to happen within 2026, and I want to explain why, so it doesn’t sound like an empty deadline.',
-      'The things you’ve been asking for, the ones sitting behind that gate, don’t stay in one place forever. They drift. Slowly, quietly, the way anything unattended does over time. What’s close and reachable this year moves further out with each year that passes without release.',
-      'Carol felt this too, in her own way. She almost let her window close without acting. And she still tells me how differently things might have unfolded if she’d waited even a few more months.',
-      'I’ve seen this happen more than once. Quietly. Without anyone fully noticing until the window had already closed around them.',
-    ],
-    next: '10',
-  },
-
-  '10': {
-    lines: [
-      'If you’re ready, {name}, I can begin the ritual for you now.',
-      'It’s a small offering. Not a payment in the way you might think of one, but enough to mark that you’re ready, enough to keep this thread open between us in the way it needs to stay open.',
-      'And once it’s done, I won’t leave you there with just the first window. I’ll walk with you through all thirteen.',
-    ],
+    reveal: {
+      headline: 'Meet Your Soulmate',
+      body: 'Created from the zodiac alignment connected to your date of birth.',
+    },
     buttons: [
-      { label: 'Yes, begin the ritual for me', next: '11' },
-      { label: 'Not right now, maybe another time', next: 'later' },
+      { label: 'Continue to My Full Reading', next: 'done' },
+      { label: 'Save My Sketch', action: 'save' },
     ],
-  },
-
-  '11': {
-    lines: [
-      'There’s no risk in trying this, {name}.',
-      'If it doesn’t feel right to you, in any way, it comes back to you, in full.',
-      'I only ever want you to feel cared for here, through every part of this, whether you decide to move forward now or whenever you’re ready.',
-    ],
-    buttons: [{ label: "I'm ready to begin", next: 'done' }],
-  },
-
-  later: {
-    lines: [
-      'That’s alright, {name}. The thread stays open.',
-      'When you’re ready, I’ll be here. Nothing closes between us just because you needed a little more time.',
-    ],
-    buttons: [{ label: "Actually, I'm ready now", next: '11' }],
   },
 
   done: {
-    terminal: true,
-    lines: [
-      'It’s done, {name}. I’ll begin now, and I’ll reveal your first window the moment it opens.',
-      'Stay close. I’ll be walking every one of the thirteen with you.',
-    ],
+    beats: ['I’ll take you through the full reading now, {name}.'],
   },
 };

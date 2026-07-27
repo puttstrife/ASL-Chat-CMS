@@ -1,35 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { STAGES, START_STAGE } from '../stages.js';
-import { getConfig, fetchReading } from '../lib/api.js';
+import { SKETCHES, STAGES, START_STAGE } from '../stages.js';
+import { getConfig } from '../lib/api.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export function useFunnel() {
-  // Session context from URL params (carried from the funnel).
-  const params = new URLSearchParams(location.search);
-  const ctx = useRef({
-    name: (params.get('name') || 'Elena').trim().slice(0, 60),
-    city: (params.get('city') || '').trim().slice(0, 80),
-    dob: (params.get('dob') || '').trim(),
-  }).current;
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+export const formatDob = ({ month, day, year }) => `${MONTHS[month - 1]} ${day}, ${year}`;
 
-  const [messages, setMessages] = useState([]); // {id, who, text}
+export function useFunnel() {
+  const [messages, setMessages] = useState([]); // {id, who, …}
   const [dock, setDock] = useState({ type: 'none' });
   const [config, setConfig] = useState({ ttsEnabled: false, readingEnabled: false });
 
   const answers = useRef({});
   const idRef = useRef(0);
   const runningRef = useRef(false);
-  const configRef = useRef(config);
   const bootedRef = useRef(false);
 
-  useEffect(() => { configRef.current = config; }, [config]);
-
+  // {name}/{dob} resolve from what the user has told us so far.
   const interpolate = useCallback(
-    (t) => t.replace(/\{name\}/g, ctx.name).replace(/\{city\}/g, ctx.city),
-    [ctx]
+    (t) => t.replace(/\{name\}/g, answers.current.name || 'friend').replace(/\{dob\}/g, answers.current.dob || 'your birth date'),
+    []
   );
-  const usableLines = (lines) => lines.filter((l) => (l.includes('{city}') ? Boolean(ctx.city) : true));
 
   const nextId = () => ++idRef.current;
   const push = (msg) => { const id = nextId(); setMessages((m) => [...m, { id, ...msg }]); return id; };
@@ -40,20 +32,17 @@ export function useFunnel() {
   const REACTIONS = {
     love: ['💜', '💖', '🥰', '✨', '💫'],
     comfort: ['🕊️', '🙏', '💫', '🌙', '💜'],
-    abundance: ['🌟', '🔮', '✨', '💫', '🌸'],
     question: ['🔮', '✨', '🌙', '💫'],
     default: ['💜', '✨', '🌙', '🙏', '💫', '💖'],
   };
   const rand = (a) => a[Math.floor(Math.random() * a.length)];
   const pickReaction = (text) => {
     const t = (text || '').toLowerCase();
-    if (/love|hope|wish|want|dream|heart|reconcile|family|together|happy|grateful|ready/.test(t)) return rand(REACTIONS.love);
-    if (/afraid|worried|scared|anxious|lost|alone|lonely|pain|hurt|grief|sad|fear|struggl|tired/.test(t)) return rand(REACTIONS.comfort);
-    if (/money|job|work|career|success|abundance|business|finance|home|move/.test(t)) return rand(REACTIONS.abundance);
-    if (/\?|what|when|how|will|why|should|whether/.test(t)) return rand(REACTIONS.question);
+    if (/love|hope|man|woman|anyone|soulmate|heart|ready/.test(t)) return rand(REACTIONS.love);
+    if (/afraid|worried|scared|alone|lonely|sad|fear/.test(t)) return rand(REACTIONS.comfort);
+    if (/\?/.test(t)) return rand(REACTIONS.question);
     return rand(REACTIONS.default);
   };
-  // Selene "reacts" a beat after the user sends.
   const scheduleReaction = (id, text) => setTimeout(() => updateMsg(id, { reaction: pickReaction(text) }), 550);
 
   // Reveal one Selene bubble: typing indicator → bubble.
@@ -66,11 +55,17 @@ export function useFunnel() {
     await sleep(360);
   };
 
-  const personalize = async (userText) => {
-    const pendingId = push({ who: 'reading-pending' });
-    const text = await fetchReading(ctx.name, userText);
-    remove(pendingId);
-    if (text) push({ who: 'selene', text });
+  // A status label sits on screen while its "work" happens, then settles.
+  const revealStatus = async (label) => {
+    push({ who: 'status', text: label });
+    await sleep(1500);
+  };
+
+  // Sketch reveals use the portrait set matching the chosen preference.
+  const revealSketch = async ({ sketch, caption }) => {
+    const set = SKETCHES[answers.current.preference] || SKETCHES.anyone;
+    push({ who: 'sketch', src: set[sketch], caption, final: sketch === set.length - 1 });
+    await sleep(700);
   };
 
   // ── State machine ──
@@ -82,17 +77,21 @@ export function useFunnel() {
     const stage = STAGES[id];
     if (!stage) { runningRef.current = false; return; }
 
-    const lines = usableLines(stage.lines);
+    for (const beat of stage.beats || []) {
+      if (typeof beat === 'string') await revealLine(beat);
+      else if (beat.status) await revealStatus(beat.status);
+      else if (beat.sketch !== undefined) await revealSketch(beat);
+    }
 
-    for (let i = 0; i < lines.length; i++) {
-      await revealLine(lines[i]);
-      if (stage.personalizeAfter === i && answers.current[stage.personalizeInput]) {
-        await personalize(answers.current[stage.personalizeInput]);
-      }
+    if (stage.reveal) {
+      push({ who: 'reveal', ...stage.reveal });
+      await sleep(300);
     }
 
     if (stage.buttons) setDock({ type: 'buttons', buttons: stage.buttons });
     else if (stage.input) setDock({ type: 'input', ...stage.input });
+    else if (stage.datePicker) setDock({ type: 'date', ...stage.datePicker });
+    else if (stage.select) setDock({ type: 'select', ...stage.select });
     else if (stage.next) setDock({ type: 'continue', next: stage.next });
     else setDock({ type: 'none' });
 
@@ -100,13 +99,35 @@ export function useFunnel() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers ──
-  const chooseButton = (b) => { const id = push({ who: 'user', text: b.label }); scheduleReaction(id, b.label); runStage(b.next); };
+  const chooseButton = (b) => {
+    if (b.action === 'save') return; // "Save My Sketch" — wired up separately.
+    const id = push({ who: 'user', text: b.label });
+    scheduleReaction(id, b.label);
+    if (b.next) runStage(b.next);
+  };
+
+  const submitSelect = (key, option, next) => {
+    answers.current[key] = option.value;
+    const id = push({ who: 'user', text: option.label });
+    scheduleReaction(id, option.label);
+    runStage(next);
+  };
+
   const submitInput = (key, value, next) => {
     answers.current[key] = value;
     const id = push({ who: 'user', text: value });
     scheduleReaction(id, value);
     runStage(next);
   };
+
+  const submitDate = (key, parts, next) => {
+    const text = formatDob(parts);
+    answers.current[key] = text;
+    const id = push({ who: 'user', text });
+    scheduleReaction(id, text);
+    runStage(next);
+  };
+
   const advance = (next) => runStage(next);
 
   // ── Boot ──
@@ -114,12 +135,10 @@ export function useFunnel() {
     if (bootedRef.current) return;
     bootedRef.current = true;
     (async () => {
-      const cfg = await getConfig();
-      setConfig(cfg);
-      configRef.current = cfg;
+      setConfig(await getConfig());
       runStage(START_STAGE);
     })();
   }, [runStage]);
 
-  return { ctx, messages, dock, config, chooseButton, submitInput, advance };
+  return { messages, dock, config, answers: answers.current, chooseButton, submitInput, submitDate, submitSelect, advance };
 }
