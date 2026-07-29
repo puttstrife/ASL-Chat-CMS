@@ -8,3 +8,4 @@ web v4/
 .vercel
 *.swp
 .codex-tmp/
+_source-art/

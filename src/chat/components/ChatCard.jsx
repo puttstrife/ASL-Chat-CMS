@@ -91,7 +91,23 @@ function Message({ m }) {
             <span key={i} className="size-2 rounded-full bg-white/60" style={{ animation: 'typingDot 1.2s infinite ease-in-out', animationDelay: `${i * 0.18}s` }} />
           ))}
         </div>
-        <p className="font-sans px-1 text-[.7rem] text-white/45" role="status">Selene is typing</p>
+        <p className="font-sans px-1 text-[.7rem] text-white/45" role="status">{m.label || 'Selene is typing'}</p>
+      </div>
+    );
+  }
+  if (m.who === 'traits') {
+    // What she has read off the chart so far. The list grows between the
+    // first sketch and the neck, so it reads as notes taken while working.
+    return (
+      <div className="bubble-in w-fit max-w-[82%] self-start rounded-2xl rounded-tl-md border border-white/10 bg-white/8 px-4 py-3">
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          {m.traits.map((t) => (
+            <li key={t} className="font-sans flex items-baseline gap-2 text-[.95rem] leading-snug text-white/85">
+              <span aria-hidden="true" className="text-[var(--gold)]">·</span>
+              {t}
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
