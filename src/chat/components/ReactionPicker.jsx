@@ -1,26 +1,27 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-// Facebook-style reactions on Selene's messages.
+// Facebook-style reactions on Selene's messages, with the two interaction
+// models Messenger itself uses:
 //
-// Pointer devices: hover the message, click one.
-// Touch: long-press to open, then slide onto a reaction and lift to pick it —
-// without a second tap. Whichever one you are over lifts.
+//   Pointer devices — hovering a message reveals a small smiley beside it;
+//   clicking that opens the picker. Nothing appears until you go looking.
 //
-// The names are for screen readers only; on screen the lift is enough, and a
-// label floating over the message above was more noise than help.
+//   Touch — no affordance to tap. Long-press the message: the rest of the
+//   conversation dims, the message lifts, and the picker opens above it.
+//   Slide onto a reaction and lift to pick, with no second tap.
 //
 // Tapping the reaction you already chose removes it. Nothing persists; this is
 // expression, not data.
 
 // The four a chat app is expected to have, plus the ones Selene already uses
 // when she reacts to the visitor — so the palette stays in the reading's
-// register rather than importing a generic emoji set wholesale.
+// register rather than importing a generic emoji set wholesale. Names are for
+// screen readers; on screen the lift says which one you are on.
 export const REACTIONS = [
   { emoji: '❤️', name: 'Love' },
   { emoji: '😮', name: 'Wow' },
   { emoji: '😢', name: 'Sad' },
   { emoji: '👍', name: 'Like' },
-  { emoji: '💜', name: 'Held' },
   { emoji: '✨', name: 'Yes' },
   { emoji: '🌙', name: 'Quiet' },
 ];
@@ -33,6 +34,8 @@ const buzz = (ms) => navigator.vibrate?.(ms);
 
 export function Reactable({ reaction, onReact, className = 'max-w-[82%]', children }) {
   const [open, setOpen] = useState(false);
+  const [touchMode, setTouchMode] = useState(false); // long-pressed, not clicked
+  const [hovered, setHovered] = useState(false);
   const [left, setLeft] = useState(0);
   const [active, setActive] = useState(-1); // which one the finger is over
 
@@ -42,21 +45,20 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
   const timer = useRef(null);
   const longPressed = useRef(false);
 
-  const close = () => { setOpen(false); setActive(-1); };
+  const close = () => { setOpen(false); setTouchMode(false); setActive(-1); };
 
-  // Sit just past the end of the bubble, so it reads as belonging to that
-  // message — but never so far right that it runs off the card. Measured after
-  // it renders, since its width depends on how many reactions there are.
+  // On a pointer device the picker sits beside the bubble, just past its end,
+  // but never so far right that it runs off the card. Measured after it
+  // renders, since its width depends on how many reactions there are.
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open || touchMode) return;
     const row = wrap.current?.getBoundingClientRect();
     const bubble = inner.current?.getBoundingClientRect();
     const box = picker.current?.getBoundingClientRect();
     if (!row || !bubble || !box) return;
     setLeft(Math.min(bubble.width + 8, Math.max(0, row.width - box.width)));
-  }, [open]);
+  }, [open, touchMode]);
 
-  // Any touch outside closes it, the way a popover should.
   useEffect(() => {
     if (!open) return;
     const away = (e) => { if (!wrap.current?.contains(e.target)) close(); };
@@ -72,11 +74,12 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
 
   // ── Touch: long-press, slide, lift ──
   const startPress = (e) => {
-    if (e.pointerType === 'mouse') return; // pointer devices get hover
+    if (e.pointerType === 'mouse') return; // pointer devices use the smiley
     longPressed.current = false;
     timer.current = setTimeout(() => {
       longPressed.current = true;
       buzz(8);
+      setTouchMode(true);
       setOpen(true);
     }, LONG_PRESS_MS);
   };
@@ -85,8 +88,7 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
   // active — so lifting picks it, no second tap.
   const trackFinger = (e) => {
     if (!open || !longPressed.current || !picker.current) return;
-    const items = [...picker.current.children];
-    const i = items.findIndex((el) => {
+    const i = [...picker.current.children].findIndex((el) => {
       const r = el.getBoundingClientRect();
       return e.clientX >= r.left && e.clientX <= r.right;
     });
@@ -98,70 +100,105 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
     if (open && longPressed.current && active >= 0) choose(REACTIONS[active].emoji);
   };
 
-  return (
+  const items = (
     <div
-      ref={wrap}
-      className="relative flex w-full items-center"
-      onPointerDown={startPress}
-      onPointerMove={trackFinger}
-      onPointerUp={endPress}
-      onPointerCancel={() => { clearTimeout(timer.current); close(); }}
-      onPointerLeave={() => { clearTimeout(timer.current); close(); }}
-      onMouseEnter={(e) => { if (e.nativeEvent.sourceCapabilities?.firesTouchEvents !== true) setOpen(true); }}
-      // A long-press on touch also raises the context menu; suppress it so the
-      // picker is what appears.
-      onContextMenu={(e) => { if (longPressed.current) e.preventDefault(); }}
-      style={{ touchAction: open ? 'none' : undefined }}
+      ref={picker}
+      role="group"
+      aria-label="React to this message"
+      style={{
+        left: touchMode ? undefined : left,
+        animation: 'bubbleIn .16s cubic-bezier(.2,.7,.3,1)',
+      }}
+      className={`absolute z-50 flex items-center gap-0 rounded-full border border-white/10 bg-[#1c1d26] px-1 py-1 shadow-[0_8px_28px_rgba(0,0,0,0.55)] ${
+        touchMode ? 'bottom-full left-0 mb-3' : 'top-1/2 -translate-y-1/2'
+      }`}
     >
-      {/* Hugs the bubble, so the badge and the picker anchor to the message
-          rather than to the far edge of the card. */}
-      <div ref={inner} className={`relative w-fit ${className}`}>
-        {children}
+      {REACTIONS.map(({ emoji, name }, i) => (
+        <button
+          key={emoji}
+          type="button"
+          aria-label={`React ${name}`}
+          aria-pressed={reaction === emoji}
+          onClick={() => choose(emoji)}
+          onMouseEnter={() => setActive(i)}
+          className={`grid size-8 shrink-0 place-items-center rounded-full text-[1.35rem] leading-none transition-transform duration-150 ${
+            active === i ? 'scale-[1.45] -translate-y-1.5' : ''
+          } ${reaction === emoji ? 'bg-white/15' : ''}`}
+          // Each pops in just after the one before it.
+          style={{ animation: `reactionPop .26s ${i * 28}ms backwards cubic-bezier(.2,1.4,.4,1)` }}
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>
+  );
 
-        {reaction && (
+  return (
+    <>
+      {/* Long-pressing dims the rest of the conversation so the message being
+          reacted to is the only thing lit. */}
+      {open && touchMode && (
+        <div className="fixed inset-0 z-40 bg-black/55" style={{ animation: 'fadeIn .18s ease-out' }} />
+      )}
+
+      <div
+        ref={wrap}
+        className="relative flex w-full items-center"
+        onPointerDown={startPress}
+        onPointerMove={trackFinger}
+        onPointerUp={endPress}
+        onPointerCancel={() => { clearTimeout(timer.current); close(); }}
+        onMouseEnter={(e) => { if (e.nativeEvent.sourceCapabilities?.firesTouchEvents !== true) setHovered(true); }}
+        onMouseLeave={() => { setHovered(false); if (!touchMode) close(); }}
+        // A long-press on touch also raises the context menu; suppress it so
+        // the picker is what appears.
+        onContextMenu={(e) => { if (longPressed.current) e.preventDefault(); }}
+        style={{ touchAction: open ? 'none' : undefined }}
+      >
+        {/* Hugs the bubble, so the badge and the picker anchor to the message
+            rather than to the far edge of the card. */}
+        <div
+          ref={inner}
+          className={`relative w-fit transition-transform duration-200 ${className} ${
+            open && touchMode ? 'z-50 scale-[1.04]' : ''
+          }`}
+        >
+          {children}
+
+          {reaction && (
+            <button
+              type="button"
+              aria-label={`Your reaction: ${reaction}. Tap to remove.`}
+              onClick={() => onReact(null)}
+              // Mirrors the badge on the visitor's own bubbles, which hangs off
+              // the corner nearest their side — so Selene's hangs off the left.
+              className="absolute -bottom-2.5 left-2 z-20 grid size-6 place-items-center rounded-full border border-white/10 bg-[#161720] text-[.75rem] leading-none ring-2 ring-[#080910]"
+              style={{ animation: 'reactionLand .34s cubic-bezier(.2,1.5,.4,1)' }}
+            >
+              {reaction}
+            </button>
+          )}
+        </div>
+
+        {/* Pointer devices only: the thing you click to open the picker. */}
+        {hovered && !open && (
           <button
             type="button"
-            aria-label={`Your reaction: ${reaction}. Tap to remove.`}
-            onClick={() => onReact(null)}
-            // Mirrors the badge on the visitor's own bubbles, which hangs off
-            // the corner nearest their side — so Selene's hangs off the left.
-            className="absolute -bottom-2.5 left-2 z-20 grid size-6 place-items-center rounded-full border border-white/10 bg-[#161720] text-[.75rem] leading-none ring-2 ring-[#080910]"
-            style={{ animation: 'reactionLand .34s cubic-bezier(.2,1.5,.4,1)' }}
+            aria-label="React to this message"
+            onClick={() => setOpen(true)}
+            style={{ left: 'calc(100% + 8px)', animation: 'bubbleIn .14s ease-out' }}
+            className="absolute grid size-7 shrink-0 place-items-center rounded-full text-white/35 transition-colors hover:bg-white/10 hover:text-white/70"
           >
-            {reaction}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4.5">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" strokeLinecap="round" />
+              <path d="M9 9.5h.01M15 9.5h.01" strokeLinecap="round" />
+            </svg>
           </button>
         )}
-      </div>
 
-      {open && (
-        <div
-          ref={picker}
-          role="group"
-          aria-label="React to this message"
-          // Centred on the bubble it belongs to, sitting in the empty column
-          // beside it rather than above the message before it.
-          style={{ left, animation: 'bubbleIn .16s cubic-bezier(.2,.7,.3,1)' }}
-          className="absolute top-1/2 z-30 flex -translate-y-1/2 items-center gap-0.5 rounded-full border border-white/10 bg-[#1c1d26] px-1.5 py-1 shadow-[0_8px_28px_rgba(0,0,0,0.55)]"
-        >
-          {REACTIONS.map(({ emoji, name }, i) => (
-            <button
-              key={emoji}
-              type="button"
-              aria-label={`React ${name}`}
-              aria-pressed={reaction === emoji}
-              onClick={() => choose(emoji)}
-              onMouseEnter={() => setActive(i)}
-              className={`relative grid size-8 shrink-0 place-items-center rounded-full text-[1.05rem] leading-none transition-transform duration-150 ${
-                active === i ? 'scale-[1.45] -translate-y-1.5' : ''
-              } ${reaction === emoji ? 'bg-white/15' : ''}`}
-              // Each pops in just after the one before it.
-              style={{ animation: `reactionPop .26s ${i * 28}ms backwards cubic-bezier(.2,1.4,.4,1)` }}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+        {open && items}
+      </div>
+    </>
   );
 }
