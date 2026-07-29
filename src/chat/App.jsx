@@ -33,10 +33,12 @@ function Starfield() {
   );
 }
 
-// Switch between the flows in scripts/. Shown while developing, and on any
-// deploy once `?v=` is in the URL — reviewing A against B on a preview build
-// is the whole point of having two, and a dev-only control can't do that.
-// A visitor arriving at a bare URL never sees it.
+// Switch between the flows in scripts/. Always visible: this is a demo, and
+// one link that flips between A and B beats a link per version.
+//
+// It has to come out before real traffic — a visitor should not be choosing
+// which variant they are in, and an A/B split cannot measure anything if they
+// can.
 function VersionSwitch({ value }) {
   return (
     <label className="fixed top-2 left-2 z-50 flex items-center gap-1.5 rounded-lg bg-black/70 px-2 py-1 font-mono text-[.65rem] text-white/60 backdrop-blur">
@@ -58,14 +60,10 @@ function VersionSwitch({ value }) {
 
 export default function App() {
   const scriptKey = useMemo(resolveScriptKey, []);
-  const showSwitch = useMemo(
-    () => import.meta.env.DEV || new URLSearchParams(window.location.search).has('v'),
-    []
-  );
   const funnel = useFunnel(scriptKey);
   return (
     <>
-      {showSwitch && <VersionSwitch value={scriptKey} />}
+      <VersionSwitch value={scriptKey} />
       {/* ambient */}
       <div className="pointer-events-none fixed z-0 rounded-full blur-[90px]" style={{ width: 700, height: 700, top: '55vh', right: -150, background: 'radial-gradient(circle, rgba(72,38,160,0.28) 0%, transparent 70%)' }} />
       <div className="pointer-events-none fixed z-0 rounded-full blur-[90px]" style={{ width: 560, height: 560, top: '40vh', left: -120, background: 'radial-gradient(circle, rgba(14,110,130,0.24) 0%, transparent 70%)' }} />
