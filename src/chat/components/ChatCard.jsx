@@ -52,7 +52,9 @@ export function ChatCard({ funnel }) {
   return (
     <section className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
       {/* Header */}
-      <header className="flex items-center gap-3 rounded-b-3xl bg-[#1a043d] px-3 py-2.5">
+      {/* Above the messages: reaction badges and pickers are positioned, and
+          without this they paint over the avatar and the name. */}
+      <header className="relative z-20 flex items-center gap-3 rounded-b-3xl bg-[#1a043d] px-3 py-2.5">
         <img
           src="/images/chat/selene-avatar.png"
           alt="Selene"
@@ -82,7 +84,9 @@ export function ChatCard({ funnel }) {
       {/* Messages */}
       {/* gap-4 rather than gap-2: a reaction badge hangs off the bottom of its
           bubble and needs clearance from the next one. */}
-      <div ref={scrollRef} className="no-scrollbar no-callout flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
+      {/* `isolate` keeps the messages' own stacking to themselves, so a badge
+          or picker can never climb above the header or the dock. */}
+      <div ref={scrollRef} className="no-scrollbar no-callout isolate flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
         {messages.map((m) => (
           <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={(e) => react(m.id, e)} />
         ))}
