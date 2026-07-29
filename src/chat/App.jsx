@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { AIGradientBorder } from './components/AIGradientBorder.jsx';
 import { ChatCard } from './components/ChatCard.jsx';
 import { useFunnel } from './hooks/useFunnel.js';
+import { useTabBadge } from './hooks/useTabBadge.js';
 import { resolveScriptKey } from './scripts/index.js';
 
 function Starfield() {
@@ -36,6 +37,7 @@ function Starfield() {
 export default function App() {
   const scriptKey = useMemo(resolveScriptKey, []);
   const funnel = useFunnel(scriptKey);
+  useTabBadge(funnel.messages);
   return (
     <>
       {/* ambient */}
