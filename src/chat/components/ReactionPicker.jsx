@@ -35,8 +35,11 @@ const CAN_HOVER =
   typeof window !== 'undefined' &&
   window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
 
-// A short tick when the picker opens and when one is chosen. Ignored by
-// browsers that don't support it, which is most desktops.
+// A short tick when the picker opens and when one is chosen.
+//
+// Android only. iOS Safari does not implement the Vibration API at all, so
+// this is a no-op on every iPhone and there is no web-facing way around that
+// — the reactions have to read well without it.
 const buzz = (ms) => navigator.vibrate?.(ms);
 
 export function Reactable({ reaction, onReact, className = 'max-w-[82%]', children }) {
