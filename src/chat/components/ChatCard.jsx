@@ -247,7 +247,13 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
   if (dock.type === 'select') {
     return <SelectRow options={dock.options} cta={dock.cta} onSend={(opt) => onSelect(dock.key, opt, dock.next)} />;
   }
-  return null;
+  // Nothing to tap — she is mid-reading. Rather than an empty bar, say she is
+  // still there, so the wait reads as company instead of a stall.
+  return (
+    <p className="font-script m-0 py-2.5 text-center text-[.95rem] italic text-white/40">
+      Selene is with you…
+    </p>
+  );
 }
 
 function SelectRow({ options, cta, onSend }) {
