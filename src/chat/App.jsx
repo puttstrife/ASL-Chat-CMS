@@ -33,8 +33,10 @@ function Starfield() {
   );
 }
 
-// Dev-only switch between the flows in scripts/. Production picks the version
-// from `?v=` alone, so a link can be shared without exposing the control.
+// Switch between the flows in scripts/. Shown while developing, and on any
+// deploy once `?v=` is in the URL — reviewing A against B on a preview build
+// is the whole point of having two, and a dev-only control can't do that.
+// A visitor arriving at a bare URL never sees it.
 function VersionSwitch({ value }) {
   return (
     <label className="fixed top-2 left-2 z-50 flex items-center gap-1.5 rounded-lg bg-black/70 px-2 py-1 font-mono text-[.65rem] text-white/60 backdrop-blur">
@@ -56,10 +58,14 @@ function VersionSwitch({ value }) {
 
 export default function App() {
   const scriptKey = useMemo(resolveScriptKey, []);
+  const showSwitch = useMemo(
+    () => import.meta.env.DEV || new URLSearchParams(window.location.search).has('v'),
+    []
+  );
   const funnel = useFunnel(scriptKey);
   return (
     <>
-      {import.meta.env.DEV && <VersionSwitch value={scriptKey} />}
+      {showSwitch && <VersionSwitch value={scriptKey} />}
       {/* ambient */}
       <div className="pointer-events-none fixed z-0 rounded-full blur-[90px]" style={{ width: 700, height: 700, top: '55vh', right: -150, background: 'radial-gradient(circle, rgba(72,38,160,0.28) 0%, transparent 70%)' }} />
       <div className="pointer-events-none fixed z-0 rounded-full blur-[90px]" style={{ width: 560, height: 560, top: '40vh', left: -120, background: 'radial-gradient(circle, rgba(14,110,130,0.24) 0%, transparent 70%)' }} />
