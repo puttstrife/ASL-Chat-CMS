@@ -175,4 +175,20 @@ export const SHARED_STAGES = {
     ],
     buttons: [{ label: 'Keep going', next: '6' }],
   },
+
+  // Both versions end here, after the CTA.
+  //
+  // DEMO ONLY. Nothing is charged and no email is sent — this stage exists so
+  // the reading closes instead of dead-ending on a button that does nothing.
+  // It must not go in front of real traffic until a real checkout sits behind
+  // the CTA, or it tells people they have bought something they have not.
+  confirmed: {
+    beats: [
+      l('Thank you, {name}. 🖤', 1.5),
+      l('I’m picking the pencil back up now.', 1),
+      l('The eyes first. Then the hair, if I have anything left in me.', 1.5),
+      l('Everything I promised you will be in your inbox the moment it’s finished. Within 24 hours.', 1.5),
+      l('Go and live your day. I’ll be here with them until it’s done.', 1.5),
+    ],
+  },
 };

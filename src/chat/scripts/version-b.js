@@ -66,7 +66,7 @@ export const STAGES = {
     ],
     // PLACEHOLDER price — deliberately not a real number, so it cannot ship
     // by accident. Swap once the offer is priced.
-    buttons: [{ label: 'Unlock My Full Sketch — $XX', variant: 'gold', arrow: true }],
+    buttons: [{ label: 'Unlock My Full Sketch — $XX', next: 'confirmed', variant: 'gold', arrow: true }],
     trust: ['Full face · personality profile · delivered in 24 hours'],
   },
 };

@@ -118,10 +118,13 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   }, [STAGES]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers ──
+  // A button that leads nowhere is a dead end, so don't echo the tap — an
+  // unanswered message from the visitor reads as the app having broken.
   const chooseButton = (b) => {
+    if (!b.next) return;
     const id = push({ who: 'user', text: b.label });
     scheduleReaction(id, b.label);
-    if (b.next) runStage(b.next);
+    runStage(b.next);
   };
 
   const submitSelect = (key, option, next) => {
