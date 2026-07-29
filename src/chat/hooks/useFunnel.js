@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PROFILES, SKETCHES, STAGES, START_STAGE } from '../stages.js';
-import { getConfig } from '../lib/api.js';
+import { SCRIPTS, DEFAULT_SCRIPT } from '../scripts/index.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 export const formatDob = ({ month, day, year }) => `${MONTHS[month - 1]} ${day}, ${year}`;
 
-export function useFunnel() {
+export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
+  const script = SCRIPTS[scriptKey] || SCRIPTS[DEFAULT_SCRIPT];
+  const { STAGES, START_STAGE } = script;
+
   const [messages, setMessages] = useState([]); // {id, who, …}
   const [dock, setDock] = useState({ type: 'none' });
-  const [config, setConfig] = useState({ ttsEnabled: false, readingEnabled: false });
 
   const answers = useRef({});
   const idRef = useRef(0);
@@ -38,42 +39,49 @@ export function useFunnel() {
   const rand = (a) => a[Math.floor(Math.random() * a.length)];
   const pickReaction = (text) => {
     const t = (text || '').toLowerCase();
-    if (/love|hope|man|woman|anyone|soulmate|heart|ready/.test(t)) return rand(REACTIONS.love);
-    if (/afraid|worried|scared|alone|lonely|sad|fear/.test(t)) return rand(REACTIONS.comfort);
+    if (/love|hope|man|woman|anyone|soulmate|heart|ready|yes/.test(t)) return rand(REACTIONS.love);
+    if (/afraid|worried|scared|alone|lonely|sad|fear|no|not sure/.test(t)) return rand(REACTIONS.comfort);
     if (/\?/.test(t)) return rand(REACTIONS.question);
     return rand(REACTIONS.default);
   };
   const scheduleReaction = (id, text) => setTimeout(() => updateMsg(id, { reaction: pickReaction(text) }), 550);
+
+  // Hold the typing indicator on its own, without producing a bubble. The
+  // script uses this to stage the pause before an image lands, with a label
+  // saying what she is doing ("Selene is drawing").
+  const holdTyping = async (ms, label) => {
+    const typingId = push({ who: 'typing', label });
+    await sleep(ms);
+    remove(typingId);
+  };
 
   // Reveal one Selene bubble: a beat of thought, then typing, then the bubble.
   // Duration scales with message length and varies per line, so short replies
   // land fast and long ones visibly take her a while — as a person would.
   const between = (min, max) => min + Math.random() * (max - min);
 
-  const revealLine = async (text) => {
+  // Roughly a real person at a keyboard. Type-Simulator's "human" profile is
+  // 80ms ± 40 per character; a chat indicator can run a little under that
+  // without reading as a bot, but the 20-32ms this used to be was ~400wpm.
+  const MS_PER_CHAR = [45, 70];
+  const MIN_TYPING = 700;
+  const MAX_TYPING = 6500;
+
+  const revealLine = async (text, { typing, label } = {}) => {
     const body = interpolate(text);
 
     // She reads/considers before the indicator even appears.
     await sleep(between(240, 700));
 
-    const typingId = push({ who: 'typing' });
-    // ~20-32ms per character, re-rolled each line, clamped so a very long
-    // message never stalls the funnel and a two-word one still registers.
-    const perChar = between(20, 32);
-    await sleep(Math.min(5400, Math.max(700, 380 + body.length * perChar)));
+    // Re-rolled each line, clamped so a very long message never stalls the
+    // funnel and a two-word one still registers. A script may ask for longer
+    // — a deliberate pause — but never for less than the text would take.
+    const perChar = between(...MS_PER_CHAR);
+    const forLength = Math.min(MAX_TYPING, Math.max(MIN_TYPING, 300 + body.length * perChar));
 
-    remove(typingId);
+    await holdTyping(Math.max(forLength, typing ?? 0), label);
     push({ who: 'selene', text: body });
     await sleep(between(220, 520));
-  };
-
-  // Sketch reveals use the portrait set matching the chosen preference.
-  // The finished portrait arrives blurred; `unlocked` re-sends it in the clear.
-  const revealSketch = async ({ sketch, unlocked }) => {
-    const set = SKETCHES[answers.current.preference] || SKETCHES.anyone;
-    const complete = sketch === set.length - 1;
-    push({ who: 'sketch', src: set[sketch], complete, locked: complete && !unlocked });
-    await sleep(700);
   };
 
   // ── State machine ──
@@ -87,11 +95,14 @@ export function useFunnel() {
 
     for (const beat of stage.beats || []) {
       if (typeof beat === 'string') await revealLine(beat);
-      else if (beat.sketch !== undefined) await revealSketch(beat);
-      else if (beat.reveal) { push({ who: 'reveal', ...beat.reveal }); await sleep(300); }
-      else if (beat.profile) {
-        const profile = PROFILES[answers.current.preference] || PROFILES.anyone;
-        push({ who: 'profile', ...profile, revealed: Boolean(beat.unredacted) });
+      else if (beat.line !== undefined) await revealLine(beat.line, beat);
+      else if (beat.wait !== undefined) await holdTyping(beat.wait, beat.label);
+      else if (beat.image) {
+        push({ who: 'sketch', src: beat.image, complete: Boolean(beat.locked), locked: Boolean(beat.locked) });
+        await sleep(700);
+      }
+      else if (beat.traits) {
+        push({ who: 'traits', traits: beat.traits });
         await sleep(700);
       }
     }
@@ -104,7 +115,7 @@ export function useFunnel() {
     else setDock({ type: 'none' });
 
     runningRef.current = false;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [STAGES]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers ──
   const chooseButton = (b) => {
@@ -141,11 +152,8 @@ export function useFunnel() {
   useEffect(() => {
     if (bootedRef.current) return;
     bootedRef.current = true;
-    (async () => {
-      setConfig(await getConfig());
-      runStage(START_STAGE);
-    })();
-  }, [runStage]);
+    runStage(START_STAGE);
+  }, [runStage, START_STAGE]);
 
-  return { messages, dock, config, answers: answers.current, chooseButton, submitInput, submitDate, submitSelect, advance };
+  return { messages, dock, answers: answers.current, chooseButton, submitInput, submitDate, submitSelect, advance };
 }

@@ -1,10 +1,12 @@
 # ASL Interactive Chat — Selene
 
-An interactive chat funnel for [Astro Lover](https://astroloversketch.com/). A scripted
-reader, "Selene", collects the visitor's name, date of birth and soulmate preference, then
-plays out a reading that progressively reveals a hand-drawn soulmate portrait — jaw, then
-hairline, then the finished sketch, which stays blurred until the visitor continues to the
-full reading.
+An interactive chat reading for [Astro Lover](https://astroloversketch.com/). Selene, a
+scripted reader, collects the visitor's name and birth date, then draws a soulmate portrait
+over the course of a conversation — silhouette, features, neck — photographing each stage
+at her desk. The finished face arrives blurred behind a paywall.
+
+The reading exists in **two versions** that differ by one stage; see
+[Versions](#versions).
 
 ---
 
@@ -15,151 +17,149 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. That is all you need — see [Architecture](#architecture) for why
-there is no backend to start.
+Open http://localhost:5173. There is no backend to start.
 
 | Script | What it does |
 | --- | --- |
 | `npm run dev` | Vite dev server (port 5173) |
 | `npm run build` | Production build → `dist/` |
-| `npm start` | Express server (see [The backend is currently unused](#the-backend-is-currently-unused)) |
-| `npm run serve` | `build` then `start` |
+| `npm run preview` | Serve the built `dist/` locally |
 
 Built and tested on Node 24 / npm 11.
 
 ---
 
+## Versions
+
+| | Version A | Version B |
+| --- | --- | --- |
+| URL | `/?v=a` (default) | `/?v=b` |
+| Stages | 9 | 8 |
+| Difference | Selene interrupts the portrait to sketch **the place** the meeting keeps pushing into her head, then asks if the visitor recognises it | No place stage — straight from the traits to the email |
+| CTA promises | face, profile, **meeting place**, 24 hours | face, profile, 24 hours |
+
+Stages 1–5 are byte-identical between them, shared from one file.
+
+In development a **version switch** appears top-left. It is dev-only; production
+selects the version from `?v=` alone, so a link can be shared without exposing the
+control. An unrecognised value falls back to A.
+
+---
+
 ## Architecture
 
-**The shipped app is a static single-page React frontend.** Everything the visitor sees is
-driven client-side by a scripted state machine. There are no network calls the experience
-depends on.
+A static single-page React frontend. Everything is driven client-side by a scripted state
+machine — no network calls, nothing to deploy but `dist/`.
 
 ```
-index.html            → src/chat/main.jsx → App.jsx
-src/chat/stages.js    the script: every line, status, sketch and dock, in order
-src/chat/hooks/useFunnel.js   the state machine that plays stages.js
-src/chat/components/ChatCard.jsx   the entire chat UI (messages + dock controls)
-public/images/sketch/ portrait artwork
-public/audio/         looping ambient track
+index.html                     → src/chat/main.jsx → App.jsx
+src/chat/scripts/shared.js       stages 1–5, identical in both versions
+src/chat/scripts/version-a.js    + place interruption, 9 stages
+src/chat/scripts/version-b.js    straight to email, 8 stages
+src/chat/scripts/index.js        registry; resolves ?v=
+src/chat/hooks/useFunnel.js      the engine that plays a script
+src/chat/components/ChatCard.jsx the entire chat UI
+public/images/sketch-v2/         the five desk photographs
+public/audio/                    looping ambient track
 ```
 
-### How the script works
+### Why sibling scripts
 
-`stages.js` is the file to edit for any copy or flow change. A stage is an ordered list of
-`beats` followed by exactly one dock (the control at the bottom of the card).
+Both versions share the engine — pacing, docks, branching, rendering. Keeping them as
+files selected at runtime means a fix lands once. A branch or a second repo would mean
+fixing every bug twice. Adding a version C is a new file plus one line in `index.js`.
+
+### How a script works
+
+A stage is an ordered list of `beats` followed by exactly one dock (the control at the
+bottom of the card).
 
 ```js
 '4': {
   beats: [
-    'The first feature coming through is the shape of their face.',   // a chat bubble
-    { sketch: 0, caption: 'First details detected' },                  // reveal portrait step 0
-    { reveal: { headline: '…', body: '…' } },                          // the reveal card
+    l('Okay. I’ve honed it down to one.', 1.5),   // a line, with its typing time
+    drawing(4),                                    // hold the indicator, no bubble
+    { image: IMG.silhouette },                     // a photograph
+    { traits: TRAITS_FIRST },                      // the notes she has so far
   ],
-  next: '5',   // dock: a "Continue" button
+  buttons: [{ label: 'Continue', next: '5' }],
 }
 ```
 
-Beats play top to bottom with typing indicators and pacing handled for you. `{name}` and
-`{dob}` interpolate from the visitor's answers.
-
-There is deliberately **no separate "system status" UI**. Progress beats like "analyzing
-your zodiac signature" are written as ordinary lines Selene says, because the machine-style
-labels read as artificial.
-
-### Typing pacing
-
-`revealLine` in `useFunnel.js` simulates a person at a keyboard: a short pause to
-"consider", then a typing indicator held for roughly 20–32 ms per character — re-rolled per
-line, so the same message is never timed twice the same way — clamped to 0.7–5.4 s. Short
-replies land almost immediately; long paragraphs visibly take her a while.
+Beats play top to bottom. `{name}` interpolates from the visitor's answers. Branches are
+ordinary stages: a `buttons` dock routes to one, and each branch ends by pointing back at
+the stage where the paths rejoin.
 
 Dock types — a stage ends in one of:
 
 | Key | Renders |
 | --- | --- |
-| `input` | `{ placeholder, key, next, cta }` free text, stored under `key` |
+| `input` | `{ placeholder, key, next, cta, inputType? }` free text stored under `key`; `inputType: 'email'` swaps in a validated email field |
 | `datePicker` | `{ key, next, cta }` month/day/year; day count clamps to the month, leap years included |
 | `select` | `{ key, options[], next, cta }` pick one, then confirm |
-| `buttons` | `[{ label, next }]` acts immediately on tap |
+| `buttons` | `[{ label, next, variant?, arrow? }]` acts immediately on tap |
 | `next` | a plain "Continue" affordance |
+
+A stage may also carry `trust: [...]`, rendered as the reassurance row beneath the button.
+
+### Typing pacing
+
+`revealLine` simulates a person at a keyboard: a short pause to consider, then a typing
+indicator held for 45–70 ms per character — re-rolled per line, so the same message is
+never timed twice the same way — clamped to 0.7–6.5 s.
+
+A beat may ask for a specific duration (`l('Wait.', 2)`). That acts as a **floor**, not a
+replacement: a script can hold a deliberate pause, but never make a long message flash by
+in less time than typing it would take.
+
+`drawing(seconds, label)` holds the indicator without producing a bubble, and labels it —
+"Selene is drawing", "Selene is opening your chart" — to stage the pause before an image.
 
 ### Portraits
 
-`SKETCHES` in `stages.js` maps the soulmate preference to a `[jaw, hairline, full]` triple.
-The last step renders blurred behind a **Details Redacted** pill unless the beat sets
-`unlocked: true` — which is what stage `done` uses to re-send the portrait in the clear
-after the visitor taps *Show Me The Face*. The blurred copy stays in the transcript.
+`IMG` in `shared.js` maps the five photographs. They are one drawing progressing:
+silhouette → features → neck → finished. The last is passed `locked: true`, which blurs it
+behind a **Details Redacted** pill.
 
-The paywall CTA is a `buttons` entry with `variant: 'gold'` (and optional `arrow: true`);
-a stage may also carry `trust: [...]`, rendered as the reassurance row beneath the button.
-
-### The case file
-
-`PROFILES` in `stages.js` holds a per-preference "Soulmate Profile" — the redacted case
-file shown beside the blurred portrait, re-sent unredacted after the CTA. Copy is authored
-once per variant: `[[withheld detail]]` renders as a redaction bar sized to the hidden
-text while locked and as the text itself (in gold) once revealed, so both states can never
-drift apart. `**…**` highlights in gold in both states.
+There is no gender question; the source script never asks one, and the artwork is a single
+set.
 
 ### Audio
 
 `public/audio/ambient.mp3` loops at volume `0.12`, wired to the speaker toggle in the
-header. Browsers block autoplay until the page is interacted with, so playback also starts
-on the first pointer or key event.
-
----
-
-## The backend is currently unused
-
-`server/index.js` and `api/*` are left over from an earlier version of this project. The
-current flow **does not call them**:
-
-- `src/chat/lib/api.js` still exports `fetchTTS` and `fetchReading`, but nothing imports
-  them — they are dead code.
-- `getConfig()` is called on boot and its result is returned from `useFunnel`, but no
-  component reads it.
-- Consequently `ELEVENLABS_*` and `ANTHROPIC_*` in `.env.example` are not needed to run
-  the app.
-
-Deploying `dist/` to any static host is sufficient. `vercel.json` is already configured for
-that (`buildCommand`, `outputDirectory`, no rewrites).
-
-**Decision needed:** either delete the server, `api/`, the unused API client functions and
-the stale env vars, or wire the reading back up to Anthropic. Right now it is carrying cost
-without benefit.
+header. Browsers block autoplay until the page has been interacted with, so playback also
+starts on the first pointer or key event.
 
 ---
 
 ## Known limitations
 
-1. **"Anyone / No preference" has no artwork of its own.** The man and woman sets are both
-   in place; *Anyone* picks one of the two at random per session. Fine as a default, but
-   worth a deliberate decision.
-2. **The reading is entirely static.** Every visitor gets identical copy; the date of birth
-   is echoed back but never actually used to compute a zodiac sign, and the portrait is not
-   derived from any input.
-3. **Nothing persists.** Refreshing restarts the funnel. Answers live in a ref and are lost
-   on reload — no analytics, no storage, no lead capture.
-4. **The paywall is cosmetic.** *Show Me The Face* re-sends the portrait unblurred and
-   prints a closing line — there is no checkout, payment or gating behind it, and the
-   full-resolution image is already in the page, so the blur is trivially bypassed in
-   devtools. The trust badges ("30-Day Money-Back Guarantee", "Delivered in 24 Hours",
-   "Secure Checkout") are **claims with nothing implementing them**; they must not ship in
-   front of real traffic until a real checkout exists.
-5. **No tests, no error boundary.** A throw inside the funnel blanks the card with nothing
-   in the UI to explain it.
-6. **No analytics or tracking.** The brand site runs GTM, Meta Pixel and Clarity; this app
-   has none of it.
-7. **Ambient track licensing.** `ambient.mp3` was generated with Suno. Identifying metadata
-   has been stripped, but Suno embeds inaudible watermarks that cannot be removed or
-   verified here — confirm the Suno plan permits commercial use before launch.
-8. **Large unoptimised assets.** The audio is ~4.9 MB and the six sketches ~200–290 KB
-   each, all loaded eagerly. Worth compressing before a paid traffic push.
-9. **Repo cruft.** `(Interactive VSL) Marisol Chat Sequence.md` and `BACKEND_HANDOFF.docx`
-   describe the previous "Marisol" product and are stale.
-10. **Desktop-first spacing.** The card is responsive and works on mobile, but spacing was
-    tuned at desktop width and has not been checked on real devices.
+1. **The paywall is cosmetic.** The CTA takes no payment and unlocks nothing. Worse, it
+   currently echoes its own label into the transcript and then does nothing, which reads
+   as broken rather than unfinished.
+2. **The blur is client-side.** The finished portrait is already in the page at full
+   resolution; devtools defeats it. A real gate has to serve the locked version only.
+3. **The trust row makes claims nothing implements.** "Delivered in 24 hours" has no
+   fulfilment behind it. Must not ship in front of real traffic as-is.
+4. **The email goes nowhere.** It is collected into a ref and lost on reload — no storage,
+   no ESP, no list — while the script promises delivery.
+5. **The price is a placeholder.** `$XX`, deliberately not a real number.
+6. **The trait copy is a placeholder.** The source doc labels its list an example and gives
+   none for the second appearance; the later list was extended, not authored.
+7. **Nothing persists.** Refreshing restarts the reading. Answers live in a ref.
+8. **No analytics.** The brand site runs GTM, Meta Pixel and Clarity; this has none, so an
+   A/B split would currently measure nothing.
+9. **The reading is static.** Every visitor gets identical copy; the birth date is echoed
+   back but never used to compute anything, and the portrait is not derived from any input.
+   The script claims all 12 chart placements while collecting only a date — no time, no
+   place.
+10. **No tests, no error boundary.** A throw inside the funnel blanks the card.
+11. **Ambient track licensing.** `ambient.mp3` was generated with Suno. Identifying
+    metadata has been stripped, but Suno embeds inaudible watermarks that cannot be
+    removed or verified here — confirm the Suno plan permits commercial use before launch.
+12. **Desktop-first spacing.** Responsive and working on mobile, but tuned at desktop
+    width and not checked on real devices. The dev version switch overlaps the header at
+    phone widths (dev-only, so it cannot ship).
 
 ---
 
@@ -167,6 +167,5 @@ without benefit.
 
 - Tailwind v4 via `@tailwindcss/vite`; design tokens live in `src/chat/index.css`.
 - Brand palette: gold `#dfa73a`, dark purple stroke `#4c1d95` on a near-black field.
-- Type: Inter throughout; Cormorant Garamond remains only on the "Meet Your Soulmate"
-  headline.
+- Type: Inter throughout.
 - Commit style: imperative subject, body explaining *why*.

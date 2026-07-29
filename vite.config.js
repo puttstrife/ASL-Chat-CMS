@@ -2,8 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// Frontend builds to dist/ (served by Express in prod).
-// In dev, `vite` runs on :5173 and proxies /api to the Express server on :3000.
+// Static build — dist/ deploys to any host. There is no backend.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
@@ -12,8 +11,5 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: {
-      '/api': 'http://localhost:3000',
-    },
   },
 });
