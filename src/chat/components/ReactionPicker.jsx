@@ -164,9 +164,12 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
       >
         {/* Hugs the bubble, so the badge and the picker anchor to the message
             rather than to the far edge of the card. */}
+        {/* No `w-fit`: as a flex item this already hugs its content, and
+            asking for fit-content here while the bubble inside asks for a
+            percentage of it makes the two depend on each other. */}
         <div
           ref={inner}
-          className={`relative w-fit transition-transform duration-200 ${className} ${
+          className={`relative min-w-0 transition-transform duration-200 ${className} ${
             open && touchMode ? 'z-50 scale-[1.04]' : ''
           }`}
         >

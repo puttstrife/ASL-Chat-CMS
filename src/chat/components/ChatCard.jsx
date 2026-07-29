@@ -52,7 +52,7 @@ export function ChatCard({ funnel }) {
   return (
     <section className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
       {/* Header */}
-      <header className="flex items-center gap-3 rounded-b-3xl bg-[#0c0d14]/95 px-3 py-2.5">
+      <header className="flex items-center gap-3 rounded-b-3xl bg-[#1a043d] px-3 py-2.5">
         <img
           src="/images/chat/selene-avatar.png"
           alt="Selene"
@@ -160,10 +160,11 @@ function Message({ m, reaction, onReact }) {
       variant={sent ? 'default' : 'muted'}
       align={sent ? 'end' : 'start'}
       // Selene's bubbles sit in the reaction wrapper, which caps the width
-      // already. Leaving Bubble's own 80% on makes it render narrower than its
-      // wrapper, and the smiley then anchors to the wrapper's edge — floating
-      // well clear of the message it belongs to.
-      className={`${m.reaction ? 'mb-3' : ''} ${sent ? '' : 'max-w-full'}`}
+      // already. Bubble's own percentage cap has to come off entirely: against
+      // a wrapper that is itself sizing to the bubble it resolves circularly,
+      // and the browser settles that by collapsing the bubble — which is what
+      // was breaking words down the middle.
+      className={`${m.reaction ? 'mb-3' : ''} ${sent ? '' : 'max-w-none'}`}
     >
       {/* Flat corner on the sender's side, mirroring the typing indicator. */}
       <BubbleContent className={sent ? 'rounded-tr-md' : 'rounded-tl-md'}>{m.text}</BubbleContent>
