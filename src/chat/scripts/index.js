@@ -7,9 +7,9 @@
 import * as versionA from './version-a.js';
 import * as versionB from './version-b.js';
 
-// The previous single-flow script is still in ../stages.js but is not
-// registered — the preview offers A and B only. Re-add it here to bring it
-// back; nothing else has to change.
+// The previous single-flow script is parked in _archive/legacy-flow/ and is
+// not registered — the preview offers A and B only. See that folder's README
+// for what bringing it back involves.
 export const SCRIPTS = {
   a: versionA,
   b: versionB,

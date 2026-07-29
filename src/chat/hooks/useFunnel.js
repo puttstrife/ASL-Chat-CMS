@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PROFILES, SKETCHES } from '../stages.js';
 import { SCRIPTS, DEFAULT_SCRIPT } from '../scripts/index.js';
 import { getConfig } from '../lib/api.js';
 
@@ -87,15 +86,6 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
     await sleep(between(220, 520));
   };
 
-  // Legacy sketch reveals use the portrait set matching the chosen preference.
-  // The finished portrait arrives blurred; `unlocked` re-sends it in the clear.
-  const revealSketch = async ({ sketch, unlocked }) => {
-    const set = SKETCHES[answers.current.preference] || SKETCHES.anyone;
-    const complete = sketch === set.length - 1;
-    push({ who: 'sketch', src: set[sketch], complete, locked: complete && !unlocked });
-    await sleep(700);
-  };
-
   // ── State machine ──
   const runStage = useCallback(async (id) => {
     if (runningRef.current) return;
@@ -115,13 +105,6 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
       }
       else if (beat.traits) {
         push({ who: 'traits', traits: beat.traits });
-        await sleep(700);
-      }
-      else if (beat.sketch !== undefined) await revealSketch(beat);
-      else if (beat.reveal) { push({ who: 'reveal', ...beat.reveal }); await sleep(300); }
-      else if (beat.profile) {
-        const profile = PROFILES[answers.current.preference] || PROFILES.anyone;
-        push({ who: 'profile', ...profile, revealed: Boolean(beat.unredacted) });
         await sleep(700);
       }
     }
