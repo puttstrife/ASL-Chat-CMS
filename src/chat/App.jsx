@@ -47,7 +47,11 @@ export default function App() {
 
       <main className="fixed inset-0 z-10 grid place-items-center sm:p-4">
         <AIGradientBorder
-          className="h-dvh w-full max-w-[600px] rounded-none sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px]"
+          // No stroke on a phone: the card is full-bleed there, so the frame
+          // has no card to outline, and a 1px edge at viewport width lands on
+          // a device pixel on one side and between two on the other — which
+          // reads as a heavier left edge.
+          className="h-dvh w-full max-w-[600px] rounded-none p-0 sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px] sm:p-px"
         >
           <ChatCard funnel={funnel} />
         </AIGradientBorder>
