@@ -159,7 +159,11 @@ function Message({ m, reaction, onReact }) {
     <Bubble
       variant={sent ? 'default' : 'muted'}
       align={sent ? 'end' : 'start'}
-      className={m.reaction ? 'mb-3' : ''}
+      // Selene's bubbles sit in the reaction wrapper, which caps the width
+      // already. Leaving Bubble's own 80% on makes it render narrower than its
+      // wrapper, and the smiley then anchors to the wrapper's edge — floating
+      // well clear of the message it belongs to.
+      className={`${m.reaction ? 'mb-3' : ''} ${sent ? '' : 'max-w-full'}`}
     >
       {/* Flat corner on the sender's side, mirroring the typing indicator. */}
       <BubbleContent className={sent ? 'rounded-tr-md' : 'rounded-tl-md'}>{m.text}</BubbleContent>
