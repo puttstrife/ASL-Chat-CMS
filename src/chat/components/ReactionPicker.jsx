@@ -28,6 +28,13 @@ export const REACTIONS = [
 
 const LONG_PRESS_MS = 350;
 
+// Whether this device actually has a hovering cursor. iOS leaves
+// `sourceCapabilities` undefined on its synthetic mouse events, so testing
+// that showed the desktop smiley on phones; the media query does not lie.
+const CAN_HOVER =
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+
 // A short tick when the picker opens and when one is chosen. Ignored by
 // browsers that don't support it, which is most desktops.
 const buzz = (ms) => navigator.vibrate?.(ms);
@@ -148,7 +155,7 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
         onPointerMove={trackFinger}
         onPointerUp={endPress}
         onPointerCancel={() => { clearTimeout(timer.current); close(); }}
-        onMouseEnter={(e) => { if (e.nativeEvent.sourceCapabilities?.firesTouchEvents !== true) setHovered(true); }}
+        onMouseEnter={() => { if (CAN_HOVER) setHovered(true); }}
         onMouseLeave={() => { setHovered(false); if (!touchMode) close(); }}
         // A long-press on touch also raises the context menu; suppress it so
         // the picker is what appears.
@@ -178,24 +185,25 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
               {reaction}
             </button>
           )}
-        </div>
 
-        {/* Pointer devices only: the thing you click to open the picker. */}
-        {hovered && !open && (
-          <button
-            type="button"
-            aria-label="React to this message"
-            onClick={() => setOpen(true)}
-            style={{ left: 'calc(100% + 8px)', animation: 'bubbleIn .14s ease-out' }}
-            className="absolute grid size-7 shrink-0 place-items-center rounded-full text-white/35 transition-colors hover:bg-white/10 hover:text-white/70"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4.5">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" strokeLinecap="round" />
-              <path d="M9 9.5h.01M15 9.5h.01" strokeLinecap="round" />
-            </svg>
-          </button>
-        )}
+          {/* Pointer devices only: the thing you click to open the picker.
+              Anchored to the bubble, not the row, or it lands off the card. */}
+          {CAN_HOVER && hovered && !open && (
+            <button
+              type="button"
+              aria-label="React to this message"
+              onClick={() => setOpen(true)}
+              style={{ animation: 'bubbleIn .14s ease-out' }}
+              className="absolute left-full top-1/2 ml-2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-white/35 transition-colors hover:bg-white/10 hover:text-white/70"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4.5">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" strokeLinecap="round" />
+                <path d="M9 9.5h.01M15 9.5h.01" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {open && items}
       </div>
