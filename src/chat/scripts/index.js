@@ -7,9 +7,9 @@
 import * as versionA from './version-a.js';
 import * as versionB from './version-b.js';
 
-// The previous single-flow script is parked in _archive/legacy-flow/ and is
-// not registered — the preview offers A and B only. See that folder's README
-// for what bringing it back involves.
+// The preview offers A and B only. The previous single-flow script is no
+// longer in the repo — recover it from git history (the commit that removed
+// it explains what restoring it involves).
 export const SCRIPTS = {
   a: versionA,
   b: versionB,
