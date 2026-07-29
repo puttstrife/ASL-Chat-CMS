@@ -6,12 +6,13 @@
 
 import * as versionA from './version-a.js';
 import * as versionB from './version-b.js';
-import * as legacy from '../stages.js';
 
+// The previous single-flow script is still in ../stages.js but is not
+// registered — the preview offers A and B only. Re-add it here to bring it
+// back; nothing else has to change.
 export const SCRIPTS = {
   a: versionA,
   b: versionB,
-  legacy,
 };
 
 export const DEFAULT_SCRIPT = 'a';
