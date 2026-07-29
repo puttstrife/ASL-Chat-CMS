@@ -55,7 +55,6 @@ export const STAGES = {
       l('The eyes and the hair need the rest of my energy, and I need to give this sketch the time it deserves. Up to 24 hours.', 1),
       l('But I don’t want to stop here.', 1.5),
       l('Because there’s something about this one.', 1),
-      { image: IMG.finalLocked, locked: true },
       l('The eyes are piercing, {name}.', 1.5),
       l('It’s strange to say out loud, but it feels like they’re looking at me instead of me looking at them.', 1),
       l('Once you hold the sketch, you’ll know exactly what I mean.', 1),

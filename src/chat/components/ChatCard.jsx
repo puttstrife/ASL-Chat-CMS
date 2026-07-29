@@ -2,12 +2,22 @@ import { useEffect, useRef, useState } from 'react';
 import { FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
+import { Reactable } from './ReactionPicker.jsx';
 
 export function ChatCard({ funnel }) {
   const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance } = funnel;
   const scrollRef = useRef(null);
   const audioRef = useRef(null);
   const [muted, setMuted] = useState(false);
+  // What the visitor has reacted with, keyed by message id. Session-only,
+  // like everything else the funnel holds.
+  const [reactions, setReactions] = useState({});
+  const react = (id, emoji) =>
+    setReactions((r) => {
+      const next = { ...r };
+      if (emoji) next[id] = emoji; else delete next[id];
+      return next;
+    });
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -71,7 +81,9 @@ export function ChatCard({ funnel }) {
 
       {/* Messages */}
       <div ref={scrollRef} className="no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-3.5">
-        {messages.map((m) => <Message key={m.id} m={m} />)}
+        {messages.map((m) => (
+          <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={(e) => react(m.id, e)} />
+        ))}
       </div>
 
       {/* Dock */}
@@ -82,7 +94,7 @@ export function ChatCard({ funnel }) {
   );
 }
 
-function Message({ m }) {
+function Message({ m, reaction, onReact }) {
   if (m.who === 'typing') {
     return (
       <div className="flex max-w-max flex-col gap-1 self-start">
@@ -99,21 +111,24 @@ function Message({ m }) {
     // What she has read off the chart so far. The list grows between the
     // first sketch and the neck, so it reads as notes taken while working.
     return (
-      <div className="bubble-in w-fit max-w-[82%] self-start rounded-2xl rounded-tl-md border border-white/10 bg-white/8 px-4 py-3">
-        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-          {m.traits.map((t) => (
-            <li key={t} className="font-sans flex items-baseline gap-2 text-[.95rem] leading-snug text-white/85">
-              <span aria-hidden="true" className="text-[var(--gold)]">·</span>
-              {t}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Reactable reaction={reaction} onReact={onReact}>
+        <div className="bubble-in w-fit max-w-full rounded-2xl rounded-tl-md border border-white/10 bg-white/8 px-4 py-3">
+          <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+            {m.traits.map((t) => (
+              <li key={t} className="font-sans flex items-baseline gap-2 text-[.95rem] leading-snug text-white/85">
+                <span aria-hidden="true" className="text-[var(--gold)]">·</span>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Reactable>
     );
   }
   if (m.who === 'sketch') {
     return (
-      <figure className="bubble-in m-0 flex w-full max-w-[82%] flex-col gap-2 self-start">
+      <Reactable reaction={reaction} onReact={onReact} className="w-full max-w-[82%]">
+      <figure className="bubble-in m-0 flex w-full flex-col gap-2">
         {/* The finished portrait stays blurred until the full reading is unlocked. */}
         <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
           <img
@@ -134,11 +149,16 @@ function Message({ m }) {
           )}
         </div>
       </figure>
+      </Reactable>
     );
   }
   const sent = m.who === 'user';
-  return (
-    <Bubble variant={sent ? 'default' : 'muted'} align={sent ? 'end' : 'start'} className={m.reaction ? 'mb-3' : ''}>
+  const bubble = (
+    <Bubble
+      variant={sent ? 'default' : 'muted'}
+      align={sent ? 'end' : 'start'}
+      className={m.reaction ? 'mb-3' : ''}
+    >
       {/* Flat corner on the sender's side, mirroring the typing indicator. */}
       <BubbleContent className={sent ? 'rounded-tr-md' : 'rounded-tl-md'}>{m.text}</BubbleContent>
       {m.reaction && (
@@ -150,6 +170,14 @@ function Message({ m }) {
         </BubbleReactions>
       )}
     </Bubble>
+  );
+
+  // The visitor's own messages aren't reactable — you don't react to yourself.
+  if (sent) return bubble;
+  return (
+    <Reactable reaction={reaction} onReact={onReact}>
+      {bubble}
+    </Reactable>
   );
 }
 
@@ -249,7 +277,9 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const THIS_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 90 }, (_, i) => THIS_YEAR - 18 - i);
 const selectClass =
-  'font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] px-3 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
+  // Extra right padding keeps the chevron off the field's edge — the browser
+  // draws it inside the padding box, so px-3 alone crowds it.
+  'font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] pl-3 pr-4 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
 
 function DateRow({ cta = 'Continue', onSend }) {
   const [month, setMonth] = useState('');
