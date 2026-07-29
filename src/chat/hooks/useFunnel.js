@@ -59,10 +59,16 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   };
 
   // Reveal one Selene bubble: a beat of thought, then typing, then the bubble.
-  // A script may state the typing time it wants; otherwise the duration scales
-  // with message length and varies per line, so short replies land fast and
-  // long ones visibly take her a while — as a person would.
+  // Duration scales with message length and varies per line, so short replies
+  // land fast and long ones visibly take her a while — as a person would.
   const between = (min, max) => min + Math.random() * (max - min);
+
+  // Roughly a real person at a keyboard. Type-Simulator's "human" profile is
+  // 80ms ± 40 per character; a chat indicator can run a little under that
+  // without reading as a bot, but the 20-32ms this used to be was ~400wpm.
+  const MS_PER_CHAR = [45, 70];
+  const MIN_TYPING = 700;
+  const MAX_TYPING = 6500;
 
   const revealLine = async (text, { typing, label } = {}) => {
     const body = interpolate(text);
@@ -70,12 +76,13 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
     // She reads/considers before the indicator even appears.
     await sleep(between(240, 700));
 
-    // ~20-32ms per character, re-rolled each line, clamped so a very long
-    // message never stalls the funnel and a two-word one still registers.
-    const perChar = between(20, 32);
-    const duration = typing ?? Math.min(5400, Math.max(700, 380 + body.length * perChar));
+    // Re-rolled each line, clamped so a very long message never stalls the
+    // funnel and a two-word one still registers. A script may ask for longer
+    // — a deliberate pause — but never for less than the text would take.
+    const perChar = between(...MS_PER_CHAR);
+    const forLength = Math.min(MAX_TYPING, Math.max(MIN_TYPING, 300 + body.length * perChar));
 
-    await holdTyping(duration, label);
+    await holdTyping(Math.max(forLength, typing ?? 0), label);
     push({ who: 'selene', text: body });
     await sleep(between(220, 520));
   };
