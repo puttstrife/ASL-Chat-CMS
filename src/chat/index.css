@@ -81,3 +81,8 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
+
+/* Reaction picker — each emoji pops in just after the one before it, and the
+   chosen one lands on the bubble with a little overshoot. */
+@keyframes reactionPop { from { opacity:0; transform: translateY(10px) scale(.4);} to { opacity:1; transform:none;} }
+@keyframes reactionLand { from { opacity:0; transform: scale(.2);} to { opacity:1; transform: scale(1);} }

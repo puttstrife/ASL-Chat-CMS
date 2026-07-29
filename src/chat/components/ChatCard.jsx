@@ -80,7 +80,9 @@ export function ChatCard({ funnel }) {
       </header>
 
       {/* Messages */}
-      <div ref={scrollRef} className="no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-3.5">
+      {/* gap-4 rather than gap-2: a reaction badge hangs off the bottom of its
+          bubble and needs clearance from the next one. */}
+      <div ref={scrollRef} className="no-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
         {messages.map((m) => (
           <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={(e) => react(m.id, e)} />
         ))}
@@ -279,7 +281,7 @@ const YEARS = Array.from({ length: 90 }, (_, i) => THIS_YEAR - 18 - i);
 const selectClass =
   // Extra right padding keeps the chevron off the field's edge — the browser
   // draws it inside the padding box, so px-3 alone crowds it.
-  'font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] pl-3 pr-4 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
+  'font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] pl-3 pr-7 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
 
 function DateRow({ cta = 'Continue', onSend }) {
   const [month, setMonth] = useState('');
