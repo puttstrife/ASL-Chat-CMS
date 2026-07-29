@@ -50,7 +50,11 @@ export function ChatCard({ funnel }) {
   }, [muted]);
 
   return (
-    <section className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
+    // The column is pinned to minmax(0,1fr): grid items default to a minimum
+    // of their own content, so one wide row — a long line, or a reaction
+    // picker sitting beside a bubble — stretched the whole card past the
+    // screen, clipping the header and dock with it.
+    <section className="grid h-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
       {/* Header */}
       {/* Above the messages: reaction badges and pickers are positioned, and
           without this they paint over the avatar and the name. */}
