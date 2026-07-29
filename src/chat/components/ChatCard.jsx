@@ -309,9 +309,9 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const THIS_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 90 }, (_, i) => THIS_YEAR - 18 - i);
 const selectClass =
-  // Extra right padding keeps the chevron off the field's edge — the browser
-  // draws it inside the padding box, so px-3 alone crowds it.
-  'font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] pl-3 pr-7 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
+  // `select-chevron` swaps the native arrow for one that can actually be
+  // positioned; the right padding then keeps the text clear of it.
+  'select-chevron font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] pl-3 pr-8 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
 
 function DateRow({ cta = 'Continue', onSend }) {
   const [month, setMonth] = useState('');
