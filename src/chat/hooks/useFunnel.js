@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SCRIPTS, DEFAULT_SCRIPT } from '../scripts/index.js';
-import { getConfig } from '../lib/api.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -13,7 +12,6 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
 
   const [messages, setMessages] = useState([]); // {id, who, …}
   const [dock, setDock] = useState({ type: 'none' });
-  const [config, setConfig] = useState({ ttsEnabled: false, readingEnabled: false });
 
   const answers = useRef({});
   const idRef = useRef(0);
@@ -154,11 +152,8 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   useEffect(() => {
     if (bootedRef.current) return;
     bootedRef.current = true;
-    (async () => {
-      setConfig(await getConfig());
-      runStage(START_STAGE);
-    })();
+    runStage(START_STAGE);
   }, [runStage, START_STAGE]);
 
-  return { messages, dock, config, answers: answers.current, chooseButton, submitInput, submitDate, submitSelect, advance };
+  return { messages, dock, answers: answers.current, chooseButton, submitInput, submitDate, submitSelect, advance };
 }
