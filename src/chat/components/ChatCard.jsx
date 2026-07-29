@@ -3,6 +3,7 @@ import { FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 import { Reactable } from './ReactionPicker.jsx';
+import { useChatSfx } from '../hooks/useChatSfx.js';
 
 export function ChatCard({ funnel }) {
   const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance } = funnel;
@@ -19,6 +20,8 @@ export function ChatCard({ funnel }) {
       return next;
     });
 
+  useChatSfx(messages, muted);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -29,7 +32,9 @@ export function ChatCard({ funnel }) {
   useEffect(() => {
     const audio = new Audio('/audio/ambient.mp3');
     audio.loop = true;
-    audio.volume = 0.12; // ambient bed — sits well under the reading
+    // Well under the reading, and under the send/reply sounds that now sit on
+    // top of it — the bed should register as atmosphere, not as music.
+    audio.volume = 0.05;
     audioRef.current = audio;
 
     const start = () => audio.play().catch(() => {});
