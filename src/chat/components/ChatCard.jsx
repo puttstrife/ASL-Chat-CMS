@@ -127,7 +127,7 @@ function Message({ m, reaction, onReact }) {
   }
   if (m.who === 'sketch') {
     return (
-      <Reactable reaction={reaction} onReact={onReact} className="w-full max-w-[82%]">
+      <Reactable reaction={reaction} onReact={onReact} className="w-[82%]">
       <figure className="bubble-in m-0 flex w-full flex-col gap-2">
         {/* The finished portrait stays blurred until the full reading is unlocked. */}
         <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
