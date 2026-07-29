@@ -82,7 +82,7 @@ export function ChatCard({ funnel }) {
       {/* Messages */}
       {/* gap-4 rather than gap-2: a reaction badge hangs off the bottom of its
           bubble and needs clearance from the next one. */}
-      <div ref={scrollRef} className="no-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
+      <div ref={scrollRef} className="no-scrollbar no-callout flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
         {messages.map((m) => (
           <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={(e) => react(m.id, e)} />
         ))}

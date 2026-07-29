@@ -87,3 +87,12 @@ body {
 @keyframes reactionPop { from { opacity:0; transform: translateY(10px) scale(.4);} to { opacity:1; transform:none;} }
 @keyframes reactionLand { from { opacity:0; transform: scale(.2);} to { opacity:1; transform: scale(1);} }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+/* iOS treats a long-press on text as "select and offer Copy / Look Up", which
+   fires instead of the reaction picker. Messages are not meant to be selected
+   anyway — the dock's fields still are. */
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
