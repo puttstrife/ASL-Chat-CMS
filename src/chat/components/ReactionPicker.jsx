@@ -45,6 +45,7 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
   const [hovered, setHovered] = useState(false);
   const [left, setLeft] = useState(0);
   const [active, setActive] = useState(-1); // which one the finger is over
+  const [below, setBelow] = useState(false); // no room above; open downward
 
   const wrap = useRef(null);
   const inner = useRef(null);
@@ -58,12 +59,20 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
   // but never so far right that it runs off the card. Measured after it
   // renders, since its width depends on how many reactions there are.
   useLayoutEffect(() => {
-    if (!open || touchMode) return;
+    if (!open) return;
     const row = wrap.current?.getBoundingClientRect();
     const bubble = inner.current?.getBoundingClientRect();
     const box = picker.current?.getBoundingClientRect();
     if (!row || !bubble || !box) return;
-    setLeft(Math.min(bubble.width + 8, Math.max(0, row.width - box.width)));
+
+    if (touchMode) {
+      // Opening above the topmost message would put the picker under the
+      // header, so when there is no room up there it opens downward instead.
+      const scroller = wrap.current?.closest('.no-scrollbar')?.getBoundingClientRect();
+      setBelow(Boolean(scroller && bubble.top - scroller.top < box.height + 16));
+    } else {
+      setLeft(Math.min(bubble.width + 8, Math.max(0, row.width - box.width)));
+    }
   }, [open, touchMode]);
 
   useEffect(() => {
@@ -117,7 +126,9 @@ export function Reactable({ reaction, onReact, className = 'max-w-[82%]', childr
         animation: 'bubbleIn .16s cubic-bezier(.2,.7,.3,1)',
       }}
       className={`absolute z-50 flex items-center gap-0 rounded-full border border-white/10 bg-[#1c1d26] px-1 py-1 shadow-[0_8px_28px_rgba(0,0,0,0.55)] ${
-        touchMode ? 'bottom-full left-0 mb-3' : 'top-1/2 -translate-y-1/2'
+        touchMode
+          ? `left-0 ${below ? 'top-full mt-3' : 'bottom-full mb-3'}`
+          : 'top-1/2 -translate-y-1/2'
       }`}
     >
       {REACTIONS.map(({ emoji, name }, i) => (
