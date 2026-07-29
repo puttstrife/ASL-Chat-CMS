@@ -2,10 +2,10 @@ import { useEffect, useRef } from 'react';
 
 // Messenger-style badge on the browser tab.
 //
-// The reading keeps playing while the visitor is in another tab. While they
-// are away the badge shows how many messages Selene has sent — the whole
-// conversation, not only what arrived after they left, so the number matches
-// what they will find waiting when they come back. Returning clears it.
+// It counts what Selene has said since the visitor last did anything — typed
+// their name, picked an answer, tapped continue. Every interaction resets it
+// to zero, and it climbs again as she replies, so the number is always "how
+// many messages she has sent me since I last spoke".
 
 const BASE_TITLE = 'Selene — Chat';
 const AVATAR = '/images/chat/selene-avatar.png';
@@ -69,42 +69,26 @@ function drawFavicon(avatar, count) {
 }
 
 export function useTabBadge(messages) {
-  const cleared = useRef(false);
-  const total = useRef(0);
   const avatar = useRef(null);
+  const count = useRef(0);
 
-  // The badge is dormant while they are reading, and stays cleared once they
-  // are back — it should never count at someone already looking at the page.
-  const paint = useRef(null);
-  paint.current = () => {
-    const count = document.hidden && !cleared.current ? total.current : 0;
-    document.title = count > 0 ? `(${count}) ${BASE_TITLE}` : BASE_TITLE;
-    drawFavicon(avatar.current, count);
-  };
+  // Everything after the visitor's most recent message is Selene answering
+  // it. Before they have said anything at all, that is the whole opening.
+  // The typing indicator is not a message and never counts.
+  const lastUserIndex = messages.map((m) => m.who).lastIndexOf('user');
+  count.current = messages
+    .slice(lastUserIndex + 1)
+    .filter((m) => m.who !== 'typing').length;
 
-  // Load the avatar once; the favicon redraws from it on every change.
   useEffect(() => {
     const img = new Image();
     img.src = AVATAR;
-    img.onload = () => { avatar.current = img; paint.current(); };
-    drawFavicon(null, 0);
+    img.onload = () => { avatar.current = img; drawFavicon(img, count.current); };
+    drawFavicon(null, count.current);
   }, []);
 
   useEffect(() => {
-    // Only what Selene produces counts — the visitor's own replies and the
-    // typing indicator are not messages waiting for them.
-    total.current = messages.filter((m) => m.who !== 'user' && m.who !== 'typing').length;
-    paint.current();
+    document.title = count.current > 0 ? `(${count.current}) ${BASE_TITLE}` : BASE_TITLE;
+    drawFavicon(avatar.current, count.current);
   }, [messages]);
-
-  useEffect(() => {
-    // Leaving paints immediately — waiting for the next message would leave
-    // the tab bare during a pause. Returning clears it.
-    const onVisibilityChange = () => {
-      cleared.current = !document.hidden;
-      paint.current();
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, []);
 }
