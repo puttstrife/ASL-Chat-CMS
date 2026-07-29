@@ -166,8 +166,19 @@ function Message({ m, reaction, onReact }) {
       // was breaking words down the middle.
       className={`${m.reaction ? 'mb-3' : ''} ${sent ? '' : 'max-w-none'}`}
     >
-      {/* Flat corner on the sender's side, mirroring the typing indicator. */}
-      <BubbleContent className={sent ? 'rounded-tr-md' : 'rounded-tl-md'}>{m.text}</BubbleContent>
+      {/* Flat corner on the sender's side, mirroring the typing indicator.
+          Selene's are glass — translucent over the field, a hairline edge, and
+          a highlight along the top so they catch light rather than sit flat. */}
+      <BubbleContent
+        className={sent ? 'rounded-tr-md' : 'rounded-tl-md backdrop-blur-xl'}
+        style={sent ? undefined : {
+          background: 'linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.045))',
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.28)',
+        }}
+      >
+        {m.text}
+      </BubbleContent>
       {m.reaction && (
         <BubbleReactions
           className="size-7 p-0 border border-white/10 bg-[#161720] text-[.75rem] leading-none ring-0"
