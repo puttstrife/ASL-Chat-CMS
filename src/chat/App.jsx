@@ -37,7 +37,7 @@ function Starfield() {
 export default function App() {
   const scriptKey = useMemo(resolveScriptKey, []);
   const funnel = useFunnel(scriptKey);
-  useTabBadge(funnel.messages);
+  const unread = useTabBadge(funnel.messages);
   return (
     <>
       {/* ambient */}
@@ -53,7 +53,7 @@ export default function App() {
           // reads as a heavier left edge.
           className="h-dvh w-full max-w-[600px] rounded-none p-0 sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px] sm:p-px"
         >
-          <ChatCard funnel={funnel} />
+          <ChatCard funnel={funnel} unread={unread} />
         </AIGradientBorder>
       </main>
     </>

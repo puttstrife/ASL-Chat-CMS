@@ -91,4 +91,8 @@ export function useTabBadge(messages) {
     document.title = count.current > 0 ? `(${count.current}) ${BASE_TITLE}` : BASE_TITLE;
     drawFavicon(avatar.current, count.current);
   }, [messages]);
+
+  // Phone browsers hide the tab strip, so the favicon badge is invisible
+  // there. The header avatar carries the same count instead.
+  return count.current;
 }

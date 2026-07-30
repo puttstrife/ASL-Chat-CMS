@@ -5,7 +5,7 @@ import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 import { Reactable } from './ReactionPicker.jsx';
 import { useChatSfx } from '../hooks/useChatSfx.js';
 
-export function ChatCard({ funnel }) {
+export function ChatCard({ funnel, unread = 0 }) {
   const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance } = funnel;
   const scrollRef = useRef(null);
   const audioRef = useRef(null);
@@ -68,13 +68,26 @@ export function ChatCard({ funnel }) {
       {/* Above the messages: reaction badges and pickers are positioned, and
           without this they paint over the avatar and the name. */}
       <header className="relative z-20 flex items-center gap-3 rounded-b-3xl bg-[#1a043d] px-3 py-2.5">
-        <img
-          src="/images/chat/selene-avatar.png"
-          alt="Selene"
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/chat/sabrina-avatar.png'; }}
-          className="size-12 shrink-0 rounded-full object-cover shadow-[0_0_16px_rgba(190,108,255,0.5)]"
-          style={{ objectPosition: 'center 18%' }}
-        />
+        {/* The favicon carries this count too, but phone browsers hide the tab
+            strip — so on a phone the avatar is the only place it can show. */}
+        <div className="relative shrink-0">
+          <img
+            src="/images/chat/selene-avatar.png"
+            alt="Selene"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/chat/sabrina-avatar.png'; }}
+            className="size-12 rounded-full object-cover shadow-[0_0_16px_rgba(190,108,255,0.5)]"
+            style={{ objectPosition: 'center 18%' }}
+          />
+          {unread > 0 && (
+            <span
+              aria-label={`${unread} new messages`}
+              className="absolute -right-1 -top-1 grid min-w-5 place-items-center rounded-full bg-[#f0334b] px-1.5 text-[.7rem] font-bold leading-5 text-white ring-2 ring-[#1a043d] sm:hidden"
+              style={{ animation: 'reactionLand .3s cubic-bezier(.2,1.5,.4,1)' }}
+            >
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
+        </div>
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="font-sans text-xl font-semibold leading-tight text-[var(--gold)]">Selene</p>
           <p className="font-sans inline-flex items-center gap-1.5 text-[.7rem] text-white/55">
