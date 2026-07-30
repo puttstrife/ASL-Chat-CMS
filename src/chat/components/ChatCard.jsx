@@ -20,7 +20,11 @@ export function ChatCard({ funnel }) {
       return next;
     });
 
-  useChatSfx(messages, muted);
+  const playSend = useChatSfx(messages, muted);
+
+  // Every control the visitor can act on sounds, including the ones that
+  // produce no message: Continue, and picking a reaction.
+  const withSound = (fn) => (...args) => { playSend(); return fn(...args); };
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -97,13 +101,20 @@ export function ChatCard({ funnel }) {
           or picker can never climb above the header or the dock. */}
       <div ref={scrollRef} className="no-scrollbar no-callout isolate flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
         {messages.map((m) => (
-          <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={(e) => react(m.id, e)} />
+          <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={withSound((e) => react(m.id, e))} />
         ))}
       </div>
 
       {/* Dock */}
       <div className="shrink-0 border-t border-white/8 bg-[#0c0d14]/96 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
-        <Dock dock={dock} onButton={chooseButton} onSubmit={submitInput} onDate={submitDate} onSelect={submitSelect} onContinue={advance} />
+        <Dock
+          dock={dock}
+          onButton={withSound(chooseButton)}
+          onSubmit={withSound(submitInput)}
+          onDate={withSound(submitDate)}
+          onSelect={withSound(submitSelect)}
+          onContinue={withSound(advance)}
+        />
       </div>
     </section>
   );
@@ -240,8 +251,10 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
             </button>
           )
         )}
+        {/* Stacked rows, not an inline list: these are the deliverables and
+            the delivery promise, and they read as two statements. */}
         {dock.trust && (
-          <ul className="font-sans m-0 flex list-none flex-wrap items-center justify-center gap-x-3 gap-y-1 p-0 pt-1 text-[.62rem] text-white/45">
+          <ul className="font-sans m-0 flex list-none flex-col items-center gap-0.5 p-0 pt-1.5 text-center text-[.68rem] leading-snug text-white/45">
             {dock.trust.map((t) => <li key={t}>{t}</li>)}
           </ul>
         )}

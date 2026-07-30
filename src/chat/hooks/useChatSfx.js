@@ -1,12 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { BUTTON_CLICK_SOUND, CHAT_ACTION_REVEAL_SOUND } from '../lib/sfx.js';
 
 // Two sounds, following the pattern the Marisol build used: an Audio object
 // held in a ref rather than constructed per play, and `currentTime` reset
 // before each one so rapid repeats retrigger instead of being ignored.
 //
-//   send   — the visitor acts: a name, a date, a tapped answer
+//   send   — the visitor acts
 //   reply  — a message from Selene lands
+//
+// `send` is driven by the action, not by a message appearing. Continue is a
+// real interaction that produces no message of its own, so keying off the
+// transcript left the most-pressed control in the funnel silent.
 //
 // Both follow the header's mute toggle, which until now only governed the
 // ambient bed.
@@ -39,19 +43,25 @@ export function useChatSfx(messages, muted) {
     [send.current, reply.current].forEach((a) => { if (a) a.muted = muted; });
   }, [muted]);
 
-  useEffect(() => {
-    // The typing indicator is a message in the list but not an event worth
-    // hearing, so it is skipped — otherwise every line would sound twice.
-    const real = messages.filter((m) => m.who !== 'typing');
-    const added = real.length - seen.current;
-    seen.current = real.length;
-    if (added <= 0) return;
-
-    const last = real[real.length - 1];
-    const audio = last.who === 'user' ? send.current : reply.current;
+  const ping = (ref) => {
+    const audio = ref.current;
     if (!audio) return;
     audio.pause();
     audio.currentTime = 0;
     audio.play().catch(() => {});
+  };
+
+  const playSend = useCallback(() => ping(send), []);
+
+  useEffect(() => {
+    // Only Selene's messages ring. The typing indicator is in the list but is
+    // not an event worth hearing, and the visitor's own lines already sounded
+    // when they acted.
+    const heard = messages.filter((m) => m.who !== 'typing' && m.who !== 'user');
+    const added = heard.length - seen.current;
+    seen.current = heard.length;
+    if (added > 0) ping(reply);
   }, [messages]);
+
+  return playSend;
 }

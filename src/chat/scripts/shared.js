@@ -9,32 +9,35 @@
 export const l = (line, typing) => ({ line, typing: typing * 1000 });
 export const drawing = (seconds, label = 'Selene is drawing') => ({ wait: seconds * 1000, label });
 
+// The portrait sets. `{gender}` is filled in at runtime from the Stage 3
+// answer; the place is not a portrait — it is where the meeting happens — so
+// one image serves both.
 export const IMG = {
-  silhouette: '/images/sketch-v2/1-silhouette.webp',
-  outline: '/images/sketch-v2/2-outline.webp',
+  silhouette: '/images/sketch-v2/{gender}/1-silhouette.webp',
+  outline: '/images/sketch-v2/{gender}/2-outline.webp',
   place: '/images/sketch-v2/3-place.webp',
-  neck: '/images/sketch-v2/4-neck.webp',
-  finalLocked: '/images/sketch-v2/5-final-locked.webp',
+  neck: '/images/sketch-v2/{gender}/4-neck.webp',
+  finalLocked: '/images/sketch-v2/{gender}/5-final-locked.webp',
 };
 
 // The traits Selene reads off the chart. She shares a first pass at stage 5
 // and adds to it at the neck stage, so the list visibly grows as she works.
 //
-// NOTE: placeholder copy — the source doc labels this list an example and
-// gives none at all for the second appearance. Needs a real pass.
+// Final copy, not the doc's example. Fixed for now; deriving them from the
+// birth date can come later.
 export const TRAITS_FIRST = [
   'Hazel eyes',
   'Olive skin',
   'Calm, deliberate voice',
-  'Notices details',
-  'Guarded until safe',
+  'Notices small things',
+  'Guarded until they trust you',
 ];
 
 export const TRAITS_SECOND = [
   ...TRAITS_FIRST,
-  'Slow to laugh — means it when they do',
-  'Remembers what you said months ago',
-  'Steadier than they first appear',
+  'Dry sense of humor',
+  'Remembers what you say',
+  'Steady under pressure',
 ];
 
 export const START_STAGE = '1';
@@ -71,7 +74,7 @@ export const SHARED_STAGES = {
     datePicker: { key: 'dob', next: '3', cta: 'Continue' },
   },
 
-  // 3 — The first reading
+  // 3 — The first reading, up to the point where two candidates appear
   '3': {
     beats: [
       { wait: 3000, label: 'Selene is opening your chart' },
@@ -80,6 +83,32 @@ export const SHARED_STAGES = {
       l('Oh.', 2),
       l('This is strange. Two came up.', 1.5),
       l('That almost never happens.', 1.5),
+      l('Before I triangulate, I need you to settle something for me.', 1.5),
+      l('The chart shows me the pull. It doesn’t show me the form it takes.', 1),
+      l('Tell me, {name}... who does your heart look for?', 1),
+    ],
+    // Answering this is what narrows two candidates to one — it resolves the
+    // "two came up" thread as well as choosing the portrait set.
+    buttons: [
+      { label: 'A man', next: '3-settled', preference: 'man' },
+      { label: 'A woman', next: '3-settled', preference: 'woman' },
+      { label: 'I’m open to either', next: '3-either', preference: 'either' },
+    ],
+  },
+
+  '3-settled': {
+    beats: [l('That settles it. The chart just sharpened.', 1)],
+    next: '3b',
+  },
+
+  '3-either': {
+    beats: [l('Then I’ll let the chart decide. It always knows before we do.', 1)],
+    next: '3b',
+  },
+
+  // 3b — the reading resumes exactly where the doc had it
+  '3b': {
+    beats: [
       l('Let me triangulate a bit more. I’m going to narrow it down, I promise.', 1),
       l('But one thing is already certain. Both of them share the same aura.', 1.5),
       l('It’s a quiet kind of presence. The type that doesn’t fill a room with noise.', 1),
@@ -184,11 +213,12 @@ export const SHARED_STAGES = {
   // the CTA, or it tells people they have bought something they have not.
   confirmed: {
     beats: [
-      l('Thank you, {name}. 🖤', 1.5),
-      l('I’m picking the pencil back up now.', 1),
-      l('The eyes first. Then the hair, if I have anything left in me.', 1.5),
-      l('Everything I promised you will be in your inbox the moment it’s finished. Within 24 hours.', 1.5),
-      l('Go and live your day. I’ll be here with them until it’s done.', 1.5),
+      l('{name}... thank you. 🖤', 2),
+      l('I’m picking the pencil back up right now.', 1),
+      l('The eyes come first. Then the hair. Then everything I’ve been holding back.', 1.5),
+      l('Your full sketch will be in your inbox within 24 hours. Watch for it.', 1),
+      l('And {name}... when you open it, look at the eyes first.', 1.5),
+      l('You’ll understand why I couldn’t stop.', 1),
     ],
   },
 };

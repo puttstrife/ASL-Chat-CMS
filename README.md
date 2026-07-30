@@ -132,6 +132,35 @@ starts on the first pointer or key event.
 
 ---
 
+## Open: "I'm open to either"
+
+Stage 3 asks who the visitor's heart looks for — a man, a woman, or either. The first two
+pick the portrait set directly. **"Either" currently picks by hashing the visitor's name and
+birth date**: arbitrary, but stable, so the same visitor always gets the same face rather
+than a different one on every reload.
+
+The brief asks for something better — infer the visitor's gender from their first name, and
+fall back to the hash. That is not built, and it is **not a frontend job**:
+
+- A usable name→gender dataset is tens of thousands of entries. It does not belong in the
+  bundle.
+- The alternative is an API (Genderize.io, NamSor). Those need a key, and a key cannot live
+  in client-side code.
+- Coverage fails regardless — on shortened names, on names used across genders, and on most
+  non-Anglo names. Including *Marisol* and *Elena*, both of which appear in the source
+  script. The hash fallback has to exist either way.
+
+So it needs a server: look the name up, return a gender, fall back to the hash on a miss.
+The frontend contract is already in place — whatever decides this only has to set the same
+value the two explicit answers set.
+
+Worth weighing before building it at all: the inference assumes the visitor wants the
+opposite gender to their own. That is a guess about their orientation, and the people most
+likely to be wronged by it are exactly the ones who chose "either" rather than answering.
+The hash makes no such claim.
+
+---
+
 ## Known limitations
 
 1. **The paywall is cosmetic.** The CTA takes no payment and unlocks nothing. Worse, it

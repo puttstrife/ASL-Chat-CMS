@@ -24,6 +24,18 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
     []
   );
 
+  // Which portrait set the sketches come from. "I'm open to either" is decided
+  // once, here, rather than per render — a face that changed halfway through
+  // the reading would undo the whole thing.
+  const gender = useCallback(() => {
+    const answer = answers.current.preference;
+    if (answer === 'man' || answer === 'woman') return answer;
+    if (!answers.current.resolvedGender) {
+      answers.current.resolvedGender = Math.random() < 0.5 ? 'man' : 'woman';
+    }
+    return answers.current.resolvedGender;
+  }, []);
+
   const nextId = () => ++idRef.current;
   const push = (msg) => { const id = nextId(); setMessages((m) => [...m, { id, ...msg }]); return id; };
   const remove = (id) => setMessages((m) => m.filter((x) => x.id !== id));
@@ -98,7 +110,8 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
       else if (beat.line !== undefined) await revealLine(beat.line, beat);
       else if (beat.wait !== undefined) await holdTyping(beat.wait, beat.label);
       else if (beat.image) {
-        push({ who: 'sketch', src: beat.image, complete: Boolean(beat.locked), locked: Boolean(beat.locked) });
+        const src = beat.image.replace('{gender}', gender());
+        push({ who: 'sketch', src, complete: Boolean(beat.locked), locked: Boolean(beat.locked) });
         await sleep(700);
       }
       else if (beat.traits) {
@@ -115,13 +128,15 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
     else setDock({ type: 'none' });
 
     runningRef.current = false;
-  }, [STAGES]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [STAGES, gender]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers ──
   // A button that leads nowhere is a dead end, so don't echo the tap — an
   // unanswered message from the visitor reads as the app having broken.
   const chooseButton = (b) => {
     if (!b.next) return;
+    // A button may also record an answer — the gender question does.
+    if (b.preference) answers.current.preference = b.preference;
     const id = push({ who: 'user', text: b.label });
     scheduleReaction(id, b.label);
     runStage(b.next);

@@ -28,7 +28,10 @@ export const STAGES = {
     beats: [
       drawing(3.5),
       { image: IMG.place },
-      l('This is what came through.', 1),
+      // The place sketch is meant to look unfinished — she dashed it off before
+      // losing the impression. This line is what makes that read as urgency
+      // rather than as a mistake.
+      l('It’s rough, I know. But this is what came through.', 1),
       l('Open air. Trees. Water nearby, or something like it.', 1),
       l('It feels ordinary. The kind of place you’d walk past without thinking.', 1),
       l('{name}, is there a place like this near you? A park, a lake, somewhere green close to where you live?', 1),
@@ -107,9 +110,7 @@ export const STAGES = {
       l('I’ve already come this far with them.', 1),
       l('Don’t make me put the pencil down. 🖤', 1),
     ],
-    // PLACEHOLDER price — deliberately not a real number, so it cannot ship
-    // by accident. Swap once the offer is priced.
-    buttons: [{ label: 'Unlock My Full Sketch — $XX', next: 'confirmed', variant: 'gold', arrow: true }],
-    trust: ['Full face · personality profile · meeting place · delivered in 24 hours'],
+    buttons: [{ label: 'Unlock My Full Sketch', next: 'confirmed', variant: 'gold', arrow: true }],
+    trust: ['Full face · Personality Profile · Meeting place', 'Delivered in 24 hours'],
   },
 };
