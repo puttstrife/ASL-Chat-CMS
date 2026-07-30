@@ -73,14 +73,14 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   const between = (min, max) => min + Math.random() * (max - min);
 
   // Selene is a middle-aged artist, not a typist, and the audience skews older
-  // too. 260-340ms per character is 35-46wpm — an ordinary adult at a keyboard,
-  // which is who she is meant to be.
+  // too. 235-300ms per character is 40-51wpm, averaging 45 — an ordinary adult
+  // at a keyboard, which is who she is meant to be.
   //
   // The ceiling is high on purpose. Capping it low made the longest messages
   // proportionally the fastest, which is backwards: those are the ones that
   // should visibly take her a while. Long lines in the script are split at
   // their own punctuation instead, so no single message sits for half a minute.
-  const MS_PER_CHAR = [260, 340];
+  const MS_PER_CHAR = [235, 300];
   const MIN_TYPING = 900;
   const MAX_TYPING = 26000;
 

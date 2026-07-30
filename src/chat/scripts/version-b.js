@@ -16,7 +16,8 @@ export const STAGES = {
     beats: [
       l('Okay.', 1.5),
       l('Before I use the last of my energy on the hardest part, I need one more thing from you.', 1),
-      l('The sketch takes me up to 24 hours to finish properly, and I refuse to let this one get lost.', 1),
+      l('The sketch takes me up to 24 hours to finish properly,', 1),
+      l('and I refuse to let this one get lost.', 1),
       l('Where should I send it when it’s done?', 1),
     ],
     input: {
@@ -58,7 +59,8 @@ export const STAGES = {
       l('But I don’t want to stop here.', 1.5),
       l('Because there’s something about this one.', 1),
       l('The eyes are piercing, {name}.', 1.5),
-      l('It’s strange to say out loud, but it feels like they’re looking at me instead of me looking at them.', 1),
+      l('It’s strange to say out loud,', 1),
+      l('but it feels like they’re looking at me instead of me looking at them.', 1),
       l('Once you hold the sketch, you’ll know exactly what I mean.', 1),
       l('If you want me to finish, just unlock the sketch below.', 1.5),
       l('Within 24 hours you’ll have the full face,', 1),

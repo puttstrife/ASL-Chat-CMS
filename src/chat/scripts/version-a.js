@@ -18,7 +18,8 @@ export const STAGES = {
       l('Wait.', 2),
       l('I’m sorry. Something just interrupted me.', 1),
       l('While I was working on the jawline, a place kept pushing into my head.', 1.5),
-      l('This happens sometimes when the meeting is close. The where arrives before the face is even finished.', 1),
+      l('This happens sometimes when the meeting is close.', 1),
+      l('The where arrives before the face is even finished.', 1),
       l('Is it okay if I draw it quickly before I lose it?', 1),
     ],
     buttons: [{ label: 'Draw it', next: '6-place' }],
@@ -34,7 +35,8 @@ export const STAGES = {
       l('It’s rough, I know. But this is what came through.', 1),
       l('Open air. Trees. Water nearby, or something like it.', 1),
       l('It feels ordinary. The kind of place you’d walk past without thinking.', 1),
-      l('{name}, is there a place like this near you? A park, a lake, somewhere green close to where you live?', 1),
+      l('{name}, is there a place like this near you?', 1),
+      l('A park, a lake, somewhere green close to where you live?', 1),
     ],
     buttons: [
       { label: 'Yes, actually', next: '6-yes' },
@@ -45,7 +47,8 @@ export const STAGES = {
   '6-yes': {
     beats: [
       l('Then hold onto that.', 1),
-      l('I’ll mark the location properly in your full reading, the exact place your love line points to.', 1),
+      l('I’ll mark the location properly in your full reading,', 1),
+      l('the exact place your love line points to.', 1),
     ],
     next: '7',
   },
@@ -64,7 +67,8 @@ export const STAGES = {
     beats: [
       l('Okay. Back to the face.', 1.5),
       l('Before I use the last of my energy on the hardest part, I need one more thing from you.', 1),
-      l('The sketch takes me up to 24 hours to finish properly, and I refuse to let this one get lost.', 1),
+      l('The sketch takes me up to 24 hours to finish properly,', 1),
+      l('and I refuse to let this one get lost.', 1),
       l('Where should I send it when it’s done?', 1),
     ],
     input: {
@@ -106,7 +110,8 @@ export const STAGES = {
       l('But I don’t want to stop here.', 1.5),
       l('Because there’s something about this one.', 1),
       l('The eyes are piercing, {name}.', 1.5),
-      l('It’s strange to say out loud, but it feels like they’re looking at me instead of me looking at them.', 1),
+      l('It’s strange to say out loud,', 1),
+      l('but it feels like they’re looking at me instead of me looking at them.', 1),
       l('Once you hold the sketch, you’ll know exactly what I mean.', 1),
       l('If you want me to finish, just unlock the sketch below.', 1.5),
       l('Within 24 hours you’ll have the full face,', 1),
