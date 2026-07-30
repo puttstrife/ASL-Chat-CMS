@@ -81,7 +81,7 @@ export function ChatCard({ funnel, unread = 0 }) {
           {unread > 0 && (
             <span
               aria-label={`${unread} new messages`}
-              className="absolute -right-1 -top-1 grid min-w-5 place-items-center rounded-full bg-[#f0334b] px-1.5 text-[.7rem] font-bold leading-5 text-white ring-2 ring-[#1a043d] sm:hidden"
+              className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-[#f0334b] px-1 text-[.55rem] font-bold leading-4 text-white ring-2 ring-[#1a043d] sm:hidden"
               style={{ animation: 'reactionLand .3s cubic-bezier(.2,1.5,.4,1)' }}
             >
               {unread > 9 ? '9+' : unread}
