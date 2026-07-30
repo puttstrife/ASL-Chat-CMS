@@ -72,12 +72,16 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   // land fast and long ones visibly take her a while — as a person would.
   const between = (min, max) => min + Math.random() * (max - min);
 
-  // Roughly a real person at a keyboard. Type-Simulator's "human" profile is
-  // 80ms ± 40 per character; a chat indicator can run a little under that
-  // without reading as a bot, but the 20-32ms this used to be was ~400wpm.
-  const MS_PER_CHAR = [45, 70];
-  const MIN_TYPING = 700;
-  const MAX_TYPING = 6500;
+  // A real person at a keyboard, which is the whole point of this screen.
+  // 105-145ms per character is 70-95wpm — a strong typist, at the top of what
+  // people actually manage rather than above it.
+  //
+  // The ceiling is high on purpose. Capping it low made the longest messages
+  // proportionally the fastest, which is backwards: those are the ones that
+  // should visibly take her a while.
+  const MS_PER_CHAR = [105, 145];
+  const MIN_TYPING = 900;
+  const MAX_TYPING = 15000;
 
   const revealLine = async (text, { typing, label } = {}) => {
     const body = interpolate(text);

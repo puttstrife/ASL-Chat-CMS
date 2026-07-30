@@ -104,9 +104,18 @@ A stage may also carry `trust: [...]`, rendered as the reassurance row beneath t
 
 ### Typing pacing
 
-`revealLine` simulates a person at a keyboard: a short pause to consider, then a typing
-indicator held for 45–70 ms per character — re-rolled per line, so the same message is
-never timed twice the same way — clamped to 0.7–6.5 s.
+The goal on this screen is to be indistinguishable from a person typing, so the pacing is
+set to what a person can actually do rather than to what reads fastest.
+
+`revealLine` holds the typing indicator for 105–145 ms per character — 70–95 wpm, a strong
+typist at the top of the human range — re-rolled per line, so the same message is never
+timed twice the same way. Clamped to 0.9–15 s.
+
+The ceiling is deliberately high. A low cap made the longest messages proportionally the
+quickest, which is backwards: those are the ones that should visibly take a while.
+
+This puts a full reading at roughly 13–15 minutes. That is the cost of the goal — a faster
+rate finishes sooner but types at a speed no one manages.
 
 A beat may ask for a specific duration (`l('Wait.', 2)`). That acts as a **floor**, not a
 replacement: a script can hold a deliberate pause, but never make a long message flash by
