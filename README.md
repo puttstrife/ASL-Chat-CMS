@@ -107,15 +107,16 @@ A stage may also carry `trust: [...]`, rendered as the reassurance row beneath t
 The goal on this screen is to be indistinguishable from a person typing, so the pacing is
 set to what a person can actually do rather than to what reads fastest.
 
-`revealLine` holds the typing indicator for 105–145 ms per character — 70–95 wpm, a strong
-typist at the top of the human range — re-rolled per line, so the same message is never
-timed twice the same way. Clamped to 0.9–15 s.
+`revealLine` holds the typing indicator for 260–340 ms per character — 35–46 wpm, an
+ordinary adult at a keyboard, which is who Selene is meant to be. Re-rolled per line, so
+the same message is never timed twice the same way. Clamped to 0.9–26 s.
 
 The ceiling is deliberately high. A low cap made the longest messages proportionally the
-quickest, which is backwards: those are the ones that should visibly take a while.
+quickest, which is backwards: those are the ones that should visibly take a while. Long
+lines are split at their own punctuation in the script instead, so no single message sits
+for half a minute.
 
-This puts a full reading at roughly 13–15 minutes. That is the cost of the goal — a faster
-rate finishes sooner but types at a speed no one manages.
+This puts a session at roughly 25–28 minutes. That is the cost of the goal.
 
 A beat may ask for a specific duration (`l('Wait.', 2)`). That acts as a **floor**, not a
 replacement: a script can hold a deliberate pause, but never make a long message flash by

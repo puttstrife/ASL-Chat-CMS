@@ -72,16 +72,17 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   // land fast and long ones visibly take her a while — as a person would.
   const between = (min, max) => min + Math.random() * (max - min);
 
-  // A real person at a keyboard, which is the whole point of this screen.
-  // 105-145ms per character is 70-95wpm — a strong typist, at the top of what
-  // people actually manage rather than above it.
+  // Selene is a middle-aged artist, not a typist, and the audience skews older
+  // too. 260-340ms per character is 35-46wpm — an ordinary adult at a keyboard,
+  // which is who she is meant to be.
   //
   // The ceiling is high on purpose. Capping it low made the longest messages
   // proportionally the fastest, which is backwards: those are the ones that
-  // should visibly take her a while.
-  const MS_PER_CHAR = [105, 145];
+  // should visibly take her a while. Long lines in the script are split at
+  // their own punctuation instead, so no single message sits for half a minute.
+  const MS_PER_CHAR = [260, 340];
   const MIN_TYPING = 900;
-  const MAX_TYPING = 15000;
+  const MAX_TYPING = 26000;
 
   const revealLine = async (text, { typing, label } = {}) => {
     const body = interpolate(text);
