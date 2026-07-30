@@ -107,8 +107,8 @@ A stage may also carry `trust: [...]`, rendered as the reassurance row beneath t
 The goal on this screen is to be indistinguishable from a person typing, so the pacing is
 set to what a person can actually do rather than to what reads fastest.
 
-`revealLine` holds the typing indicator for 235–300 ms per character — 40–51 wpm,
-averaging 45: an ordinary adult at a keyboard, which is who Selene is meant to be.
+`revealLine` holds the typing indicator for 210–270 ms per character — 44–57 wpm,
+averaging 50: an ordinary adult at a keyboard, which is who Selene is meant to be.
 Re-rolled per line, so the same message is never timed twice the same way. Clamped to
 0.9–26 s.
 
@@ -117,7 +117,7 @@ quickest, which is backwards: those are the ones that should visibly take a whil
 lines are split at their own punctuation in the script instead, so no single message sits
 for half a minute.
 
-This puts a session at roughly 23–26 minutes. That is the cost of the goal.
+This puts a session at roughly 21–24 minutes. That is the cost of the goal.
 
 A beat may ask for a specific duration (`l('Wait.', 2)`). That acts as a **floor**, not a
 replacement: a script can hold a deliberate pause, but never make a long message flash by

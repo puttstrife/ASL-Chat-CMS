@@ -43,15 +43,41 @@ export function useChatSfx(messages, muted) {
     [send.current, reply.current].forEach((a) => { if (a) a.muted = muted; });
   }, [muted]);
 
-  const ping = (ref) => {
-    const audio = ref.current;
-    if (!audio) return;
-    audio.pause();
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
+  // Browsers refuse to play anything until the page has been interacted with,
+  // and the opening runs for a dozen messages before the visitor touches
+  // anything — so the first sound after they finally do would otherwise be the
+  // one that gets rejected. Playing each clip silently on that first gesture
+  // unlocks them, so everything from then on is reliable.
+  useEffect(() => {
+    const unlock = () => {
+      [send.current, reply.current].forEach((a) => {
+        if (!a) return;
+        const clip = a.cloneNode();
+        clip.volume = 0;
+        clip.play().catch(() => {});
+      });
+    };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, []);
+
+  // Play a clone rather than rewinding the original. Calling pause() on an
+  // element whose play() is still resolving makes the browser abort the new
+  // one, which dropped the sound at random whenever two messages landed close
+  // together. Clones can overlap, so every message keeps its own.
+  const ping = (ref, volume) => {
+    const source = ref.current;
+    if (!source || source.muted) return;
+    const clip = source.cloneNode();
+    clip.volume = volume;
+    clip.play().catch(() => {});
   };
 
-  const playSend = useCallback(() => ping(send), []);
+  const playSend = useCallback(() => ping(send, 0.5), []);
 
   useEffect(() => {
     // Only Selene's messages ring. The typing indicator is in the list but is
@@ -60,7 +86,7 @@ export function useChatSfx(messages, muted) {
     const heard = messages.filter((m) => m.who !== 'typing' && m.who !== 'user');
     const added = heard.length - seen.current;
     seen.current = heard.length;
-    if (added > 0) ping(reply);
+    if (added > 0) ping(reply, 0.32);
   }, [messages]);
 
   return playSend;
