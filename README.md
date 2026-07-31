@@ -52,15 +52,22 @@ A static single-page React frontend. Everything is driven client-side by a scrip
 machine — no network calls, nothing to deploy but `dist/`.
 
 ```
-index.html                     → src/chat/main.jsx → App.jsx
-src/chat/scripts/shared.js       stages 1–5, identical in both versions
-src/chat/scripts/version-a.js    + place interruption, 9 stages
-src/chat/scripts/version-b.js    straight to email, 8 stages
-src/chat/scripts/index.js        registry; resolves ?v=
-src/chat/hooks/useFunnel.js      the engine that plays a script
-src/chat/components/ChatCard.jsx the entire chat UI
-public/images/sketch-v2/         the five desk photographs
-public/audio/                    looping ambient track
+index.html                       → src/chat/main.jsx → App.jsx
+src/chat/scripts/shared.js         stages 1–5, identical in both versions
+src/chat/scripts/version-a.js      + place interruption, 9 stages
+src/chat/scripts/version-b.js      straight to email, 8 stages
+src/chat/scripts/index.js          registry; resolves ?v=
+src/chat/hooks/useFunnel.js        the engine that plays a script
+src/chat/hooks/useChatSfx.js       send/reply sound effects, muted by the header toggle
+src/chat/hooks/useTabBadge.js      unread-message count on the browser tab (desktop) / avatar (mobile)
+src/chat/lib/sfx.js                sound asset paths
+src/chat/components/ChatCard.jsx   the chat shell — header, transcript, dock
+src/chat/components/Bubble.jsx     a single message bubble
+src/chat/components/ReactionPicker.jsx  emoji reaction on the visitor's own messages
+src/chat/components/AIGradientBorder.jsx  the glass/gradient card border
+src/shared/components/RainbowButton.jsx   shared button primitive
+public/images/sketch-v2/           the desk photographs (man/ and woman/ sets, plus one shared place image)
+public/audio/                      looping ambient track + sfx
 ```
 
 ### Why sibling scripts
@@ -128,55 +135,73 @@ in less time than typing it would take.
 
 ### Portraits
 
-`IMG` in `shared.js` maps the five photographs. They are one drawing progressing:
-silhouette → features → neck → finished. The last is passed `locked: true`, which blurs it
-behind a **Details Redacted** pill.
+`IMG` in `shared.js` maps five photographs per gender (`man/` and `woman/`), plus one
+`place` image shared by both. They are one drawing progressing: silhouette → outline →
+neck → finished. The last is passed `locked: true`, which blurs it behind a **Details
+Redacted** pill.
 
-There is no gender question; the source script never asks one, and the artwork is a single
-set.
+Stage 3 asks who the visitor's heart looks for — a man, a woman, or either — which is what
+selects the portrait set. This question is not in the source doc; it was added because the
+artwork needs to know which set to render, and because the doc's "two came up" beat needs
+something to narrow it down to one. "A man"/"A woman" set the set directly. **"I'm open to
+either" picks at random** (`useFunnel.js`'s `gender()`), once per session, and holds — a
+face that changed partway through would undo the reading. There is no name/date-based
+inference; that was considered and deliberately not built (see below).
 
-### Audio
+### Sound
 
-`public/audio/ambient.mp3` loops at volume `0.12`, wired to the speaker toggle in the
-header. Browsers block autoplay until the page has been interacted with, so playback also
-starts on the first pointer or key event.
+Three audio elements, all governed by the single speaker toggle in the header:
+
+- `public/audio/ambient.mp3` — looping bed at volume `0.12`.
+- Send/reply sfx (`useChatSfx.js`) — a short ping when the visitor acts, and when a Selene
+  message lands. Each play uses a cloned `Audio` element rather than rewinding the shared
+  one, so overlapping triggers don't cancel each other.
+
+Browsers block audio until the page has been interacted with; all three unlock silently on
+the visitor's first pointer or key event, ahead of the first sound that's actually meant to
+be heard.
+
+### Other UI details worth knowing
+
+- **Message counter** — `useTabBadge.js` counts Selene's messages since the visitor's last
+  reply, shown in the browser tab title/favicon on desktop and on the header avatar badge
+  on mobile (phone browsers hide the tab strip). Resets to zero on every visitor action.
+- **Reactions** — `ReactionPicker.jsx` puts an emoji reaction on the visitor's own message,
+  chosen by keyword-matching what they typed/tapped. Cosmetic only, not tied to the
+  message counter.
 
 ---
 
-## Open: "I'm open to either"
+## Gender inference: deliberately not built
 
-Stage 3 asks who the visitor's heart looks for — a man, a woman, or either. The first two
-pick the portrait set directly. **"Either" currently picks by hashing the visitor's name and
-birth date**: arbitrary, but stable, so the same visitor always gets the same face rather
-than a different one on every reload.
-
-The brief asks for something better — infer the visitor's gender from their first name, and
-fall back to the hash. That is not built, and it is **not a frontend job**:
+The brief asks for something better than random-on-"either" — infer the visitor's gender
+from their first name. That was considered and rejected for now, not just deferred:
 
 - A usable name→gender dataset is tens of thousands of entries. It does not belong in the
   bundle.
 - The alternative is an API (Genderize.io, NamSor). Those need a key, and a key cannot live
-  in client-side code.
+  in client-side code — this would need a server, which the project doesn't have.
 - Coverage fails regardless — on shortened names, on names used across genders, and on most
   non-Anglo names. Including *Marisol* and *Elena*, both of which appear in the source
-  script. The hash fallback has to exist either way.
+  script. The random fallback has to exist either way.
+- Worth weighing even if a server gets built: the inference assumes the visitor wants the
+  opposite gender to their own — a guess about their orientation, and the people most
+  likely to be wronged by it are exactly the ones who chose "either" rather than answering.
+  The current random pick makes no such claim.
 
-So it needs a server: look the name up, return a gender, fall back to the hash on a miss.
-The frontend contract is already in place — whatever decides this only has to set the same
-value the two explicit answers set.
-
-Worth weighing before building it at all: the inference assumes the visitor wants the
-opposite gender to their own. That is a guess about their orientation, and the people most
-likely to be wronged by it are exactly the ones who chose "either" rather than answering.
-The hash makes no such claim.
+If this gets built, the frontend contract is already in place — whatever decides this only
+has to set the same value the two explicit "A man"/"A woman" answers set.
 
 ---
 
 ## Known limitations
 
-1. **The paywall is cosmetic.** The CTA takes no payment and unlocks nothing. Worse, it
-   currently echoes its own label into the transcript and then does nothing, which reads
-   as broken rather than unfinished.
+1. **The paywall is cosmetic.** The CTA takes no payment and unlocks nothing. It plays a
+   scripted `confirmed` closing stage instead — demo scaffolding so the reading doesn't
+   dead-end, but nothing is charged and no email is sent. **Must not go in front of real
+   traffic** until a real checkout sits behind it; if the CTA ends up linking out to an
+   offer page instead, this stage should be deleted and its copy moved to that page's
+   thank-you screen.
 2. **The blur is client-side.** The finished portrait is already in the page at full
    resolution; devtools defeats it. A real gate has to serve the locked version only.
 3. **The trust row makes claims nothing implements.** "Delivered in 24 hours" has no
@@ -190,7 +215,8 @@ The hash makes no such claim.
 8. **No analytics.** The brand site runs GTM, Meta Pixel and Clarity; this has none, so an
    A/B split would currently measure nothing.
 9. **The reading is static.** Every visitor gets identical copy; the birth date is echoed
-   back but never used to compute anything, and the portrait is not derived from any input.
+   back but never used to compute anything. The portrait set follows the gender answer (or
+   a random pick on "either"), but nothing else about the artwork or text varies by input.
    The script claims all 12 chart placements while collecting only a date — no time, no
    place.
 10. **No tests, no error boundary.** A throw inside the funnel blanks the card.
@@ -200,6 +226,31 @@ The hash makes no such claim.
 12. **Desktop-first spacing.** Responsive and working on mobile, but tuned at desktop
     width and not checked on real devices. The dev version switch overlaps the header at
     phone widths (dev-only, so it cannot ship).
+13. **Background tabs stall the reading.** All pacing runs on `setTimeout`, and browsers
+    throttle hidden tabs to roughly one timer per second, then one per minute after five —
+    which matters at this length and undercuts the tab-badge counter, since it barely
+    climbs while the visitor is away. Fix is timestamp-based scheduling instead of raw
+    timers; not started.
+
+---
+
+## Handoff: what's next
+
+The single blocker on everything else in [Known limitations](#known-limitations): there is
+no real offer/checkout page to send the CTA to. `astroloversketch.com/offer/v4/` currently
+404s with and without params. Once one exists:
+
+- Point the CTA button (`buttons: [{ label: 'Unlock My Full Sketch', next: 'confirmed', ... }]`
+  in `version-a.js`/`version-b.js`, stage `9`/`8`) at that URL instead of `next: 'confirmed'`.
+- Carry `name`, `email`, `birthdate` (format `1973-September-26`, i.e. `formatDob` in
+  `useFunnel.js`), and `gender` as query params or state. `zodiac` and `opposite` are
+  derivable from the birth date client-side if the offer page needs them.
+- Delete the `confirmed` stage in `shared.js` and move its copy to the offer page's
+  thank-you screen — it exists only to keep the reading from dead-ending on a CTA that
+  goes nowhere.
+
+Everything else in Known limitations (persistence, analytics, real paywall, gender
+inference, tab-throttle fix) is independent of that and can be picked up in any order.
 
 ---
 
