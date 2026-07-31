@@ -226,8 +226,6 @@ export const SHARED_STAGES = {
   confirmed: {
     beats: [
       l('{name}... thank you. 🖤', 2),
-      l('I’m picking the pencil back up right now.', 1),
-      l('The eyes come first. Then the hair. Then everything I’ve been holding back.', 1.5),
       l('Your full sketch will be in your inbox within 24 hours. Watch for it.', 1),
       l('And {name}... when you open it, look at the eyes first.', 1.5),
       l('You’ll understand why I couldn’t stop.', 1),
