@@ -72,15 +72,15 @@ export function useFunnel(scriptKey = DEFAULT_SCRIPT) {
   // land fast and long ones visibly take her a while — as a person would.
   const between = (min, max) => min + Math.random() * (max - min);
 
-  // Selene is a middle-aged artist, not a typist, and the audience skews older
-  // too. 210-270ms per character is 44-57wpm, averaging 50 — an ordinary adult
-  // at a keyboard, which is who she is meant to be.
+  // Session target is ~7min, not a realistic typing speed. 30-50ms per
+  // character is 240-400wpm, averaging ~300 — chosen to hit the time target,
+  // not to read as an ordinary adult at a keyboard.
   //
   // The ceiling is high on purpose. Capping it low made the longest messages
   // proportionally the fastest, which is backwards: those are the ones that
   // should visibly take her a while. Long lines in the script are split at
   // their own punctuation instead, so no single message sits for half a minute.
-  const MS_PER_CHAR = [210, 270];
+  const MS_PER_CHAR = [30, 50];
   const MIN_TYPING = 900;
   const MAX_TYPING = 26000;
 
