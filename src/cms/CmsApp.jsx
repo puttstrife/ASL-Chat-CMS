@@ -175,7 +175,13 @@ function Editor({ funnel, onBack, onChange }) {
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,460px)]">
+      {/* Preview first, then the form it drives — the reading is the thing being
+          worked on, so it sits where the eye starts rather than off to one side. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(360px,460px)_minmax(0,1fr)]">
+        <aside className="hidden min-h-0 border-r border-white/8 bg-[#0a0b11] p-3.5 lg:block">
+          <PreviewPanel funnel={funnel} />
+        </aside>
+
         <div className="min-h-0 overflow-y-auto p-4">
           {broken.length > 0 && (
             <p className="mb-3 rounded-lg border border-[#ff6b7d]/25 bg-[#ff6b7d]/10 px-3 py-2 text-[.76rem] text-[#ff9aa7]">
@@ -199,10 +205,6 @@ function Editor({ funnel, onBack, onChange }) {
             </div>
           )}
         </div>
-
-        <aside className="hidden min-h-0 border-l border-white/8 bg-[#0a0b11] p-3.5 lg:block">
-          <PreviewPanel funnel={funnel} />
-        </aside>
       </div>
     </div>
   );
