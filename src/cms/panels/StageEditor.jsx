@@ -1,4 +1,5 @@
-import { BEAT_TYPES, makeStage } from '../model.js';
+import { useConfirm } from '../Confirm.jsx';
+import { BEAT_TYPES, describeBeat, makeStage } from '../model.js';
 import { Btn, inputClass } from '../ui.jsx';
 import { BeatEditor, IconBtn } from './BeatEditor.jsx';
 import { DockEditor } from './DockEditor.jsx';
@@ -81,6 +82,7 @@ export function StageList({ funnel, selectedId, onSelect, onChange, onPreview, p
 function StageCard({ stage, index, funnel, expanded, isStart, previewing, onPreview, onSelect, onChange, onRemove, onMove, onMakeStart, isFirst, isLast }) {
   const beats = stage.beats || [];
   const lineCount = beats.filter((b) => b.type === 'line').length;
+  const confirm = useConfirm();
 
   const mapBeats = (fn) => onChange((prev) => ({ beats: fn(prev.beats || []) }));
   const addBeat = (type) => mapBeats((b) => [...b, BEAT_TYPES[type].make()]);
@@ -112,14 +114,20 @@ function StageCard({ stage, index, funnel, expanded, isStart, previewing, onPrev
           <IconBtn label="Move up" disabled={isFirst} onClick={onMove.bind(null, -1)}>↑</IconBtn>
           <IconBtn label="Move down" disabled={isLast} onClick={onMove.bind(null, 1)}>↓</IconBtn>
           {/* There is no undo, and autosave is immediate — so a mis-click here
-              is unrecoverable. Say what is about to be lost, and count it. */}
+              is unrecoverable. Say what is about to be lost, and quote it. */}
           <IconBtn
             label="Delete stage"
             danger
-            onClick={() => {
-              const n = beats.length;
-              const what = n ? `${n} ${n === 1 ? 'item' : 'items'}` : 'nothing in it';
-              if (confirm(`Delete “${stage.title || 'this stage'}”?\n\nIt has ${what}. This cannot be undone.`)) onRemove();
+            onClick={async () => {
+              const ok = await confirm({
+                title: `Delete “${stage.title || 'this stage'}”?`,
+                summary: beats.length
+                  ? `Everything in it goes too — ${beats.length} ${beats.length === 1 ? 'item' : 'items'}:`
+                  : 'This stage is empty.',
+                items: beats.map(describeBeat),
+                confirmLabel: 'Delete stage',
+              });
+              if (ok) onRemove();
             }}
           >
             ✕

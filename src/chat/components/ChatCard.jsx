@@ -194,23 +194,7 @@ function Message({ m, accent, reaction, onReact }) {
     return (
       <Reactable reaction={reaction} onReact={onReact} className="w-[82%]">
         <figure className="bubble-in m-0 flex w-full flex-col gap-2">
-          <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
-            <img
-              src={m.src}
-              alt={m.locked ? 'Blurred until unlocked' : ''}
-              className={`block w-full object-cover transition-all duration-700 ${m.locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
-            />
-            {m.locked && (
-              <div className="absolute inset-0 flex items-end justify-center pb-6">
-                <span
-                  className="font-sans rounded-md bg-black/55 px-3.5 py-1.5 text-[.7rem] font-medium uppercase tracking-[0.18em] backdrop-blur-sm"
-                  style={{ color: accent }}
-                >
-                  Details Redacted
-                </span>
-              </div>
-            )}
-          </div>
+          <SketchImage src={m.src} locked={m.locked} accent={accent} />
         </figure>
       </Reactable>
     );
@@ -246,6 +230,51 @@ function Message({ m, accent, reaction, onReact }) {
 
   if (sent) return bubble;
   return <Reactable reaction={reaction} onReact={onReact}>{bubble}</Reactable>;
+}
+
+// A sketch that has not been drawn yet, or whose file is not on this deploy,
+// should still occupy the space it will occupy — a broken-image glyph makes a
+// half-built funnel look broken rather than unfinished, which matters most on a
+// demo where the artwork has not been supplied.
+function SketchImage({ src, locked, accent }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  const missing = !src || failed;
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
+      {missing ? (
+        <div
+          className="grid aspect-[4/5] w-full place-items-center border border-dashed border-white/12"
+          style={{ background: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 12px, transparent 12px 24px)' }}
+        >
+          <div className="flex flex-col items-center gap-1.5 px-6 text-center">
+            <span className="text-2xl opacity-30" aria-hidden="true">🖼️</span>
+            <p className="font-sans text-[.72rem] leading-snug text-white/35">
+              {src ? 'Artwork not added yet' : 'No image set for this step'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <img
+          src={src}
+          onError={() => setFailed(true)}
+          alt={locked ? 'Blurred until unlocked' : ''}
+          className={`block w-full object-cover transition-all duration-700 ${locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
+        />
+      )}
+      {locked && (
+        <div className="absolute inset-0 flex items-end justify-center pb-6">
+          <span
+            className="font-sans rounded-md bg-black/55 px-3.5 py-1.5 text-[.7rem] font-medium uppercase tracking-[0.18em] backdrop-blur-sm"
+            style={{ color: accent }}
+          >
+            Details Redacted
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function TrustRow({ items }) {

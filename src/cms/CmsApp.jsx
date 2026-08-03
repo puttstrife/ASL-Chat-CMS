@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ConfirmProvider, useConfirm } from './Confirm.jsx';
 import { estimateFunnel, fmtDuration } from './estimate.js';
 import { danglingLinks } from './model.js';
 import { AudioPanel } from './panels/AudioPanel.jsx';
@@ -23,6 +24,7 @@ export default function CmsApp() {
     // The editor owns the viewport and scrolls its own panes; the list is an
     // ordinary page that grows. Giving both `min-h-dvh` let the editor's own
     // `h-dvh` stack on top of it, so the body scrolled instead of the panes.
+    <ConfirmProvider>
     <div className={`bg-[#08090e] text-white/90 ${open ? 'h-dvh overflow-hidden' : 'min-h-dvh'}`}>
       {open ? (
         <Editor
@@ -37,12 +39,14 @@ export default function CmsApp() {
         <FunnelList funnels={funnels} onOpen={setOpenId} onRefresh={refresh} />
       )}
     </div>
+    </ConfirmProvider>
   );
 }
 
 function FunnelList({ funnels, onOpen, onRefresh }) {
   const fileRef = useRef(null);
   const [error, setError] = useState('');
+  const confirm = useConfirm();
 
   const create = () => { const f = store.createFunnel(); onRefresh(); onOpen(f.id); };
 
@@ -113,8 +117,14 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
                 <Btn onClick={() => { store.duplicateFunnel(f.id); onRefresh(); }}>Duplicate</Btn>
                 <Btn
                   variant="danger"
-                  onClick={() => {
-                    if (confirm(`Delete “${f.name}”? This cannot be undone.`)) { store.deleteFunnel(f.id); onRefresh(); }
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: `Delete “${f.name}”?`,
+                      detail: `${f.persona?.name || 'Untitled reader'} · ${f.stages.length} stages`,
+                      note: 'This cannot be undone. Export it first if you might want it back.',
+                      confirmLabel: 'Delete funnel',
+                    });
+                    if (ok) { store.deleteFunnel(f.id); onRefresh(); }
                   }}
                 >
                   Delete

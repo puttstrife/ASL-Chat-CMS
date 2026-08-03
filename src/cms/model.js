@@ -47,6 +47,27 @@ export const FIELD_PRESETS = [
   { key: 'custom', label: 'Something else…', placeholder: '', inputType: 'text' },
 ];
 
+// One line describing a beat, for confirm dialogs and anywhere else that has to
+// show what a beat is without rendering its editor.
+export function describeBeat(beat) {
+  const meta = BEAT_TYPES[beat.type] || {};
+  const icon = meta.icon || '•';
+  if (beat.type === 'line') return { icon, text: beat.text?.trim() || '(empty message)' };
+  if (beat.type === 'pause') return { icon, text: `${beat.label || 'pause'} — ${beat.seconds || 0}s` };
+  if (beat.type === 'image') {
+    if (!beat.src) return { icon, text: '(no image set)' };
+    return { icon, text: beat.src.startsWith('data:') ? 'Uploaded image — stored in this funnel and nowhere else' : beat.src };
+  }
+  if (beat.type === 'list') {
+    const items = (beat.items || []).filter(Boolean);
+    return { icon, text: items.length ? items.join(' · ') : '(empty list)' };
+  }
+  return { icon, text: beat.type };
+}
+
+export const beatHasContent = (b) =>
+  Boolean(b.text?.trim() || b.src || (b.items || []).some((i) => i.trim()) || (b.type === 'pause' && b.label?.trim()));
+
 export const makeStage = (over = {}) => ({
   id: uid(),
   title: 'Untitled stage',

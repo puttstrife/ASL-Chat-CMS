@@ -1,24 +1,13 @@
-import { useRef, useState } from 'react';
-import { BEAT_TYPES } from '../model.js';
+import { useEffect, useRef, useState } from 'react';
+import { useConfirm } from '../Confirm.jsx';
+import { BEAT_TYPES, beatHasContent, describeBeat } from '../model.js';
 import { Btn, inputClass, readImageFile, textareaClass } from '../ui.jsx';
-
-const beatHasContent = (b) =>
-  Boolean(b.text?.trim() || b.src || (b.items || []).some((i) => i.trim()) || (b.type === 'pause' && b.label?.trim()));
-
-// Quote what is about to go, so the dialog is a description rather than a
-// generic "are you sure" nobody reads.
-function beatSummary(b) {
-  if (b.type === 'line') return `“${b.text.length > 80 ? `${b.text.slice(0, 80)}…` : b.text}”`;
-  if (b.type === 'pause') return `“${b.label}” for ${b.seconds || 0}s`;
-  if (b.type === 'image') return b.src?.startsWith('data:') ? 'An uploaded image — it is stored here and nowhere else.' : b.src;
-  if (b.type === 'list') return (b.items || []).filter(Boolean).map((i) => `• ${i}`).join('\n');
-  return '';
-}
 
 // One beat — a message, a pause, an image or a list. Beats play top to bottom,
 // which is why the ordering controls sit on every row rather than behind a menu.
 export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, isPreviewing, isFirst, isLast }) {
   const meta = BEAT_TYPES[beat.type] || {};
+  const confirm = useConfirm();
   return (
     <li
       className={`overflow-hidden rounded-lg border bg-[var(--surface-3)] shadow-[0_1px_2px_rgba(0,0,0,0.35)] transition-colors ${
@@ -50,8 +39,14 @@ export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, 
           <IconBtn
             label="Delete beat"
             danger
-            onClick={() => {
-              if (!beatHasContent(beat) || confirm(`Delete this ${(meta.label || beat.type).toLowerCase()}?\n\n${beatSummary(beat)}\n\nThis cannot be undone.`)) onRemove();
+            onClick={async () => {
+              if (!beatHasContent(beat)) return onRemove();
+              const ok = await confirm({
+                title: `Delete this ${(meta.label || beat.type).toLowerCase()}?`,
+                items: [describeBeat(beat)],
+                confirmLabel: 'Delete',
+              });
+              if (ok) onRemove();
             }}
           >
             ✕
@@ -122,6 +117,42 @@ export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, 
   );
 }
 
+// A templated path cannot be loaded here — `{gender}` is only known once a
+// visitor has answered — so showing it as a broken image is a lie about the
+// funnel. It says which answer it varies by instead. Anything else that fails
+// to load is genuinely missing, and says that.
+function Thumb({ src }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+
+  const varies = src?.match(/\{([a-z0-9_]+)\}/i)?.[1];
+  const box = 'grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg border bg-[var(--field)] text-center';
+
+  if (!src) return <div className={`${box} border-white/10`}><span className="text-[.6rem] text-white/25">empty</span></div>;
+
+  if (varies) {
+    return (
+      <div className={`${box} border-dashed border-[#7c5cff]/40`} title={`Resolves per answer: ${src}`}>
+        <span className="px-1 font-mono text-[.55rem] leading-tight text-[#a892ff]">{`{${varies}}`}</span>
+      </div>
+    );
+  }
+
+  if (failed) {
+    return (
+      <div className={`${box} border-dashed border-white/15`} title={`Not found: ${src}`}>
+        <span className="px-1 text-[.55rem] leading-tight text-white/30">not found</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${box} border-white/10`}>
+      <img src={src} alt="" onError={() => setFailed(true)} className="size-full object-cover" />
+    </div>
+  );
+}
+
 function ImageBeat({ beat, keys, onChange }) {
   const fileRef = useRef(null);
   const [error, setError] = useState('');
@@ -139,13 +170,7 @@ function ImageBeat({ beat, keys, onChange }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/10 bg-[var(--field)]">
-          {beat.src ? (
-            <img src={beat.src} alt="" className="size-full object-cover" />
-          ) : (
-            <span className="text-[.6rem] text-white/25">empty</span>
-          )}
-        </div>
+        <Thumb src={beat.src} />
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <input
             className={inputClass}
