@@ -1,0 +1,1042 @@
+{
+  "id": "seed-selene-b",
+  "name": "Selene — Version B (no place)",
+  "updatedAt": "2026-08-03T00:00:00.000Z",
+  "persona": {
+    "name": "Selene",
+    "role": "Astrological Portrait Reader",
+    "avatar": "/images/chat/selene-avatar.png",
+    "idleText": "is with you…",
+    "typingLabel": "is typing",
+    "accent": "#dfa73a",
+    "header": "#1a043d"
+  },
+  "pacing": {
+    "msPerCharMin": 30,
+    "msPerCharMax": 50,
+    "minTyping": 900,
+    "maxTyping": 26000
+  },
+  "startStage": "1",
+  "stages": [
+    {
+      "id": "1",
+      "title": "The hook — who are you",
+      "beats": [
+        {
+          "id": "s4g",
+          "type": "line",
+          "text": "Oh, hi. You’re here. ✨",
+          "seconds": 2
+        },
+        {
+          "id": "s4h",
+          "type": "line",
+          "text": "I’m Selene.",
+          "seconds": 1
+        },
+        {
+          "id": "s4i",
+          "type": "line",
+          "text": "I draw soulmate sketches by hand using Vedic astrology.",
+          "seconds": 1
+        },
+        {
+          "id": "s4j",
+          "type": "line",
+          "text": "And I should tell you something before we begin.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4k",
+          "type": "line",
+          "text": "99% of readings only look at your sun sign.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4l",
+          "type": "line",
+          "text": "One placement.",
+          "seconds": 1
+        },
+        {
+          "id": "s4m",
+          "type": "line",
+          "text": "The same one shared by millions of people born the same month as you.",
+          "seconds": 1
+        },
+        {
+          "id": "s4n",
+          "type": "line",
+          "text": "That’s why every sketch you’ve ever seen felt like it could be anyone.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4o",
+          "type": "line",
+          "text": "I don’t work that way.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4p",
+          "type": "line",
+          "text": "I open your birth chart and read all 12 placements.",
+          "seconds": 1
+        },
+        {
+          "id": "s4q",
+          "type": "line",
+          "text": "The whole sky as it stood the moment you arrived.",
+          "seconds": 1
+        },
+        {
+          "id": "s4r",
+          "type": "line",
+          "text": "That’s where the face is hiding. In the eleven placements nobody else bothers to read.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4s",
+          "type": "line",
+          "text": "My canvas is in front of me. My pencils are ready.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4t",
+          "type": "line",
+          "text": "But a chart doesn’t open for a stranger. It opens for a name.",
+          "seconds": 1
+        },
+        {
+          "id": "s4u",
+          "type": "line",
+          "text": "So before anything else... what does the universe call you? 🌙",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "input",
+        "key": "name",
+        "placeholder": "Enter your first name",
+        "inputType": "text",
+        "cta": "Continue",
+        "next": "2"
+      }
+    },
+    {
+      "id": "2",
+      "title": "The birth date",
+      "beats": [
+        {
+          "id": "s4v",
+          "type": "line",
+          "text": "{name}.",
+          "seconds": 1
+        },
+        {
+          "id": "s4w",
+          "type": "line",
+          "text": "I just wrote it at the top of the canvas. Names hold more weight than people think.",
+          "seconds": 1
+        },
+        {
+          "id": "s4x",
+          "type": "line",
+          "text": "Now I need the key that opens everything.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4y",
+          "type": "line",
+          "text": "The day you were born, the sky arranged itself into a pattern that has never repeated since.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s4z",
+          "type": "line",
+          "text": "Not once.",
+          "seconds": 1
+        },
+        {
+          "id": "s50",
+          "type": "line",
+          "text": "That pattern is your birth chart.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s51",
+          "type": "line",
+          "text": "And hidden inside it, like a lock holding the shape of its key, is theirs.",
+          "seconds": 1
+        },
+        {
+          "id": "s52",
+          "type": "line",
+          "text": "Tell me your birth date, {name}. Let’s see what the sky was keeping for you. 🔑",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "date",
+        "key": "dob",
+        "cta": "Continue",
+        "next": "3"
+      }
+    },
+    {
+      "id": "3",
+      "title": "Two came up — who do you look for",
+      "beats": [
+        {
+          "id": "s53",
+          "type": "pause",
+          "seconds": 3,
+          "label": "is opening your chart"
+        },
+        {
+          "id": "s54",
+          "type": "line",
+          "text": "Okay. Give me a moment.",
+          "seconds": 2
+        },
+        {
+          "id": "s55",
+          "type": "line",
+          "text": "I’m laying out your placements now... Sun... Moon... Venus...",
+          "seconds": 2.5
+        },
+        {
+          "id": "s56",
+          "type": "line",
+          "text": "Oh.",
+          "seconds": 2
+        },
+        {
+          "id": "s57",
+          "type": "line",
+          "text": "This is strange. Two came up.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s58",
+          "type": "line",
+          "text": "That almost never happens.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s59",
+          "type": "line",
+          "text": "Before I triangulate, I need you to settle something for me.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s5a",
+          "type": "line",
+          "text": "The chart shows me the pull. It doesn’t show me the form it takes.",
+          "seconds": 1
+        },
+        {
+          "id": "s5b",
+          "type": "line",
+          "text": "Tell me, {name}... who does your heart look for?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "buttons",
+        "options": [
+          {
+            "id": "s5c",
+            "label": "A man",
+            "next": "3-settled",
+            "setKey": "gender",
+            "setValue": "man"
+          },
+          {
+            "id": "s5d",
+            "label": "A woman",
+            "next": "3-settled",
+            "setKey": "gender",
+            "setValue": "woman"
+          },
+          {
+            "id": "s5e",
+            "label": "I’m open to either",
+            "next": "3-either",
+            "setKey": "gender",
+            "setRandom": [
+              "man",
+              "woman"
+            ]
+          }
+        ],
+        "trust": []
+      }
+    },
+    {
+      "id": "4",
+      "title": "The silhouette",
+      "beats": [
+        {
+          "id": "s5f",
+          "type": "line",
+          "text": "Okay. I’ve honed it down to one.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s5g",
+          "type": "line",
+          "text": "I’m starting the silhouette now, the outline of the face.",
+          "seconds": 1
+        },
+        {
+          "id": "s5h",
+          "type": "line",
+          "text": "This takes me a moment because I don’t sketch from imagination.",
+          "seconds": 1
+        },
+        {
+          "id": "s5i",
+          "type": "line",
+          "text": "I sketch from your placements.",
+          "seconds": 1
+        },
+        {
+          "id": "s5j",
+          "type": "line",
+          "text": "Bear with me. 🎨",
+          "seconds": 1
+        },
+        {
+          "id": "s5k",
+          "type": "pause",
+          "seconds": 4,
+          "label": "is drawing"
+        },
+        {
+          "id": "s5l",
+          "type": "image",
+          "src": "/images/sketch-v2/{gender}/1-silhouette.webp",
+          "locked": false
+        },
+        {
+          "id": "s5m",
+          "type": "line",
+          "text": "There.",
+          "seconds": 0.8
+        },
+        {
+          "id": "s5n",
+          "type": "line",
+          "text": "That’s them forming.",
+          "seconds": 1
+        },
+        {
+          "id": "s5o",
+          "type": "line",
+          "text": "Do you want me to continue?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "buttons",
+        "options": [
+          {
+            "id": "s5p",
+            "label": "Continue",
+            "next": "5"
+          }
+        ],
+        "trust": []
+      }
+    },
+    {
+      "id": "5",
+      "title": "The energy + first traits",
+      "beats": [
+        {
+          "id": "s5q",
+          "type": "line",
+          "text": "Alright. Before I draw any features, I always do one thing first.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s5r",
+          "type": "line",
+          "text": "I sit with the energy coming off the chart, and I pour it into the outline.",
+          "seconds": 1
+        },
+        {
+          "id": "s5s",
+          "type": "line",
+          "text": "The features come after the energy. That’s how the face stays true.",
+          "seconds": 1
+        },
+        {
+          "id": "s5t",
+          "type": "line",
+          "text": "And what I’m feeling from this one, {name}...",
+          "seconds": 1.5
+        },
+        {
+          "id": "s5u",
+          "type": "line",
+          "text": "There’s a steadiness here.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s5v",
+          "type": "line",
+          "text": "Someone who thinks before they speak and means it when they do.",
+          "seconds": 1
+        },
+        {
+          "id": "s5w",
+          "type": "line",
+          "text": "Someone who notices small things about people and keeps them.",
+          "seconds": 1
+        },
+        {
+          "id": "s5x",
+          "type": "pause",
+          "seconds": 3.5,
+          "label": "is drawing"
+        },
+        {
+          "id": "s5y",
+          "type": "image",
+          "src": "/images/sketch-v2/{gender}/2-outline.webp",
+          "locked": false
+        },
+        {
+          "id": "s5z",
+          "type": "line",
+          "text": "The features are starting to come through.",
+          "seconds": 1
+        },
+        {
+          "id": "s60",
+          "type": "line",
+          "text": "Here’s what I have on them so far.",
+          "seconds": 1
+        },
+        {
+          "id": "s61",
+          "type": "list",
+          "items": [
+            "Hazel eyes",
+            "Olive skin",
+            "Calm, deliberate voice",
+            "Notices small things",
+            "Guarded until they trust you"
+          ]
+        },
+        {
+          "id": "s62",
+          "type": "line",
+          "text": "Should I keep going?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "buttons",
+        "options": [
+          {
+            "id": "s63",
+            "label": "Keep going",
+            "next": "6"
+          }
+        ],
+        "trust": []
+      }
+    },
+    {
+      "id": "6",
+      "title": "The email",
+      "beats": [
+        {
+          "id": "s64",
+          "type": "line",
+          "text": "Okay.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s65",
+          "type": "line",
+          "text": "Before I use the last of my energy on the hardest part, I need one more thing from you.",
+          "seconds": 1
+        },
+        {
+          "id": "s66",
+          "type": "line",
+          "text": "The sketch takes me up to 24 hours to finish properly,",
+          "seconds": 1
+        },
+        {
+          "id": "s67",
+          "type": "line",
+          "text": "and I refuse to let this one get lost.",
+          "seconds": 1
+        },
+        {
+          "id": "s68",
+          "type": "line",
+          "text": "Where should I send it when it’s done?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "input",
+        "key": "email",
+        "placeholder": "you@example.com",
+        "inputType": "email",
+        "cta": "Continue",
+        "next": "7"
+      }
+    },
+    {
+      "id": "7",
+      "title": "The neck + fuller traits",
+      "beats": [
+        {
+          "id": "s69",
+          "type": "line",
+          "text": "Saved. It goes there and nowhere else. 🤍",
+          "seconds": 1
+        },
+        {
+          "id": "s6a",
+          "type": "line",
+          "text": "Now, a strange confession about how I work.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s6b",
+          "type": "line",
+          "text": "I always draw from the neck up.",
+          "seconds": 1
+        },
+        {
+          "id": "s6c",
+          "type": "line",
+          "text": "The hair comes last, because hair holds the most detail and it drains me fastest.",
+          "seconds": 1
+        },
+        {
+          "id": "s6d",
+          "type": "line",
+          "text": "The neck first. Then the face. Then, when I have everything left in me... the hair.",
+          "seconds": 1
+        },
+        {
+          "id": "s6e",
+          "type": "pause",
+          "seconds": 3,
+          "label": "is drawing"
+        },
+        {
+          "id": "s6f",
+          "type": "line",
+          "text": "And {name}... the neck on this one.",
+          "seconds": 1
+        },
+        {
+          "id": "s6g",
+          "type": "line",
+          "text": "Elegant. Strong. The kind of line an artist doesn’t get to draw very often.",
+          "seconds": 1
+        },
+        {
+          "id": "s6h",
+          "type": "line",
+          "text": "Whoever this is carries themselves well.",
+          "seconds": 1
+        },
+        {
+          "id": "s6i",
+          "type": "image",
+          "src": "/images/sketch-v2/{gender}/4-neck.webp",
+          "locked": false
+        },
+        {
+          "id": "s6j",
+          "type": "line",
+          "text": "Look at where we are.",
+          "seconds": 1
+        },
+        {
+          "id": "s6k",
+          "type": "list",
+          "items": [
+            "Hazel eyes",
+            "Olive skin",
+            "Calm, deliberate voice",
+            "Notices small things",
+            "Guarded until they trust you",
+            "Dry sense of humor",
+            "Remembers what you say",
+            "Steady under pressure"
+          ]
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "8"
+      }
+    },
+    {
+      "id": "8",
+      "title": "The close + CTA",
+      "beats": [
+        {
+          "id": "s6l",
+          "type": "line",
+          "text": "{name}, I have to be honest with you.",
+          "seconds": 2.5
+        },
+        {
+          "id": "s6m",
+          "type": "line",
+          "text": "I’ve drained almost everything I have.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s6n",
+          "type": "line",
+          "text": "The eyes and the hair need the rest of my energy,",
+          "seconds": 1
+        },
+        {
+          "id": "s6o",
+          "type": "line",
+          "text": "and I need to give this sketch the time it deserves.",
+          "seconds": 1
+        },
+        {
+          "id": "s6p",
+          "type": "line",
+          "text": "Up to 24 hours.",
+          "seconds": 1
+        },
+        {
+          "id": "s6q",
+          "type": "line",
+          "text": "But I don’t want to stop here.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s6r",
+          "type": "line",
+          "text": "Because there’s something about this one.",
+          "seconds": 1
+        },
+        {
+          "id": "s6s",
+          "type": "line",
+          "text": "The eyes are piercing, {name}.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s6t",
+          "type": "line",
+          "text": "It’s strange to say out loud,",
+          "seconds": 1
+        },
+        {
+          "id": "s6u",
+          "type": "line",
+          "text": "but it feels like they’re looking at me instead of me looking at them.",
+          "seconds": 1
+        },
+        {
+          "id": "s6v",
+          "type": "line",
+          "text": "Once you hold the sketch, you’ll know exactly what I mean.",
+          "seconds": 1
+        },
+        {
+          "id": "s6w",
+          "type": "line",
+          "text": "If you want me to finish, just unlock the sketch below.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s6x",
+          "type": "line",
+          "text": "Within 24 hours you’ll have the full face,",
+          "seconds": 1
+        },
+        {
+          "id": "s6y",
+          "type": "line",
+          "text": "the personality profile,",
+          "seconds": 1
+        },
+        {
+          "id": "s6z",
+          "type": "line",
+          "text": "and why your Vedic chart matches theirs.",
+          "seconds": 1
+        },
+        {
+          "id": "s70",
+          "type": "line",
+          "text": "I’ve already come this far with them.",
+          "seconds": 1
+        },
+        {
+          "id": "s71",
+          "type": "line",
+          "text": "Don’t make me put the pencil down. 🖤",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "cta",
+        "label": "Unlock My Full Sketch",
+        "url": "",
+        "next": "confirmed",
+        "passKeys": [
+          "name",
+          "email",
+          "dob",
+          "gender"
+        ],
+        "trust": [
+          "Full face · Personality Profile",
+          "Delivered in 24 hours"
+        ]
+      }
+    },
+    {
+      "id": "3-settled",
+      "title": "They chose a gender",
+      "beats": [
+        {
+          "id": "s73",
+          "type": "line",
+          "text": "That settles it. The chart just sharpened.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "3b"
+      }
+    },
+    {
+      "id": "3-either",
+      "title": "They left it open",
+      "beats": [
+        {
+          "id": "s74",
+          "type": "line",
+          "text": "Then I’ll let the chart decide. It always knows before we do.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "3b"
+      }
+    },
+    {
+      "id": "3b",
+      "title": "The shared aura",
+      "beats": [
+        {
+          "id": "s75",
+          "type": "line",
+          "text": "Let me triangulate a bit more. I’m going to narrow it down, I promise.",
+          "seconds": 1
+        },
+        {
+          "id": "s76",
+          "type": "line",
+          "text": "But one thing is already certain. Both of them share the same aura.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s77",
+          "type": "line",
+          "text": "It’s a quiet kind of presence. The type that doesn’t fill a room with noise.",
+          "seconds": 1
+        },
+        {
+          "id": "s78",
+          "type": "line",
+          "text": "The room just leans toward them.",
+          "seconds": 1
+        },
+        {
+          "id": "s79",
+          "type": "line",
+          "text": "Warm, but guarded. They don’t let people in easily.",
+          "seconds": 1
+        },
+        {
+          "id": "s7a",
+          "type": "line",
+          "text": "When they finally do, they’re in completely.",
+          "seconds": 1
+        },
+        {
+          "id": "s7b",
+          "type": "line",
+          "text": "{name}... do you know someone with this kind of presence?",
+          "seconds": 1
+        },
+        {
+          "id": "s7c",
+          "type": "line",
+          "text": "Or have you felt drawn to this energy before?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "buttons",
+        "options": [
+          {
+            "id": "s7d",
+            "label": "Yes, I think so",
+            "next": "3-yes"
+          },
+          {
+            "id": "s7e",
+            "label": "No, not yet",
+            "next": "3-no"
+          }
+        ],
+        "trust": []
+      }
+    },
+    {
+      "id": "3-yes",
+      "title": "They recognise it",
+      "beats": [
+        {
+          "id": "s7f",
+          "type": "line",
+          "text": "I thought so.",
+          "seconds": 1
+        },
+        {
+          "id": "s7g",
+          "type": "line",
+          "text": "That’s exactly what I’m picking up from your side of the chart.",
+          "seconds": 1
+        },
+        {
+          "id": "s7h",
+          "type": "line",
+          "text": "Your Venus placement has been responding to this exact aura for a long time.",
+          "seconds": 1
+        },
+        {
+          "id": "s7i",
+          "type": "line",
+          "text": "Your chart already knows them, {name}. Even if your mind is still catching up.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "4"
+      }
+    },
+    {
+      "id": "3-no",
+      "title": "They do not — push once",
+      "beats": [
+        {
+          "id": "s7j",
+          "type": "line",
+          "text": "Hmm. Hold on.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s7k",
+          "type": "line",
+          "text": "Because your chart is telling me something different, {name}.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s7l",
+          "type": "line",
+          "text": "Your Venus placement has been responding to this exact aura. And the response is recent.",
+          "seconds": 1
+        },
+        {
+          "id": "s7m",
+          "type": "line",
+          "text": "A signal like this only registers when someone has crossed your path.",
+          "seconds": 1
+        },
+        {
+          "id": "s7n",
+          "type": "line",
+          "text": "Even briefly.",
+          "seconds": 1
+        },
+        {
+          "id": "s7o",
+          "type": "line",
+          "text": "Even for a moment.",
+          "seconds": 1
+        },
+        {
+          "id": "s7p",
+          "type": "line",
+          "text": "Think back over the last few months.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s7q",
+          "type": "line",
+          "text": "Someone you barely spoke to but noticed.",
+          "seconds": 1
+        },
+        {
+          "id": "s7r",
+          "type": "line",
+          "text": "Someone who felt strangely familiar and you never figured out why.",
+          "seconds": 1
+        },
+        {
+          "id": "s7s",
+          "type": "line",
+          "text": "A stranger you caught yourself thinking about after.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "buttons",
+        "options": [
+          {
+            "id": "s7t",
+            "label": "Wait... maybe",
+            "next": "3-maybe"
+          },
+          {
+            "id": "s7u",
+            "label": "Still no",
+            "next": "3-still-no"
+          }
+        ],
+        "trust": []
+      }
+    },
+    {
+      "id": "3-maybe",
+      "title": "They reconsider",
+      "beats": [
+        {
+          "id": "s7v",
+          "type": "line",
+          "text": "There it is.",
+          "seconds": 1
+        },
+        {
+          "id": "s7w",
+          "type": "line",
+          "text": "That’s the one your chart flagged.",
+          "seconds": 1
+        },
+        {
+          "id": "s7x",
+          "type": "line",
+          "text": "I’m not saying it’s them, because I haven’t finished the face yet.",
+          "seconds": 1
+        },
+        {
+          "id": "s7y",
+          "type": "line",
+          "text": "But your chart logged that encounter for a reason.",
+          "seconds": 1
+        },
+        {
+          "id": "s7z",
+          "type": "line",
+          "text": "When the sketch is done, you’ll know whether your instinct was right.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "4"
+      }
+    },
+    {
+      "id": "3-still-no",
+      "title": "They hold firm",
+      "beats": [
+        {
+          "id": "s80",
+          "type": "line",
+          "text": "Then they’re still ahead of you.",
+          "seconds": 1
+        },
+        {
+          "id": "s81",
+          "type": "line",
+          "text": "And that’s the better position to be in, {name}.",
+          "seconds": 1
+        },
+        {
+          "id": "s82",
+          "type": "line",
+          "text": "It means you’ll see their face before you ever meet them.",
+          "seconds": 1
+        },
+        {
+          "id": "s83",
+          "type": "line",
+          "text": "Almost nobody gets it in that order.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "4"
+      }
+    },
+    {
+      "id": "confirmed",
+      "title": "After the CTA (demo only)",
+      "beats": [
+        {
+          "id": "s84",
+          "type": "line",
+          "text": "{name}... thank you. 🖤",
+          "seconds": 2
+        },
+        {
+          "id": "s85",
+          "type": "line",
+          "text": "Your full sketch will be in your inbox within 24 hours. Watch for it.",
+          "seconds": 1
+        },
+        {
+          "id": "s86",
+          "type": "line",
+          "text": "And {name}... when you open it, look at the eyes first.",
+          "seconds": 1.5
+        },
+        {
+          "id": "s87",
+          "type": "line",
+          "text": "You’ll understand why I couldn’t stop.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "end"
+      }
+    }
+  ],
+  "audio": {
+    "src": "/audio/ambient.mp3",
+    "volume": 0.05,
+    "enabled": true
+  }
+}
