@@ -1,7 +1,7 @@
 {
-  "name": "asl-interactive-chat",
+  "name": "asl-chat-cms",
   "version": "1.0.0",
-  "description": "Interactive soulmate-sketch chat reading for Astro Lover, in two versions.",
+  "description": "CMS for building and playing scripted chat readings.",
   "type": "module",
   "scripts": {
     "dev": "vite",

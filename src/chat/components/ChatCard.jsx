@@ -5,13 +5,14 @@ import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 import { Reactable } from './ReactionPicker.jsx';
 import { useChatSfx } from '../hooks/useChatSfx.js';
 
-export function ChatCard({ funnel, unread = 0 }) {
-  const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance } = funnel;
+// The chat surface. Everything that used to be Selene — the name, the face, the
+// role, the colours, the line shown while she is mid-flow — now comes from the
+// funnel's `persona`, so one component renders every reader the CMS can make.
+export function ChatCard({ funnel, persona, unread = 0, sound = true }) {
+  const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance, finish } = funnel;
   const scrollRef = useRef(null);
   const audioRef = useRef(null);
   const [muted, setMuted] = useState(false);
-  // What the visitor has reacted with, keyed by message id. Session-only,
-  // like everything else the funnel holds.
   const [reactions, setReactions] = useState({});
   const react = (id, emoji) =>
     setReactions((r) => {
@@ -20,10 +21,7 @@ export function ChatCard({ funnel, unread = 0 }) {
       return next;
     });
 
-  const playSend = useChatSfx(messages, muted);
-
-  // Every control the visitor can act on sounds, including the ones that
-  // produce no message: Continue, and picking a reaction.
+  const playSend = useChatSfx(messages, muted || !sound);
   const withSound = (fn) => (...args) => { playSend(); return fn(...args); };
 
   useEffect(() => {
@@ -31,13 +29,12 @@ export function ChatCard({ funnel, unread = 0 }) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, dock]);
 
-  // Looping ambient bed. Browsers block autoplay until the page has been
-  // interacted with, so fall back to starting on the first user gesture.
+  // Looping ambient bed. Off entirely in the editor preview — a track starting
+  // every time someone retypes a line would be unbearable.
   useEffect(() => {
+    if (!sound) return undefined;
     const audio = new Audio('/audio/ambient.mp3');
     audio.loop = true;
-    // Well under the reading, and under the send/reply sounds that now sit on
-    // top of it — the bed should register as atmosphere, not as music.
     audio.volume = 0.05;
     audioRef.current = audio;
 
@@ -52,48 +49,43 @@ export function ChatCard({ funnel, unread = 0 }) {
       audio.pause();
       audio.src = '';
     };
-  }, []);
+  }, [sound]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.muted = muted;
   }, [muted]);
 
+  const accent = persona?.accent || '#dfa73a';
+
   return (
-    // The column is pinned to minmax(0,1fr): grid items default to a minimum
-    // of their own content, so one wide row — a long line, or a reaction
-    // picker sitting beside a bubble — stretched the whole card past the
-    // screen, clipping the header and dock with it.
-    <section className="grid h-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]">
-      {/* Header */}
-      {/* Above the messages: reaction badges and pickers are positioned, and
-          without this they paint over the avatar and the name. */}
-      <header className="relative z-20 flex items-center gap-3 rounded-b-3xl bg-[#1a043d] px-3 py-2.5">
-        {/* The favicon carries this count too, but phone browsers hide the tab
-            strip — so on a phone the avatar is the only place it can show. */}
+    <section
+      className="grid h-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] bg-[#080910]"
+      style={{ '--gold': accent }}
+    >
+      <header
+        className="relative z-20 flex items-center gap-3 rounded-b-3xl px-3 py-2.5"
+        style={{ background: persona?.header || '#1a043d' }}
+      >
         <div className="relative shrink-0">
-          <img
-            src="/images/chat/selene-avatar.png"
-            alt="Selene"
-            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/chat/sabrina-avatar.png'; }}
-            className="size-12 rounded-full object-cover shadow-[0_0_16px_rgba(190,108,255,0.5)]"
-            style={{ objectPosition: 'center 18%' }}
-          />
+          <Avatar persona={persona} />
           {unread > 0 && (
             <span
               aria-label={`${unread} new messages`}
-              className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-[#f0334b] px-1 text-[.55rem] font-bold leading-4 text-white ring-2 ring-[#1a043d] sm:hidden"
-              style={{ animation: 'reactionLand .3s cubic-bezier(.2,1.5,.4,1)' }}
+              className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-[#f0334b] px-1 text-[.55rem] font-bold leading-4 text-white ring-2 sm:hidden"
+              style={{ animation: 'reactionLand .3s cubic-bezier(.2,1.5,.4,1)', '--tw-ring-color': persona?.header || '#1a043d' }}
             >
               {unread > 9 ? '9+' : unread}
             </span>
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <p className="font-sans text-xl font-semibold leading-tight text-[var(--gold)]">Selene</p>
-          <p className="font-sans inline-flex items-center gap-1.5 text-[.7rem] text-white/55">
+          <p className="font-sans truncate text-xl font-semibold leading-tight" style={{ color: accent }}>
+            {persona?.name || 'Untitled'}
+          </p>
+          <p className="font-sans inline-flex items-center gap-1.5 truncate text-[.7rem] text-white/55">
             <span className="live-dot size-2.5 shrink-0 rounded-full bg-[#38c878]" aria-hidden="true" />
             <span className="sr-only">Live session. </span>
-            Astrological Portrait Reader
+            {persona?.role || ''}
           </p>
         </div>
         <button
@@ -107,33 +99,59 @@ export function ChatCard({ funnel, unread = 0 }) {
         </button>
       </header>
 
-      {/* Messages */}
-      {/* gap-4 rather than gap-2: a reaction badge hangs off the bottom of its
-          bubble and needs clearance from the next one. */}
-      {/* `isolate` keeps the messages' own stacking to themselves, so a badge
-          or picker can never climb above the header or the dock. */}
       <div ref={scrollRef} className="no-scrollbar no-callout isolate flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3.5">
         {messages.map((m) => (
-          <Message key={m.id} m={m} reaction={reactions[m.id]} onReact={withSound((e) => react(m.id, e))} />
+          <Message key={m.id} m={m} accent={accent} reaction={reactions[m.id]} onReact={withSound((e) => react(m.id, e))} />
         ))}
       </div>
 
-      {/* Dock */}
       <div className="shrink-0 border-t border-white/8 bg-[#0c0d14]/96 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
         <Dock
           dock={dock}
+          persona={persona}
           onButton={withSound(chooseButton)}
           onSubmit={withSound(submitInput)}
           onDate={withSound(submitDate)}
           onSelect={withSound(submitSelect)}
           onContinue={withSound(advance)}
+          onFinish={withSound(finish)}
         />
       </div>
     </section>
   );
 }
 
-function Message({ m, reaction, onReact }) {
+// An uploaded avatar is a data URL; a stock one is a path. Either can be
+// missing or broken, and a broken face in the header is worse than no face, so
+// it falls back to the persona's initial on the header colour.
+function Avatar({ persona }) {
+  const [failed, setFailed] = useState(false);
+  const src = persona?.avatar;
+  useEffect(() => setFailed(false), [src]);
+
+  if (!src || failed) {
+    return (
+      <div
+        className="grid size-12 place-items-center rounded-full text-lg font-semibold text-white/80 shadow-[0_0_16px_rgba(190,108,255,0.5)]"
+        style={{ background: 'rgba(255,255,255,0.12)' }}
+        aria-hidden="true"
+      >
+        {(persona?.name || '?').trim().charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={persona?.name || ''}
+      onError={() => setFailed(true)}
+      className="size-12 rounded-full object-cover shadow-[0_0_16px_rgba(190,108,255,0.5)]"
+      style={{ objectPosition: 'center 18%' }}
+    />
+  );
+}
+
+function Message({ m, accent, reaction, onReact }) {
   if (m.who === 'typing') {
     return (
       <div className="flex max-w-max flex-col gap-1 self-start">
@@ -142,20 +160,18 @@ function Message({ m, reaction, onReact }) {
             <span key={i} className="size-2 rounded-full bg-white/60" style={{ animation: 'typingDot 1.2s infinite ease-in-out', animationDelay: `${i * 0.18}s` }} />
           ))}
         </div>
-        <p className="font-sans px-1 text-[.7rem] text-white/45" role="status">{m.label || 'Selene is typing'}</p>
+        <p className="font-sans px-1 text-[.7rem] text-white/45" role="status">{m.label}</p>
       </div>
     );
   }
-  if (m.who === 'traits') {
-    // What she has read off the chart so far. The list grows between the
-    // first sketch and the neck, so it reads as notes taken while working.
+  if (m.who === 'list') {
     return (
       <Reactable reaction={reaction} onReact={onReact}>
         <div className="bubble-in w-fit max-w-full rounded-2xl rounded-tl-md border border-white/10 bg-white/8 px-4 py-3">
           <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-            {m.traits.map((t) => (
-              <li key={t} className="font-sans flex items-baseline gap-2 text-[.95rem] leading-snug text-white/85">
-                <span aria-hidden="true" className="text-[var(--gold)]">·</span>
+            {m.items.map((t, i) => (
+              <li key={i} className="font-sans flex items-baseline gap-2 text-[.95rem] leading-snug text-white/85">
+                <span aria-hidden="true" style={{ color: accent }}>·</span>
                 {t}
               </li>
             ))}
@@ -164,48 +180,39 @@ function Message({ m, reaction, onReact }) {
       </Reactable>
     );
   }
-  if (m.who === 'sketch') {
+  if (m.who === 'image') {
     return (
       <Reactable reaction={reaction} onReact={onReact} className="w-[82%]">
-      <figure className="bubble-in m-0 flex w-full flex-col gap-2">
-        {/* The finished portrait stays blurred until the full reading is unlocked. */}
-        <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
-          <img
-            src={m.src}
-            alt={
-              m.locked ? 'Your completed soulmate sketch, blurred until unlocked'
-                : m.complete ? 'Your completed soulmate sketch'
-                : 'Your soulmate sketch, still forming'
-            }
-            className={`block w-full object-cover transition-all duration-700 ${m.locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
-          />
-          {m.locked && (
-            <div className="absolute inset-0 flex items-end justify-center pb-6">
-              <span className="font-sans rounded-md bg-black/55 px-3.5 py-1.5 text-[.7rem] font-medium uppercase tracking-[0.18em] text-[var(--gold)] backdrop-blur-sm">
-                Details Redacted
-              </span>
-            </div>
-          )}
-        </div>
-      </figure>
+        <figure className="bubble-in m-0 flex w-full flex-col gap-2">
+          <div className="relative overflow-hidden rounded-2xl rounded-tl-md border border-white/10 bg-white/5">
+            <img
+              src={m.src}
+              alt={m.locked ? 'Blurred until unlocked' : ''}
+              className={`block w-full object-cover transition-all duration-700 ${m.locked ? 'blur-md scale-105' : 'blur-0 scale-100'}`}
+            />
+            {m.locked && (
+              <div className="absolute inset-0 flex items-end justify-center pb-6">
+                <span
+                  className="font-sans rounded-md bg-black/55 px-3.5 py-1.5 text-[.7rem] font-medium uppercase tracking-[0.18em] backdrop-blur-sm"
+                  style={{ color: accent }}
+                >
+                  Details Redacted
+                </span>
+              </div>
+            )}
+          </div>
+        </figure>
       </Reactable>
     );
   }
+
   const sent = m.who === 'user';
   const bubble = (
     <Bubble
       variant={sent ? 'default' : 'muted'}
       align={sent ? 'end' : 'start'}
-      // Selene's bubbles sit in the reaction wrapper, which caps the width
-      // already. Bubble's own percentage cap has to come off entirely: against
-      // a wrapper that is itself sizing to the bubble it resolves circularly,
-      // and the browser settles that by collapsing the bubble — which is what
-      // was breaking words down the middle.
       className={`${m.reaction ? 'mb-3' : ''} ${sent ? '' : 'max-w-none'}`}
     >
-      {/* Flat corner on the sender's side, mirroring the typing indicator.
-          Selene's are glass — translucent over the field, a hairline edge, and
-          a highlight along the top so they catch light rather than sit flat. */}
       <BubbleContent
         className={sent ? 'rounded-tr-md' : 'rounded-tl-md backdrop-blur-xl'}
         style={sent ? undefined : {
@@ -227,36 +234,47 @@ function Message({ m, reaction, onReact }) {
     </Bubble>
   );
 
-  // The visitor's own messages aren't reactable — you don't react to yourself.
   if (sent) return bubble;
+  return <Reactable reaction={reaction} onReact={onReact}>{bubble}</Reactable>;
+}
+
+function TrustRow({ items }) {
+  if (!items?.length) return null;
   return (
-    <Reactable reaction={reaction} onReact={onReact}>
-      {bubble}
-    </Reactable>
+    <ul className="font-sans m-0 flex list-none flex-col items-center gap-0.5 p-0 pt-1.5 text-center text-[.68rem] leading-snug text-white/45">
+      {items.filter(Boolean).map((t, i) => <li key={i}>{t}</li>)}
+    </ul>
   );
 }
 
-function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
+function Dock({ dock, persona, onButton, onSubmit, onDate, onSelect, onContinue, onFinish }) {
+  if (dock.type === 'cta') {
+    return (
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => onFinish(dock)}
+          className="font-sans inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl px-8 text-[1rem] font-bold text-[#1a1408] shadow-[0_0_28px_rgba(223,167,58,0.35)] transition-[filter,transform] hover:brightness-105 active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0d14]"
+          style={{ background: 'var(--gold)' }}
+        >
+          {dock.label || 'Continue'}
+          <span aria-hidden="true">→</span>
+        </button>
+        <TrustRow items={dock.trust} />
+      </div>
+    );
+  }
   if (dock.type === 'buttons') {
     return (
       <div className="flex flex-col gap-2">
-        {dock.buttons.map((b, i) =>
-          b.variant === 'gold' ? (
-            <button
-              key={i}
-              onClick={() => onButton(b)}
-              className="font-sans inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-8 text-[1rem] font-bold text-[#1a1408] shadow-[0_0_28px_rgba(223,167,58,0.35)] transition-[filter,transform] hover:brightness-105 active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0d14]"
-            >
-              {b.label}
-              {b.arrow && <span aria-hidden="true">→</span>}
-            </button>
-          ) : i === 0 ? (
-            <RainbowButton key={i} onClick={() => onButton(b)} className="font-sans w-full">
+        {(dock.options || []).map((b, i) =>
+          i === 0 ? (
+            <RainbowButton key={b.id || i} onClick={() => onButton(b)} className="font-sans w-full">
               {b.label}
             </RainbowButton>
           ) : (
             <button
-              key={i}
+              key={b.id || i}
               onClick={() => onButton(b)}
               className="font-sans inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/10 bg-[#15161c] px-8 text-[.85rem] font-semibold text-white/50 transition-colors hover:bg-[#1b1c24] hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c084fc] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0d14]"
             >
@@ -264,13 +282,7 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
             </button>
           )
         )}
-        {/* Stacked rows, not an inline list: these are the deliverables and
-            the delivery promise, and they read as two statements. */}
-        {dock.trust && (
-          <ul className="font-sans m-0 flex list-none flex-col items-center gap-0.5 p-0 pt-1.5 text-center text-[.68rem] leading-snug text-white/45">
-            {dock.trust.map((t) => <li key={t}>{t}</li>)}
-          </ul>
-        )}
+        <TrustRow items={dock.trust} />
       </div>
     );
   }
@@ -284,6 +296,7 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
   if (dock.type === 'input') {
     return (
       <InputRow
+        key={dock.key}
         placeholder={dock.placeholder}
         cta={dock.cta}
         inputType={dock.inputType}
@@ -292,16 +305,14 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
     );
   }
   if (dock.type === 'date') {
-    return <DateRow cta={dock.cta} onSend={(parts) => onDate(dock.key, parts, dock.next)} />;
+    return <DateRow key={dock.key} cta={dock.cta} onSend={(parts) => onDate(dock.key, parts, dock.next)} />;
   }
   if (dock.type === 'select') {
-    return <SelectRow options={dock.options} cta={dock.cta} onSend={(opt) => onSelect(dock.key, opt, dock.next)} />;
+    return <SelectRow key={dock.key} options={dock.options || []} cta={dock.cta} onSend={(opt) => onSelect(dock.key, opt, dock.next)} />;
   }
-  // Nothing to tap — she is mid-reading. Rather than an empty bar, say she is
-  // still there, so the wait reads as company instead of a stall.
   return (
     <p className="font-sans m-0 py-2.5 text-center text-[.8rem] italic text-white/40">
-      Selene is with you…
+      {persona?.name || ''} {persona?.idleText || 'is with you…'}
     </p>
   );
 }
@@ -309,29 +320,24 @@ function Dock({ dock, onButton, onSubmit, onDate, onSelect, onContinue }) {
 function SelectRow({ options, cta, onSend }) {
   const [chosen, setChosen] = useState(null);
   return (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={(e) => { e.preventDefault(); if (chosen) onSend(chosen); }}
-    >
-      {options.map((o) => {
-        const active = chosen?.value === o.value;
+    <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); if (chosen) onSend(chosen); }}>
+      {options.map((o, i) => {
+        const active = chosen === o;
         return (
           <button
-            key={o.value}
+            key={o.id || i}
             type="button"
             aria-pressed={active}
             onClick={() => setChosen(o)}
             className={`font-sans inline-flex h-12 w-full items-center justify-center rounded-xl border px-8 text-[.85rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95] ${
-              active
-                ? 'border-[#4c1d95] bg-[#1d1430] text-white'
-                : 'border-white/10 bg-[#15161c] text-white/50 hover:bg-[#1b1c24] hover:text-white/70'
+              active ? 'border-[#4c1d95] bg-[#1d1430] text-white' : 'border-white/10 bg-[#15161c] text-white/50 hover:bg-[#1b1c24] hover:text-white/70'
             }`}
           >
             {o.label}
           </button>
         );
       })}
-      <RainbowButton type="submit" disabled={!chosen} className="font-sans w-full">{cta}</RainbowButton>
+      <RainbowButton type="submit" disabled={!chosen} className="font-sans w-full">{cta || 'Continue'}</RainbowButton>
     </form>
   );
 }
@@ -340,15 +346,12 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const THIS_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 90 }, (_, i) => THIS_YEAR - 18 - i);
 const selectClass =
-  // `select-chevron` swaps the native arrow for one that can actually be
-  // positioned; the right padding then keeps the text clear of it.
   'select-chevron font-sans h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#15161c] pl-3 pr-8 text-[.85rem] text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[#4c1d95]';
 
 function DateRow({ cta = 'Continue', onSend }) {
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [year, setYear] = useState('');
-  // Clamp the day list to the selected month (leap years included).
   const daysInMonth = month && year ? new Date(Number(year), Number(month), 0).getDate() : 31;
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const complete = month && day && year && Number(day) <= daysInMonth;
@@ -390,20 +393,20 @@ function InputRow({ placeholder, cta, inputType, onSend }) {
   const send = () => { if (!valid) return; setValue(''); onSend(value.trim()); };
 
   const fieldClass =
-    'no-scrollbar font-sans max-h-[120px] min-h-[48px] w-full flex-1 resize-none rounded-[999px] border border-[var(--gold)]/20 bg-white/5 px-4.5 py-3 text-[.9rem] leading-tight text-white/90 outline-none placeholder:font-semibold placeholder:text-white/60';
+    'no-scrollbar font-sans max-h-[120px] min-h-[48px] w-full flex-1 resize-none rounded-[999px] border bg-white/5 px-4.5 py-3 text-[.9rem] leading-tight text-white/90 outline-none placeholder:font-semibold placeholder:text-white/60';
+  const fieldStyle = { borderColor: 'color-mix(in srgb, var(--gold) 20%, transparent)' };
 
-  // Email gets a real input so mobile shows the right keyboard and the
-  // browser can autofill; everything else stays a growing textarea.
-  const field = isEmail ? (
+  const field = isEmail || inputType === 'tel' || inputType === 'number' ? (
     <input
       ref={taRef}
-      type="email"
-      inputMode="email"
-      autoComplete="email"
+      type={inputType === 'number' ? 'number' : inputType}
+      inputMode={isEmail ? 'email' : inputType === 'tel' ? 'tel' : inputType === 'number' ? 'numeric' : undefined}
+      autoComplete={isEmail ? 'email' : inputType === 'tel' ? 'tel' : undefined}
       value={value}
       placeholder={placeholder}
       onChange={(e) => setValue(e.target.value)}
       className={fieldClass}
+      style={fieldStyle}
     />
   ) : (
     <textarea
@@ -414,11 +417,10 @@ function InputRow({ placeholder, cta, inputType, onSend }) {
       onChange={(e) => { setValue(e.target.value); grow(e.target); }}
       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
       className={fieldClass}
+      style={fieldStyle}
     />
   );
 
-  // Stages that name a CTA stack a full-width button under the field;
-  // the rest keep the compact send icon beside it.
   if (cta) {
     return (
       <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex flex-col gap-2">
