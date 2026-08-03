@@ -24,28 +24,20 @@ export function PreviewPanel({ funnel }) {
   const [handoff, setHandoff] = useState(null);
   const [runId, setRunId] = useState(0);
 
-  // A new object identity on every restart or speed change is what makes the
-  // engine re-boot; the id carries the run so a restart is a genuinely fresh
-  // reading rather than a resumed one.
+  // A new object identity on every restart is what makes the engine re-boot;
+  // the run id carries it, so a restart is a genuinely fresh reading rather
+  // than a resumed one. Speed is passed as an option instead of being baked in,
+  // so changing it does not restart what you were watching — and so the saved
+  // pacing is never touched.
   const previewFunnel = useMemo(
-    () => ({
-      ...funnel,
-      id: `${funnel.id}:preview:${runId}:${speed}`,
-      pacing: {
-        ...funnel.pacing,
-        msPerCharMin: funnel.pacing.msPerCharMin / speed,
-        msPerCharMax: funnel.pacing.msPerCharMax / speed,
-        minTyping: funnel.pacing.minTyping / speed,
-        maxTyping: funnel.pacing.maxTyping / speed,
-      },
-    }),
+    () => ({ ...funnel, id: `${funnel.id}:preview:${runId}` }),
     // Copy edits should not restart the reading mid-proof, so this deliberately
-    // does not depend on the whole funnel — the Restart button is the way back
-    // to the top after an edit.
-    [funnel.id, runId, speed] // eslint-disable-line react-hooks/exhaustive-deps
+    // does not depend on the whole funnel — Restart is the way back to the top.
+    [funnel.id, runId] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const engine = useFunnel(previewFunnel, {
+    speed,
     onFinish: ({ dock, params }) => {
       setHandoff({ url: dock.url, next: dock.next, params });
       // Returning false keeps the engine from navigating away from the editor.
@@ -78,9 +70,14 @@ export function PreviewPanel({ funnel }) {
 
       {handoff && <HandoffNote handoff={handoff} funnel={funnel} />}
 
-      <div className="grid min-h-0 flex-1 place-items-center rounded-xl border border-white/8 bg-[#06070c] p-3">
+      {/* Flex, not `grid place-items-center`: a percentage height on a centred
+          grid item does not resolve against the track, so the card fell back to
+          its content height and hung past the bottom of the pane on a short
+          window — clipping the dock, which is the part you most need to see.
+          Flex stretch gives it a real height with no percentage involved. */}
+      <div className="flex min-h-0 flex-1 justify-center rounded-xl border border-white/8 bg-[#06070c] p-3">
         <AIGradientBorder className="h-full max-h-[720px] w-full max-w-[400px] rounded-[22px] p-px">
-          <ChatCard funnel={engine} persona={funnel.persona} sound={false} />
+          <ChatCard funnel={engine} persona={funnel.persona} audio={funnel.audio} sound={false} />
         </AIGradientBorder>
       </div>
     </div>

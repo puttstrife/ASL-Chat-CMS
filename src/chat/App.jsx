@@ -61,7 +61,7 @@ export default function App() {
 
       <main className="fixed inset-0 z-10 grid place-items-center sm:p-4">
         <AIGradientBorder className="h-dvh w-full max-w-[600px] rounded-none p-0 sm:h-[min(800px,100dvh-2rem)] sm:rounded-[22px] sm:p-px">
-          <ChatCard funnel={engine} persona={funnel.persona} unread={unread} />
+          <ChatCard funnel={engine} persona={funnel.persona} audio={funnel.audio} unread={unread} />
         </AIGradientBorder>
       </main>
     </>

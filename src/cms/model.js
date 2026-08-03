@@ -69,6 +69,23 @@ export const makePersona = (over = {}) => ({
   ...over,
 });
 
+// The ambient bed. Uploaded tracks are embedded in the funnel like avatars are,
+// which is what keeps a funnel one portable file — but audio is far heavier than
+// an image, and localStorage caps out around 5–10MB for everything combined. So
+// uploads are capped hard, and a path to a bundled file stays the cheaper option.
+//
+// The send/reply sounds are deliberately not configurable: they are short and
+// generic enough to suit any reader, where music sets a mood that genuinely
+// differs between one persona and the next.
+export const makeAudio = (over = {}) => ({
+  src: '/audio/ambient.mp3',
+  // Well under the reading and under the send/reply sounds sitting on top of it:
+  // the bed should register as atmosphere, not as music.
+  volume: 0.05,
+  enabled: true,
+  ...over,
+});
+
 // Selene's measured settings, which are the defaults for anything new.
 // 30–50ms per character is ~300wpm; deliberately fast, chosen to land a full
 // reading near 7 minutes. Raise `msPerChar` to make the reader feel more human
@@ -89,11 +106,24 @@ export const makeFunnel = (over = {}) => {
     updatedAt: new Date().toISOString(),
     persona: makePersona(),
     pacing: makePacing(),
+    audio: makeAudio(),
     startStage: first.id,
     stages: [first],
     ...over,
   };
 };
+
+// Funnels saved before a field existed — and any imported from elsewhere — are
+// filled in on read rather than migrated in place. Anything above the store can
+// then assume the shape is whole, and adding a field later stays a one-line
+// change here instead of a migration.
+export const withDefaults = (funnel) => ({
+  ...funnel,
+  persona: { ...makePersona(), ...funnel.persona },
+  pacing: { ...makePacing(), ...funnel.pacing },
+  audio: { ...makeAudio(), ...funnel.audio },
+  stages: funnel.stages || [],
+});
 
 // ── Derived helpers the editor and the player both need ──
 

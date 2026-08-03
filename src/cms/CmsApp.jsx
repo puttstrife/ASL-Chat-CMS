@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { estimateFunnel, fmtDuration } from './estimate.js';
 import { danglingLinks } from './model.js';
+import { AudioPanel } from './panels/AudioPanel.jsx';
 import { PacingPanel } from './panels/PacingPanel.jsx';
 import { PersonaPanel } from './panels/PersonaPanel.jsx';
 import { PreviewPanel } from './panels/PreviewPanel.jsx';
@@ -67,7 +68,11 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
         </div>
         <div className="flex gap-2">
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => importFile(e.target.files?.[0])} />
-          <Btn onClick={() => fileRef.current?.click()}>Import</Btn>
+          {/* Named for what it actually accepts: a file this app exported, not
+              a script doc or a spreadsheet. */}
+          <Btn onClick={() => fileRef.current?.click()} title="Load a .json funnel file that was exported from here">
+            Import funnel file
+          </Btn>
           <Btn variant="primary" onClick={create}>+ New funnel</Btn>
         </div>
       </header>
@@ -76,7 +81,9 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
 
       <p className="rounded-lg border border-white/8 bg-[#0e0f16] px-3.5 py-2.5 text-[.75rem] leading-relaxed text-white/40">
         Funnels are saved in <strong className="text-white/60">this browser only</strong> — not on a server. Clearing
-        site data loses them, and nobody else can see them. Use Export to hand one to someone, or to keep a backup.
+        site data loses them, and nobody else can see them. <strong className="text-white/60">Export</strong> writes a
+        funnel to a <code>.json</code> file; <strong className="text-white/60">Import funnel file</strong> loads one
+        back. That pair is the only way to move a funnel to another browser or machine, or to keep a backup.
       </p>
 
       <ul className="flex list-none flex-col gap-2 p-0">
@@ -136,14 +143,28 @@ function Editor({ funnel, onBack, onChange }) {
   const [tab, setTab] = useState('script');
   const [selectedStage, setSelectedStage] = useState(funnel.stages[0]?.id || null);
   const [saved, setSaved] = useState(true);
+  const [saveError, setSaveError] = useState('');
 
   // Autosave, debounced. A CMS that needs a Save button invites losing work to
   // a closed tab, and there is no server round-trip to make saving expensive.
+  //
+  // Storage can genuinely fill up now that music and avatars are embedded, and a
+  // write that fails silently is worse than no autosave at all — so a failure is
+  // said out loud and the "Saved" badge does not lie.
   const first = useRef(true);
   useEffect(() => {
     if (first.current) { first.current = false; return; }
     setSaved(false);
-    const t = setTimeout(() => { store.saveFunnel(funnel); setSaved(true); }, 600);
+    const t = setTimeout(() => {
+      try {
+        store.saveFunnel(funnel);
+        setSaved(true);
+        setSaveError('');
+      } catch (e) {
+        setSaved(false);
+        setSaveError(e.message);
+      }
+    }, 600);
     return () => clearTimeout(t);
   }, [funnel]);
 
@@ -201,6 +222,10 @@ function Editor({ funnel, onBack, onChange }) {
               <PacingPanel
                 funnel={funnel}
                 onPatch={(patch) => onChange((prev) => ({ ...prev, pacing: { ...prev.pacing, ...patch } }))}
+              />
+              <AudioPanel
+                audio={funnel.audio}
+                onPatch={(patch) => onChange((prev) => ({ ...prev, audio: { ...prev.audio, ...patch } }))}
               />
             </div>
           )}

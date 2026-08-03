@@ -11,7 +11,7 @@
 // database, only this file should need rewriting — nothing above it knows where
 // a funnel came from.
 
-import { makeFunnel, uid } from './model.js';
+import { makeFunnel, uid, withDefaults } from './model.js';
 import { SEED_FUNNELS } from './seed.js';
 
 const KEY = 'chat-cms:funnels:v1';
@@ -19,14 +19,26 @@ const SEEDED = 'chat-cms:seeded:v1';
 
 const read = () => {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) || [];
+    return (JSON.parse(localStorage.getItem(KEY)) || []).map(withDefaults);
   } catch {
     return [];
   }
 };
 
+// Embedded avatars and audio make the quota a real ceiling rather than a
+// theoretical one, and a failed write must not look like a successful save —
+// so this throws something a person can act on and the editor surfaces it.
 const write = (funnels) => {
-  localStorage.setItem(KEY, JSON.stringify(funnels));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(funnels));
+  } catch (e) {
+    if (e?.name === 'QuotaExceededError' || e?.code === 22) {
+      throw new Error(
+        'Out of browser storage — this change was NOT saved. Uploaded music and avatars are stored inside the funnel, so delete or export a funnel you are not using, or swap a big upload for a file path.'
+      );
+    }
+    throw e;
+  }
   return funnels;
 };
 
@@ -37,7 +49,7 @@ export function listFunnels() {
   if (!localStorage.getItem(SEEDED)) {
     localStorage.setItem(SEEDED, '1');
     const existing = read();
-    if (!existing.length) return write(SEED_FUNNELS.map((f) => ({ ...f })));
+    if (!existing.length) return write(SEED_FUNNELS.map(withDefaults));
   }
   return read();
 }
@@ -115,7 +127,7 @@ export async function importFunnel(file) {
   }
   // A fresh id, so importing a funnel you already have makes a second copy
   // rather than silently overwriting the one you are working on.
-  const funnel = { ...parsed, id: uid(), name: `${parsed.name || 'Imported funnel'}` };
+  const funnel = withDefaults({ ...parsed, id: uid(), name: parsed.name || 'Imported funnel' });
   write([...listFunnels(), funnel]);
   return funnel;
 }

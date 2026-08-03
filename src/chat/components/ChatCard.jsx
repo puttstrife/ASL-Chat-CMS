@@ -8,7 +8,7 @@ import { useChatSfx } from '../hooks/useChatSfx.js';
 // The chat surface. Everything that used to be Selene — the name, the face, the
 // role, the colours, the line shown while she is mid-flow — now comes from the
 // funnel's `persona`, so one component renders every reader the CMS can make.
-export function ChatCard({ funnel, persona, unread = 0, sound = true }) {
+export function ChatCard({ funnel, persona, audio: audioConfig, unread = 0, sound = true }) {
   const { messages, dock, chooseButton, submitInput, submitDate, submitSelect, advance, finish } = funnel;
   const scrollRef = useRef(null);
   const audioRef = useRef(null);
@@ -29,13 +29,17 @@ export function ChatCard({ funnel, persona, unread = 0, sound = true }) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, dock]);
 
-  // Looping ambient bed. Off entirely in the editor preview — a track starting
-  // every time someone retypes a line would be unbearable.
+  // Looping ambient bed, configured per funnel. Off entirely in the editor
+  // preview — a track restarting every time someone retypes a line would be
+  // unbearable; the Music panel has its own opt-in listen button instead.
+  const bedSrc = audioConfig?.enabled === false ? null : audioConfig?.src;
+  const bedVolume = audioConfig?.volume ?? 0.05;
+
   useEffect(() => {
-    if (!sound) return undefined;
-    const audio = new Audio('/audio/ambient.mp3');
+    if (!sound || !bedSrc) return undefined;
+    const audio = new Audio(bedSrc);
     audio.loop = true;
-    audio.volume = 0.05;
+    audio.volume = bedVolume;
     audioRef.current = audio;
 
     const start = () => audio.play().catch(() => {});
@@ -49,7 +53,13 @@ export function ChatCard({ funnel, persona, unread = 0, sound = true }) {
       audio.pause();
       audio.src = '';
     };
-  }, [sound]);
+    // Volume is applied separately below, so nudging it does not tear down and
+    // restart the track from the beginning.
+  }, [sound, bedSrc]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = bedVolume;
+  }, [bedVolume]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.muted = muted;

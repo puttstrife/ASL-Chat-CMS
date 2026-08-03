@@ -48,15 +48,19 @@ export function Panel({ title, subtitle, right, children, className = '' }) {
   );
 }
 
-// Reads a picked file as a data URL. Images live inside the funnel JSON rather
-// than in a bucket, which is what makes a funnel a single portable file — at
-// the cost of size, so anything big is rejected loudly rather than silently
+// Reads a picked file as a data URL. Uploads live inside the funnel JSON rather
+// than in a bucket, which is what makes a funnel a single portable file — at the
+// cost of size, so anything too big is rejected loudly rather than silently
 // blowing the localStorage quota.
-export function readImageFile(file, { maxKb = 900 } = {}) {
+export function readUploadedFile(file, { kind = 'image', maxKb = 900 } = {}) {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) return reject(new Error('That is not an image file.'));
+    if (!file.type.startsWith(`${kind}/`)) return reject(new Error(`That is not ${kind === 'audio' ? 'an audio' : 'an image'} file.`));
     if (file.size > maxKb * 1024) {
-      return reject(new Error(`That image is ${Math.round(file.size / 1024)}KB. Keep it under ${maxKb}KB — funnels are stored whole, so a big image can break saving.`));
+      return reject(
+        new Error(
+          `That file is ${Math.round(file.size / 1024)}KB. Keep it under ${maxKb}KB — funnels are stored whole in this browser, so a big upload can break saving.`
+        )
+      );
     }
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
@@ -64,3 +68,5 @@ export function readImageFile(file, { maxKb = 900 } = {}) {
     reader.readAsDataURL(file);
   });
 }
+
+export const readImageFile = (file, opts = {}) => readUploadedFile(file, { kind: 'image', maxKb: 900, ...opts });

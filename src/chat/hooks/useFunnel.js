@@ -11,7 +11,13 @@ export const slugDob = ({ month, day, year }) => `${year}-${MONTHS[month - 1]}-$
 //
 // `onFinish` fires when a CTA is tapped, so the host decides what a CTA means:
 // navigate, in the real player; stop and report, in the editor preview.
-export function useFunnel(funnel, { onFinish } = {}) {
+//
+// `speed` divides every wait, so the editor can play a reading faster than it
+// ships. It has to cover the thinking pauses between messages as well as the
+// typing itself: those are a fixed ~0.8s per message, so scaling only the
+// typing left a fifteen-message stage taking thirteen seconds however fast the
+// control claimed to be.
+export function useFunnel(funnel, { onFinish, speed = 1 } = {}) {
   const [messages, setMessages] = useState([]);
   const [dock, setDock] = useState({ type: 'none' });
 
@@ -23,6 +29,7 @@ export function useFunnel(funnel, { onFinish } = {}) {
   // from the previous version can tell it is stale and bail. Without it,
   // editing copy mid-preview leaves two readings interleaving.
   const runRef = useRef(0);
+  const rateRef = useRef(1);
 
   const stages = useRef({});
   stages.current = Object.fromEntries((funnel?.stages || []).map((s) => [s.id, s]));
@@ -64,11 +71,20 @@ export function useFunnel(funnel, { onFinish } = {}) {
   };
   const scheduleReaction = (id, text) => setTimeout(() => updateMsg(id, { reaction: pickReaction(text) }), 550);
 
+  // Every wait goes through `wait`, so the speed control cannot miss one — and
+  // `between` stays a plain random, since it also picks the per-character rate,
+  // which must not be divided a second time on its way through `wait`.
+  //
+  // Read from a ref, not the closure: a run already in flight was started by an
+  // earlier render, and changing the speed should take effect on the very next
+  // pause rather than only after a restart.
+  rateRef.current = speed > 0 ? speed : 1;
+  const wait = (ms) => sleep(ms / rateRef.current);
   const between = (min, max) => min + Math.random() * (max - min);
 
   const holdTyping = async (ms, label) => {
     const typingId = push({ who: 'typing', label: `${personaName} ${label || 'is typing'}` });
-    await sleep(ms);
+    await wait(ms);
     remove(typingId);
   };
 
@@ -80,12 +96,12 @@ export function useFunnel(funnel, { onFinish } = {}) {
   // flashes past in less time than typing it would take.
   const revealLine = async (text, seconds) => {
     const body = interpolate(text);
-    await sleep(between(240, 700));
+    await wait(between(240, 700));
     const perChar = between(...MS_PER_CHAR);
     const forLength = Math.min(MAX_TYPING, Math.max(MIN_TYPING, 300 + body.length * perChar));
     await holdTyping(Math.max(forLength, (seconds || 0) * 1000));
     push({ who: 'persona', text: body });
-    await sleep(between(220, 520));
+    await wait(between(220, 520));
   };
 
   const runStage = useCallback(async (id) => {
@@ -102,10 +118,10 @@ export function useFunnel(funnel, { onFinish } = {}) {
       if (beat.type === 'line') await revealLine(beat.text, beat.seconds);
       else if (beat.type === 'pause') await holdTyping((beat.seconds || 0) * 1000, beat.label);
       else if (beat.type === 'image') {
-        if (beat.src) { push({ who: 'image', src: interpolate(beat.src), locked: Boolean(beat.locked) }); await sleep(700); }
+        if (beat.src) { push({ who: 'image', src: interpolate(beat.src), locked: Boolean(beat.locked) }); await wait(700); }
       } else if (beat.type === 'list') {
         const items = (beat.items || []).filter(Boolean).map(interpolate);
-        if (items.length) { push({ who: 'list', items }); await sleep(700); }
+        if (items.length) { push({ who: 'list', items }); await wait(700); }
       }
     }
 
