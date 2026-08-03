@@ -139,6 +139,44 @@ export function collectKeys(funnel) {
   return [...new Set(keys)];
 }
 
+// Stand-in answers for everything captured before a given stage.
+//
+// Playing from the middle means the visitor never answered anything, so a line
+// like "{name}, I have to be honest with you" would open on "…" and read as
+// broken copy rather than as missing input. Filling them makes a mid-script
+// preview show the shape a real visitor would see.
+const SAMPLES = {
+  email: 'alex@example.com',
+  phone: '+1 555 0100',
+  name: 'Alex',
+  city: 'Lisbon',
+};
+
+export function sampleAnswersBefore(funnel, stageId) {
+  const out = {};
+  for (const stage of funnel.stages) {
+    if (stage.id === stageId) break;
+    const d = stage.dock || {};
+    if (d.type === 'input' && d.key) {
+      out[d.key] = SAMPLES[d.key] || SAMPLES[d.inputType] || 'Sample';
+    } else if (d.type === 'date' && d.key) {
+      out[d.key] = 'March 14, 1985';
+      out[`${d.key}_slug`] = '1985-March-14';
+    } else if (d.type === 'select' && d.key) {
+      const first = (d.options || [])[0];
+      if (first) out[d.key] = first.value ?? first.label;
+    } else if (d.type === 'buttons') {
+      // Whichever answer the writer listed first — a preview has to commit to
+      // one path, and the first is the one they wrote as the likely reply.
+      for (const o of d.options || []) {
+        if (!o.setKey || out[o.setKey] !== undefined) continue;
+        out[o.setKey] = o.setRandom?.length ? o.setRandom[0] : o.setValue ?? '';
+      }
+    }
+  }
+  return out;
+}
+
 // Stage ids a dock can point at, so the editor can flag a link that goes
 // nowhere before the writer ever runs a preview.
 export function danglingLinks(funnel) {

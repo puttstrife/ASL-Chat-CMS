@@ -4,13 +4,27 @@ import { Btn, inputClass, readImageFile, textareaClass } from '../ui.jsx';
 
 // One beat — a message, a pause, an image or a list. Beats play top to bottom,
 // which is why the ordering controls sit on every row rather than behind a menu.
-export function BeatEditor({ beat, keys, onChange, onRemove, onMove, isFirst, isLast }) {
+export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, isPreviewing, isFirst, isLast }) {
   const meta = BEAT_TYPES[beat.type] || {};
   return (
-    <li className="rounded-lg border border-white/8 bg-[#101119]">
+    <li className={`rounded-lg border bg-[#101119] ${isPreviewing ? 'border-[#7c5cff]/50' : 'border-white/8'}`}>
       <div className="flex items-center gap-2 border-b border-white/8 px-2.5 py-1.5">
         <span className="text-[.8rem]" aria-hidden="true">{meta.icon}</span>
         <span className="flex-1 text-[.7rem] font-semibold uppercase tracking-wide text-white/40">{meta.label || beat.type}</span>
+        {/* Play the reading from this beat, rather than sitting through
+            everything before it to check one line. */}
+        <button
+          type="button"
+          onClick={onPreview}
+          title="Play the preview from here"
+          className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[.68rem] font-semibold transition-colors ${
+            isPreviewing
+              ? 'border-[#7c5cff] bg-[#7c5cff] text-white'
+              : 'border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/85'
+          }`}
+        >
+          ▶ Preview
+        </button>
         <div className="flex items-center gap-0.5">
           <IconBtn label="Move up" disabled={isFirst} onClick={() => onMove(-1)}>↑</IconBtn>
           <IconBtn label="Move down" disabled={isLast} onClick={() => onMove(1)}>↓</IconBtn>

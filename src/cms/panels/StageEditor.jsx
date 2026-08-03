@@ -10,7 +10,7 @@ import { DockEditor } from './DockEditor.jsx';
 // `onChange` takes a producer of the next funnel, never a rebuilt one — see the
 // note where it is passed in. Every helper below is written that way so edits
 // made in the same tick compose instead of overwriting one another.
-export function StageList({ funnel, selectedId, onSelect, onChange }) {
+export function StageList({ funnel, selectedId, onSelect, onChange, onPreview, previewing }) {
   const mapStages = (fn) => onChange((prev) => ({ ...prev, stages: fn(prev.stages, prev) }));
 
   const addStage = () => {
@@ -62,6 +62,8 @@ export function StageList({ funnel, selectedId, onSelect, onChange }) {
           funnel={funnel}
           expanded={stage.id === selectedId}
           isStart={stage.id === funnel.startStage}
+          previewing={previewing}
+          onPreview={onPreview}
           onSelect={() => onSelect(stage.id === selectedId ? null : stage.id)}
           onChange={(patch) => patchStage(stage.id, patch)}
           onRemove={() => removeStage(stage.id)}
@@ -76,7 +78,7 @@ export function StageList({ funnel, selectedId, onSelect, onChange }) {
   );
 }
 
-function StageCard({ stage, index, funnel, expanded, isStart, onSelect, onChange, onRemove, onMove, onMakeStart, isFirst, isLast }) {
+function StageCard({ stage, index, funnel, expanded, isStart, previewing, onPreview, onSelect, onChange, onRemove, onMove, onMakeStart, isFirst, isLast }) {
   const beats = stage.beats || [];
   const lineCount = beats.filter((b) => b.type === 'line').length;
 
@@ -134,6 +136,8 @@ function StageCard({ stage, index, funnel, expanded, isStart, onSelect, onChange
                   onChange={(next) => mapBeats((b) => b.map((x, j) => (j === i ? next : x)))}
                   onRemove={() => mapBeats((b) => b.filter((_, j) => j !== i))}
                   onMove={(dir) => moveBeat(i, dir)}
+                  onPreview={() => onPreview(stage.id, i)}
+                  isPreviewing={previewing?.stageId === stage.id && previewing?.beatIndex === i}
                   isFirst={i === 0}
                   isLast={i === beats.length - 1}
                 />

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { AIGradientBorder } from '../../chat/components/AIGradientBorder.jsx';
 import { ChatCard } from '../../chat/components/ChatCard.jsx';
 import { useFunnel } from '../../chat/hooks/useFunnel.js';
+import { sampleAnswersBefore } from '../model.js';
 import { Btn } from '../ui.jsx';
 
 // The funnel as the visitor sees it, beside the thing being edited.
@@ -19,10 +20,24 @@ const SPEEDS = [
   { label: 'Instant', value: 200 },
 ];
 
-export function PreviewPanel({ funnel }) {
+export function PreviewPanel({ funnel, startAt, startBeat = 0, replayKey = 0, onClearStart }) {
   const [speed, setSpeed] = useState(20);
   const [handoff, setHandoff] = useState(null);
   const [runId, setRunId] = useState(0);
+
+  // Previewing beat 0 of the funnel's own start is just a normal play, so it
+  // gets no banner — anything else is a partial run and has to say so.
+  const target = startAt ? funnel.stages.find((s) => s.id === startAt) : null;
+  const fromStage = target && !(startAt === funnel.startStage && startBeat === 0) ? target : null;
+
+  // Playing from the middle means nothing was ever answered, so anything the
+  // script captured earlier is stood in for. Without this a stage opening on
+  // "{name}" would render "…" and read as broken copy rather than as a preview
+  // that simply started late.
+  const seedAnswers = useMemo(
+    () => (fromStage ? sampleAnswersBefore(funnel, fromStage.id) : undefined),
+    [funnel, fromStage] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   // A new object identity on every restart is what makes the engine re-boot;
   // the run id carries it, so a restart is a genuinely fresh reading rather
@@ -30,14 +45,20 @@ export function PreviewPanel({ funnel }) {
   // so changing it does not restart what you were watching — and so the saved
   // pacing is never touched.
   const previewFunnel = useMemo(
-    () => ({ ...funnel, id: `${funnel.id}:preview:${runId}` }),
+    () => ({
+      ...funnel,
+      id: `${funnel.id}:preview:${runId}:${replayKey}:${startAt || ''}:${startBeat}`,
+      startStage: startAt || funnel.startStage,
+    }),
     // Copy edits should not restart the reading mid-proof, so this deliberately
     // does not depend on the whole funnel — Restart is the way back to the top.
-    [funnel.id, runId] // eslint-disable-line react-hooks/exhaustive-deps
+    [funnel.id, runId, replayKey, startAt, startBeat] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const engine = useFunnel(previewFunnel, {
     speed,
+    seedAnswers,
+    startBeat,
     onFinish: ({ dock, params }) => {
       setHandoff({ url: dock.url, next: dock.next, params });
       // Returning false keeps the engine from navigating away from the editor.
@@ -67,6 +88,35 @@ export function PreviewPanel({ funnel }) {
         </div>
         <span className="text-[.66rem] leading-tight text-white/30">Preview speed only — not saved</span>
       </div>
+
+      {fromStage && (
+        <div className="rounded-lg border border-[#7c5cff]/30 bg-[#7c5cff]/10 px-3 py-2 text-[.74rem] leading-relaxed text-white/70">
+          <div className="flex items-start justify-between gap-2">
+            <p>
+              Playing from <strong className="text-white/90">{fromStage.title || 'this stage'}</strong>.
+              {Object.keys(seedAnswers || {}).length > 0 && (
+                <>
+                  {' '}Earlier answers are stood in with samples —{' '}
+                  <span className="text-white/50">
+                    {Object.entries(seedAnswers)
+                      .filter(([k]) => !k.endsWith('_slug'))
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(', ')}
+                  </span>
+                  .
+                </>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={onClearStart}
+              className="shrink-0 rounded border border-white/15 px-1.5 py-0.5 text-[.68rem] font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              From the top
+            </button>
+          </div>
+        </div>
+      )}
 
       {handoff && <HandoffNote handoff={handoff} funnel={funnel} />}
 

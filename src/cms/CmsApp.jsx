@@ -142,6 +142,12 @@ const TABS = [
 function Editor({ funnel, onBack, onChange }) {
   const [tab, setTab] = useState('script');
   const [selectedStage, setSelectedStage] = useState(funnel.stages[0]?.id || null);
+  // Where the preview starts: {stageId, beatIndex}, or null for the funnel's
+  // own start. The counter is what makes tapping the same beat twice replay it
+  // — the position alone would be unchanged, so nothing would restart, and
+  // re-checking a line you just edited is the common case.
+  const [previewFrom, setPreviewFrom] = useState(null);
+  const [replay, setReplay] = useState(0);
   const [saved, setSaved] = useState(true);
   const [saveError, setSaveError] = useState('');
 
@@ -200,7 +206,13 @@ function Editor({ funnel, onBack, onChange }) {
           worked on, so it sits where the eye starts rather than off to one side. */}
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(360px,460px)_minmax(0,1fr)]">
         <aside className="hidden min-h-0 border-r border-white/8 bg-[#0a0b11] p-3.5 lg:block">
-          <PreviewPanel funnel={funnel} />
+          <PreviewPanel
+            funnel={funnel}
+            startAt={previewFrom?.stageId}
+            startBeat={previewFrom?.beatIndex}
+            replayKey={replay}
+            onClearStart={() => { setPreviewFrom(null); setReplay((n) => n + 1); }}
+          />
         </aside>
 
         <div className="min-h-0 overflow-y-auto p-4">
@@ -212,7 +224,14 @@ function Editor({ funnel, onBack, onChange }) {
           )}
 
           {tab === 'script' ? (
-            <StageList funnel={funnel} selectedId={selectedStage} onSelect={setSelectedStage} onChange={onChange} />
+            <StageList
+              funnel={funnel}
+              selectedId={selectedStage}
+              onSelect={setSelectedStage}
+              onChange={onChange}
+              previewing={previewFrom}
+              onPreview={(stageId, beatIndex) => { setPreviewFrom({ stageId, beatIndex }); setReplay((n) => n + 1); }}
+            />
           ) : (
             <div className="flex max-w-xl flex-col gap-4">
               <PersonaPanel

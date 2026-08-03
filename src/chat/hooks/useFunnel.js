@@ -17,7 +17,7 @@ export const slugDob = ({ month, day, year }) => `${year}-${MONTHS[month - 1]}-$
 // typing itself: those are a fixed ~0.8s per message, so scaling only the
 // typing left a fifteen-message stage taking thirteen seconds however fast the
 // control claimed to be.
-export function useFunnel(funnel, { onFinish, speed = 1 } = {}) {
+export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat = 0 } = {}) {
   const [messages, setMessages] = useState([]);
   const [dock, setDock] = useState({ type: 'none' });
 
@@ -30,6 +30,14 @@ export function useFunnel(funnel, { onFinish, speed = 1 } = {}) {
   // editing copy mid-preview leaves two readings interleaving.
   const runRef = useRef(0);
   const rateRef = useRef(1);
+  // Held in a ref, not a dependency: this is a fresh object on every render, so
+  // depending on it would reboot the reading continuously.
+  const seedRef = useRef(seedAnswers);
+  seedRef.current = seedAnswers;
+  // How far into the FIRST stage to begin, so the editor can play from one
+  // message rather than from the top of the stage holding it. Consumed once —
+  // every stage after the first plays whole.
+  const startBeatRef = useRef(0);
 
   const stages = useRef({});
   stages.current = Object.fromEntries((funnel?.stages || []).map((s) => [s.id, s]));
@@ -113,7 +121,10 @@ export function useFunnel(funnel, { onFinish, speed = 1 } = {}) {
     const stage = stages.current[id];
     if (!stage) { runningRef.current = false; return; }
 
-    for (const beat of stage.beats || []) {
+    const skip = startBeatRef.current;
+    startBeatRef.current = 0;
+
+    for (const beat of (stage.beats || []).slice(skip)) {
       if (runRef.current !== myRun) { runningRef.current = false; return; }
       if (beat.type === 'line') await revealLine(beat.text, beat.seconds);
       else if (beat.type === 'pause') await holdTyping((beat.seconds || 0) * 1000, beat.label);
@@ -212,7 +223,8 @@ export function useFunnel(funnel, { onFinish, speed = 1 } = {}) {
   const boot = useCallback(() => {
     runRef.current += 1;
     runningRef.current = false;
-    answers.current = {};
+    answers.current = { ...(seedRef.current || {}) };
+    startBeatRef.current = startBeat || 0;
     idRef.current = 0;
     setMessages([]);
     setDock({ type: 'none' });
