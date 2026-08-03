@@ -34,7 +34,13 @@ export function DockEditor({ dock, stages, selfId, onPatch, onReplace }) {
       </Field>
 
       {dock.type === 'continue' && (
-        <StageLink label="Then go to" value={dock.next} stages={targets} onChange={(next) => set({ next })} />
+        <StageLink
+          label="Then go to"
+          hint="Which stage plays after they tap Continue."
+          value={dock.next}
+          stages={targets}
+          onChange={(next) => set({ next })}
+        />
       )}
 
       {dock.type === 'buttons' && <ButtonsDock dock={dock} targets={targets} set={set} />}
@@ -43,7 +49,13 @@ export function DockEditor({ dock, stages, selfId, onPatch, onReplace }) {
         <>
           <KeyField dock={dock} set={set} placeholder="dob" />
           <Field label="Button text"><input className={inputClass} value={dock.cta || ''} onChange={(e) => set({ cta: e.target.value })} placeholder="Continue" /></Field>
-          <StageLink label="Then go to" value={dock.next} stages={targets} onChange={(next) => set({ next })} />
+          <StageLink
+            label="Then go to"
+            hint="Which stage plays once they've picked a date."
+            value={dock.next}
+            stages={targets}
+            onChange={(next) => set({ next })}
+          />
         </>
       )}
       {dock.type === 'select' && <SelectDock dock={dock} targets={targets} set={set} />}
@@ -74,10 +86,10 @@ function switchType(dock, type) {
 
 const makeOption = () => ({ id: uid(), label: '', next: '' });
 
-function StageLink({ label, value, stages, onChange, allowEmpty = true }) {
+function StageLink({ label, hint = 'Pick which stage plays next.', value, stages, onChange, allowEmpty = true }) {
   const missing = value && !stages.some((s) => s.id === value);
   return (
-    <Field label={label}>
+    <Field label={label} hint={missing ? undefined : hint}>
       <select
         className={`${selectClass} ${missing ? 'border-[#ff6b7d]/50' : ''}`}
         value={missing ? '' : value || ''}
@@ -120,14 +132,31 @@ function ButtonsDock({ dock, targets, set }) {
             <IconBtn label="Remove answer" danger onClick={() => set({ options: options.filter((_, j) => j !== i) })}>✕</IconBtn>
           </div>
           <div className="mt-2 grid gap-2">
-            <StageLink label="Goes to" value={o.next} stages={targets} onChange={(next) => setOpt(i, { next })} />
+            <StageLink
+              label="Goes to"
+              hint="Which stage plays if they pick this answer."
+              value={o.next}
+              stages={targets}
+              onChange={(next) => setOpt(i, { next })}
+            />
+            {/* A button normally only routes. This lets it capture something
+                too — the button equivalent of what a text input does — which is
+                how a funnel remembers a choice nobody typed. */}
             <details className="text-[.72rem]">
-              <summary className="cursor-pointer text-white/35 hover:text-white/60">Also remember an answer…</summary>
+              <summary className="cursor-pointer text-white/40 hover:text-white/70">
+                {o.setKey ? `Remembers ${o.setKey} = ${o.setRandom ? o.setRandom.join(' or ') : o.setValue || '…'}` : 'Also remember what they picked…'}
+              </summary>
+              <p className="mt-1.5 leading-snug text-white/35">
+                Stores their choice so later messages can use it as{' '}
+                <code className="text-white/50">{`{${o.setKey || 'key'}}`}</code> — and so image paths like{' '}
+                <code className="text-white/50">/images/{`{${o.setKey || 'key'}}`}/face.webp</code> can show a
+                different picture depending on the answer.
+              </p>
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <Field label="Save as">
+                <Field label="Save as" hint="A short name, e.g. gender">
                   <input className={inputClass} value={o.setKey || ''} onChange={(e) => setOpt(i, { setKey: e.target.value.replace(/[^a-z0-9_]/gi, '').toLowerCase() })} placeholder="gender" />
                 </Field>
-                <Field label="Value" hint="Comma-separate to pick one at random, held for the session.">
+                <Field label="Value" hint="Comma-separate to pick one at random, held for the whole session.">
                   <input
                     className={inputClass}
                     value={o.setRandom ? o.setRandom.join(', ') : o.setValue || ''}
@@ -183,7 +212,13 @@ function InputDock({ dock, targets, set }) {
       <Field label="Button text">
         <input className={inputClass} value={dock.cta || ''} onChange={(e) => set({ cta: e.target.value })} placeholder="Continue" />
       </Field>
-      <StageLink label="Then go to" value={dock.next} stages={targets} onChange={(next) => set({ next })} />
+      <StageLink
+        label="Then go to"
+        hint="Which stage plays once they've typed their answer."
+        value={dock.next}
+        stages={targets}
+        onChange={(next) => set({ next })}
+      />
     </>
   );
 }
@@ -206,7 +241,13 @@ function SelectDock({ dock, targets, set }) {
       <Field label="Button text">
         <input className={inputClass} value={dock.cta || ''} onChange={(e) => set({ cta: e.target.value })} placeholder="Continue" />
       </Field>
-      <StageLink label="Then go to" value={dock.next} stages={targets} onChange={(next) => set({ next })} />
+      <StageLink
+        label="Then go to"
+        hint="Which stage plays once they've chosen."
+        value={dock.next}
+        stages={targets}
+        onChange={(next) => set({ next })}
+      />
     </>
   );
 }
@@ -224,7 +265,15 @@ function CtaDock({ dock, targets, set }) {
       >
         <input className={inputClass} value={dock.url || ''} onChange={(e) => set({ url: e.target.value })} placeholder="https://example.com/offer/" />
       </Field>
-      {!dock.url && <StageLink label="No link, so play" value={dock.next} stages={targets} onChange={(next) => set({ next })} />}
+      {!dock.url && (
+        <StageLink
+          label="No link, so play"
+          hint="With no URL set, this stage plays instead — how a funnel closes while the real page is still being built."
+          value={dock.next}
+          stages={targets}
+          onChange={(next) => set({ next })}
+        />
+      )}
       <Field label="Pass answers along" hint="Added to the link as ?name=…&email=… so the next page knows who arrived.">
         <input
           className={inputClass}
