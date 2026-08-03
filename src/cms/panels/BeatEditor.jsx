@@ -2,6 +2,19 @@ import { useRef, useState } from 'react';
 import { BEAT_TYPES } from '../model.js';
 import { Btn, inputClass, readImageFile, textareaClass } from '../ui.jsx';
 
+const beatHasContent = (b) =>
+  Boolean(b.text?.trim() || b.src || (b.items || []).some((i) => i.trim()) || (b.type === 'pause' && b.label?.trim()));
+
+// Quote what is about to go, so the dialog is a description rather than a
+// generic "are you sure" nobody reads.
+function beatSummary(b) {
+  if (b.type === 'line') return `“${b.text.length > 80 ? `${b.text.slice(0, 80)}…` : b.text}”`;
+  if (b.type === 'pause') return `“${b.label}” for ${b.seconds || 0}s`;
+  if (b.type === 'image') return b.src?.startsWith('data:') ? 'An uploaded image — it is stored here and nowhere else.' : b.src;
+  if (b.type === 'list') return (b.items || []).filter(Boolean).map((i) => `• ${i}`).join('\n');
+  return '';
+}
+
 // One beat — a message, a pause, an image or a list. Beats play top to bottom,
 // which is why the ordering controls sit on every row rather than behind a menu.
 export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, isPreviewing, isFirst, isLast }) {
@@ -32,7 +45,17 @@ export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, 
         <div className="flex items-center gap-0.5">
           <IconBtn label="Move up" disabled={isFirst} onClick={() => onMove(-1)}>↑</IconBtn>
           <IconBtn label="Move down" disabled={isLast} onClick={() => onMove(1)}>↓</IconBtn>
-          <IconBtn label="Delete beat" danger onClick={onRemove}>✕</IconBtn>
+          {/* Only asks when there is something to lose — confirming an empty
+              beat teaches people to dismiss the dialog without reading it. */}
+          <IconBtn
+            label="Delete beat"
+            danger
+            onClick={() => {
+              if (!beatHasContent(beat) || confirm(`Delete this ${(meta.label || beat.type).toLowerCase()}?\n\n${beatSummary(beat)}\n\nThis cannot be undone.`)) onRemove();
+            }}
+          >
+            ✕
+          </IconBtn>
         </div>
       </div>
 

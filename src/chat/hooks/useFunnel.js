@@ -90,7 +90,14 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat 
   const wait = (ms) => sleep(ms / rateRef.current);
   const between = (min, max) => min + Math.random() * (max - min);
 
-  const holdTyping = async (ms, label) => {
+  // `token` is the run this belongs to. A beat that was already mid-await when
+  // the reading restarted has to notice before it pushes, or its bubble lands
+  // in the transcript of the run that replaced it — carrying the old answers
+  // with it, which is what made a restarted preview look haunted.
+  const stale = (token) => token !== undefined && runRef.current !== token;
+
+  const holdTyping = async (ms, label, token) => {
+    if (stale(token)) return;
     const typingId = push({ who: 'typing', label: `${personaName} ${label || 'is typing'}` });
     await wait(ms);
     remove(typingId);
@@ -102,12 +109,14 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat 
   // visibly take a while. A beat may name its own duration; that is a FLOOR,
   // not a replacement — a deliberate pause is honoured, but no message ever
   // flashes past in less time than typing it would take.
-  const revealLine = async (text, seconds) => {
+  const revealLine = async (text, seconds, token) => {
     const body = interpolate(text);
     await wait(between(240, 700));
+    if (stale(token)) return;
     const perChar = between(...MS_PER_CHAR);
     const forLength = Math.min(MAX_TYPING, Math.max(MIN_TYPING, 300 + body.length * perChar));
-    await holdTyping(Math.max(forLength, (seconds || 0) * 1000));
+    await holdTyping(Math.max(forLength, (seconds || 0) * 1000), undefined, token);
+    if (stale(token)) return;
     push({ who: 'persona', text: body });
     await wait(between(220, 520));
   };
@@ -126,8 +135,8 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat 
 
     for (const beat of (stage.beats || []).slice(skip)) {
       if (runRef.current !== myRun) { runningRef.current = false; return; }
-      if (beat.type === 'line') await revealLine(beat.text, beat.seconds);
-      else if (beat.type === 'pause') await holdTyping((beat.seconds || 0) * 1000, beat.label);
+      if (beat.type === 'line') await revealLine(beat.text, beat.seconds, myRun);
+      else if (beat.type === 'pause') await holdTyping((beat.seconds || 0) * 1000, beat.label, myRun);
       else if (beat.type === 'image') {
         if (beat.src) { push({ who: 'image', src: interpolate(beat.src), locked: Boolean(beat.locked) }); await wait(700); }
       } else if (beat.type === 'list') {

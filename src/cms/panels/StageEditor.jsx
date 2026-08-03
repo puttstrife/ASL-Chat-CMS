@@ -111,7 +111,19 @@ function StageCard({ stage, index, funnel, expanded, isStart, previewing, onPrev
         <div className="flex shrink-0 items-center gap-0.5">
           <IconBtn label="Move up" disabled={isFirst} onClick={onMove.bind(null, -1)}>↑</IconBtn>
           <IconBtn label="Move down" disabled={isLast} onClick={onMove.bind(null, 1)}>↓</IconBtn>
-          <IconBtn label="Delete stage" danger onClick={onRemove}>✕</IconBtn>
+          {/* There is no undo, and autosave is immediate — so a mis-click here
+              is unrecoverable. Say what is about to be lost, and count it. */}
+          <IconBtn
+            label="Delete stage"
+            danger
+            onClick={() => {
+              const n = beats.length;
+              const what = n ? `${n} ${n === 1 ? 'item' : 'items'}` : 'nothing in it';
+              if (confirm(`Delete “${stage.title || 'this stage'}”?\n\nIt has ${what}. This cannot be undone.`)) onRemove();
+            }}
+          >
+            ✕
+          </IconBtn>
         </div>
       </header>
 

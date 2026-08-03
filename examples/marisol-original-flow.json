@@ -1,0 +1,552 @@
+{
+  "id": "legacy-marisol",
+  "name": "Marisol — the original single flow",
+  "updatedAt": "2026-08-03T00:00:00.000Z",
+  "persona": {
+    "name": "Marisol",
+    "role": "Soulmate Sketch Artist",
+    "avatar": "/images/chat/marisol.webp",
+    "idleText": "is with you…",
+    "typingLabel": "is typing",
+    "accent": "#dfa73a",
+    "header": "#1a043d"
+  },
+  "pacing": {
+    "msPerCharMin": 30,
+    "msPerCharMax": 50,
+    "minTyping": 900,
+    "maxTyping": 26000
+  },
+  "audio": {
+    "src": "/audio/ambient.mp3",
+    "volume": 0.05,
+    "enabled": true
+  },
+  "startStage": "0",
+  "stages": [
+    {
+      "id": "0",
+      "title": "Welcome — who are you",
+      "beats": [
+        {
+          "id": "lg1",
+          "type": "line",
+          "text": "Hi, I’m Selene. I’ll use your birth date and zodiac alignment to reveal the face of the person you’re most likely destined to meet.",
+          "seconds": 1
+        },
+        {
+          "id": "lg2",
+          "type": "line",
+          "text": "Before I begin, what should I call you?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "input",
+        "key": "name",
+        "placeholder": "Enter your first name",
+        "inputType": "text",
+        "cta": "Continue",
+        "next": "1"
+      }
+    },
+    {
+      "id": "1",
+      "title": "Date of birth",
+      "beats": [
+        {
+          "id": "lg3",
+          "type": "line",
+          "text": "Nice to meet you, {name}.",
+          "seconds": 1
+        },
+        {
+          "id": "lg4",
+          "type": "line",
+          "text": "Now, tell me your date of birth. This helps me identify your zodiac signature and the features connected to it.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "date",
+        "key": "dob",
+        "cta": "Continue",
+        "next": "email"
+      }
+    },
+    {
+      "id": "2",
+      "title": "Who should she look for",
+      "beats": [
+        {
+          "id": "lg5",
+          "type": "line",
+          "text": "One last question before I begin.",
+          "seconds": 1
+        },
+        {
+          "id": "lg6",
+          "type": "line",
+          "text": "Who would you like me to look for?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "buttons",
+        "options": [
+          {
+            "id": "lg7",
+            "label": "A man",
+            "next": "3",
+            "setKey": "preference",
+            "setValue": "man"
+          },
+          {
+            "id": "lg8",
+            "label": "A woman",
+            "next": "3",
+            "setKey": "preference",
+            "setValue": "woman"
+          },
+          {
+            "id": "lg9",
+            "label": "Anyone / No preference",
+            "next": "3",
+            "setKey": "preference",
+            "setRandom": [
+              "man",
+              "woman"
+            ]
+          }
+        ],
+        "trust": []
+      }
+    },
+    {
+      "id": "3",
+      "title": "Preparing the reading",
+      "beats": [
+        {
+          "id": "lga",
+          "type": "line",
+          "text": "Thank you, {name}. I have everything I need.",
+          "seconds": 1
+        },
+        {
+          "id": "lgb",
+          "type": "line",
+          "text": "Give me a second—I’m reading the zodiac alignment connected to {dob}.",
+          "seconds": 1
+        },
+        {
+          "id": "lgc",
+          "type": "line",
+          "text": "There’s a strong pattern beginning to appear.",
+          "seconds": 1
+        },
+        {
+          "id": "lgd",
+          "type": "line",
+          "text": "Hold on. Let me translate it into facial structure.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "4"
+      }
+    },
+    {
+      "id": "4",
+      "title": "First sketch — the jawline",
+      "beats": [
+        {
+          "id": "lge",
+          "type": "line",
+          "text": "The first feature coming through is the shape of their face.",
+          "seconds": 1
+        },
+        {
+          "id": "lgf",
+          "type": "line",
+          "text": "Their jawline suggests someone with a calm, grounded presence. They may not demand attention, but you’ll naturally notice when they enter the room.",
+          "seconds": 1
+        },
+        {
+          "id": "lgg",
+          "type": "pause",
+          "seconds": 3,
+          "label": "is drawing"
+        },
+        {
+          "id": "lgh",
+          "type": "image",
+          "src": "/images/sketch/{preference}-1-jaw.webp",
+          "locked": false
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "5"
+      }
+    },
+    {
+      "id": "5",
+      "title": "Personality reading",
+      "beats": [
+        {
+          "id": "lgi",
+          "type": "line",
+          "text": "There’s a quiet confidence around this person.",
+          "seconds": 1
+        },
+        {
+          "id": "lgj",
+          "type": "line",
+          "text": "They may seem reserved when you first meet them. Not distant—just careful about who they allow into their inner world.",
+          "seconds": 1
+        },
+        {
+          "id": "lgk",
+          "type": "line",
+          "text": "Let me sit with their emotional energy for a moment.",
+          "seconds": 1
+        },
+        {
+          "id": "lgl",
+          "type": "line",
+          "text": "They appear soft-spoken and thoughtful. The kind of person who listens closely before responding.",
+          "seconds": 1
+        },
+        {
+          "id": "lgm",
+          "type": "line",
+          "text": "You may feel unusually comfortable around them, even before you know them well.",
+          "seconds": 1
+        },
+        {
+          "id": "lgn",
+          "type": "line",
+          "text": "I’m beginning to sense a creative side too.",
+          "seconds": 1
+        },
+        {
+          "id": "lgo",
+          "type": "line",
+          "text": "They may express themselves through ideas, music, design, writing, or something they prefer to keep private.",
+          "seconds": 1
+        },
+        {
+          "id": "lgp",
+          "type": "line",
+          "text": "Give me a moment—I’m still reading their appearance and personality.",
+          "seconds": 1
+        },
+        {
+          "id": "lgq",
+          "type": "line",
+          "text": "The upper outline is becoming clearer now.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "6"
+      }
+    },
+    {
+      "id": "6",
+      "title": "Second sketch — the hairline",
+      "beats": [
+        {
+          "id": "lgr",
+          "type": "line",
+          "text": "I can see their hair and overall silhouette beginning to form.",
+          "seconds": 1
+        },
+        {
+          "id": "lgs",
+          "type": "line",
+          "text": "This may be one of the first physical details you notice about them.",
+          "seconds": 1
+        },
+        {
+          "id": "lgt",
+          "type": "pause",
+          "seconds": 3,
+          "label": "is drawing"
+        },
+        {
+          "id": "lgu",
+          "type": "image",
+          "src": "/images/sketch/{preference}-2-hairline.webp",
+          "locked": false
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "7"
+      }
+    },
+    {
+      "id": "7",
+      "title": "The eyes and their energy",
+      "beats": [
+        {
+          "id": "lgv",
+          "type": "line",
+          "text": "We’re getting closer, {name}.",
+          "seconds": 1
+        },
+        {
+          "id": "lgw",
+          "type": "line",
+          "text": "Their eyes are the strongest part of this reading.",
+          "seconds": 1
+        },
+        {
+          "id": "lgx",
+          "type": "line",
+          "text": "Let me draw their eyes and expression. This part takes care.",
+          "seconds": 1
+        },
+        {
+          "id": "lgy",
+          "type": "line",
+          "text": "They have thoughtful eyes—the kind that make you feel they understand more than they say.",
+          "seconds": 1
+        },
+        {
+          "id": "lgz",
+          "type": "line",
+          "text": "At first, they may appear serious or difficult to read. But beneath that reserved nature, their energy feels warm and reassuring.",
+          "seconds": 1
+        },
+        {
+          "id": "lg10",
+          "type": "line",
+          "text": "This person doesn’t open up immediately.",
+          "seconds": 1
+        },
+        {
+          "id": "lg11",
+          "type": "line",
+          "text": "But once they trust you, they become deeply attentive, affectionate, and emotionally present.",
+          "seconds": 1
+        },
+        {
+          "id": "lg12",
+          "type": "line",
+          "text": "Hold on. I’m connecting your energy to theirs.",
+          "seconds": 1
+        },
+        {
+          "id": "lg13",
+          "type": "line",
+          "text": "There’s also something familiar about their presence.",
+          "seconds": 1
+        },
+        {
+          "id": "lg14",
+          "type": "line",
+          "text": "Meeting them may not feel dramatic. It may feel calm—almost as though you’ve known them before.",
+          "seconds": 1
+        },
+        {
+          "id": "lg15",
+          "type": "line",
+          "text": "The final details are forming now: their eyes, expression, and the way their energy appears through the portrait.",
+          "seconds": 1
+        },
+        {
+          "id": "lg16",
+          "type": "line",
+          "text": "Some people recognize someone immediately. Others meet them much later.",
+          "seconds": 1
+        },
+        {
+          "id": "lg17",
+          "type": "line",
+          "text": "Almost there. I’m finishing the portrait now.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "continue",
+        "next": "8"
+      }
+    },
+    {
+      "id": "8",
+      "title": "The full reveal + CTA",
+      "beats": [
+        {
+          "id": "lg18",
+          "type": "line",
+          "text": "Your sketch is ready, {name}.",
+          "seconds": 1
+        },
+        {
+          "id": "lg19",
+          "type": "line",
+          "text": "This is the face connected to your zodiac signature.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1a",
+          "type": "pause",
+          "seconds": 3,
+          "label": "is drawing"
+        },
+        {
+          "id": "lg1b",
+          "type": "image",
+          "src": "/images/sketch/{preference}-3-full.webp",
+          "locked": true
+        },
+        {
+          "id": "lg1c",
+          "type": "line",
+          "text": "Meet Your Soulmate — Created from the zodiac alignment connected to your date of birth.",
+          "seconds": 1.5
+        },
+        {
+          "id": "lg1d",
+          "type": "line",
+          "text": "I wrote down everything else that came through while I drew.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1e",
+          "type": "list",
+          "items": [
+            "He is █████████████ with sharp dark eyes that hold your attention ███████████ you expect.",
+            "Height: ████",
+            "Hair: ██████████████████",
+            "Eyes: ██████████ with an intensity that feels like he’s ███████████████ something about you.",
+            "He is not loud about what he wants — but when he wants something, nothing stops him. He moves through rooms like someone who ██████████████████ he’s going.",
+            "His first words to you will be ██████████████████ and they will catch you completely off guard."
+          ]
+        },
+        {
+          "id": "lg1f",
+          "type": "line",
+          "text": "Look closely at their features.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1g",
+          "type": "line",
+          "text": "You may recognize someone you already know—or remember this face when someone new enters your life.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "cta",
+        "label": "Show Me The Face",
+        "url": "",
+        "next": "done",
+        "passKeys": [
+          "name",
+          "email",
+          "dob",
+          "preference"
+        ],
+        "trust": [
+          "🛡 30-Day Money-Back Guarantee",
+          "⚡ Delivered in 24 Hours",
+          "🔒 Secure Checkout"
+        ]
+      }
+    },
+    {
+      "id": "email",
+      "title": "The email",
+      "beats": [
+        {
+          "id": "lg1h",
+          "type": "line",
+          "text": "One thing before I start drawing.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1i",
+          "type": "line",
+          "text": "I work on paper, so what you’ll see here are just photos I take at my desk as it comes together.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1j",
+          "type": "line",
+          "text": "The finished one I scan properly—that’s the copy worth keeping.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1k",
+          "type": "line",
+          "text": "Where should I send it?",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "input",
+        "key": "email",
+        "placeholder": "you@example.com",
+        "inputType": "email",
+        "cta": "Continue",
+        "next": "2"
+      }
+    },
+    {
+      "id": "done",
+      "title": "After the CTA — nothing held back",
+      "beats": [
+        {
+          "id": "lg1l",
+          "type": "line",
+          "text": "Here they are, {name} — nothing held back this time.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1m",
+          "type": "pause",
+          "seconds": 3,
+          "label": "is drawing"
+        },
+        {
+          "id": "lg1n",
+          "type": "image",
+          "src": "/images/sketch/{preference}-3-full.webp",
+          "locked": false
+        },
+        {
+          "id": "lg1o",
+          "type": "line",
+          "text": "And the rest of what I wrote down.",
+          "seconds": 1
+        },
+        {
+          "id": "lg1p",
+          "type": "list",
+          "items": [
+            "He is tall and lean with sharp dark eyes that hold your attention longer than you expect.",
+            "Height: 6′1″",
+            "Hair: dark, softly parted",
+            "Eyes: deep brown with an intensity that feels like he’s already decided something about you.",
+            "He is not loud about what he wants — but when he wants something, nothing stops him. He moves through rooms like someone who already knows where he’s going.",
+            "His first words to you will be an apology for something small and they will catch you completely off guard."
+          ]
+        },
+        {
+          "id": "lg1q",
+          "type": "line",
+          "text": "I’ll take you through the full reading now.",
+          "seconds": 1
+        }
+      ],
+      "dock": {
+        "type": "end"
+      }
+    }
+  ]
+}
