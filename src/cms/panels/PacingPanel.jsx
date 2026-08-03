@@ -34,7 +34,7 @@ export function PacingPanel({ funnel, onPatch }) {
   return (
     <Panel title="Pace" subtitle="Typing speed, and what it costs in session length">
       <div className="flex flex-col gap-3.5">
-        <div className="rounded-lg border border-white/8 bg-[#101119] p-3">
+        <div className="rounded-lg border border-white/8 bg-[var(--surface-3)] p-3">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-[.7rem] font-semibold uppercase tracking-wide text-white/45">Longest run</span>
             <span className="font-mono text-lg font-semibold text-[#8f74ff]">{fmtDuration(est.max)}</span>

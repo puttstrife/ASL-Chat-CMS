@@ -7,10 +7,14 @@ import { Btn, inputClass, readImageFile, textareaClass } from '../ui.jsx';
 export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, isPreviewing, isFirst, isLast }) {
   const meta = BEAT_TYPES[beat.type] || {};
   return (
-    <li className={`rounded-lg border bg-[#101119] ${isPreviewing ? 'border-[#7c5cff]/50' : 'border-white/8'}`}>
-      <div className="flex items-center gap-2 border-b border-white/8 px-2.5 py-1.5">
+    <li
+      className={`overflow-hidden rounded-lg border bg-[var(--surface-3)] shadow-[0_1px_2px_rgba(0,0,0,0.35)] transition-colors ${
+        isPreviewing ? 'border-[#7c5cff]/60' : 'border-white/10'
+      }`}
+    >
+      <div className="flex items-center gap-2 border-b border-white/8 bg-[var(--surface-4)] px-2.5 py-1.5">
         <span className="text-[.8rem]" aria-hidden="true">{meta.icon}</span>
-        <span className="flex-1 text-[.7rem] font-semibold uppercase tracking-wide text-white/40">{meta.label || beat.type}</span>
+        <span className="flex-1 text-[.7rem] font-semibold uppercase tracking-wide text-white/50">{meta.label || beat.type}</span>
         {/* Play the reading from this beat, rather than sitting through
             everything before it to check one line. */}
         <button
@@ -51,7 +55,7 @@ export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, 
                   step={0.5}
                   value={beat.seconds ?? 0}
                   onChange={(e) => onChange({ ...beat, seconds: Number(e.target.value) })}
-                  className="w-14 rounded-md border border-white/10 bg-[#0c0d14] px-1.5 py-1 text-center text-white/80 outline-none focus:border-[#7c5cff]"
+                  className="w-14 rounded-md border border-white/10 bg-[var(--field)] px-1.5 py-1 text-center text-white/80 outline-none focus:border-[#7c5cff]"
                 />
                 s
               </label>
@@ -78,7 +82,7 @@ export function BeatEditor({ beat, keys, onChange, onRemove, onMove, onPreview, 
                 step={0.5}
                 value={beat.seconds ?? 0}
                 onChange={(e) => onChange({ ...beat, seconds: Number(e.target.value) })}
-                className="w-14 rounded-md border border-white/10 bg-[#0c0d14] px-1.5 py-1 text-center text-white/80 outline-none focus:border-[#7c5cff]"
+                className="w-14 rounded-md border border-white/10 bg-[var(--field)] px-1.5 py-1 text-center text-white/80 outline-none focus:border-[#7c5cff]"
               />
               s
             </label>
@@ -112,7 +116,7 @@ function ImageBeat({ beat, keys, onChange }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/10 bg-[#0c0d14]">
+        <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/10 bg-[var(--field)]">
           {beat.src ? (
             <img src={beat.src} alt="" className="size-full object-cover" />
           ) : (

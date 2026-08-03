@@ -1,5 +1,5 @@
 import { DOCK_TYPES, FIELD_PRESETS, uid } from '../model.js';
-import { Btn, Field, inputClass } from '../ui.jsx';
+import { Btn, Field, inputClass, selectClass } from '../ui.jsx';
 import { IconBtn } from './BeatEditor.jsx';
 
 // What ends a stage — the control the visitor actually touches, and where each
@@ -14,9 +14,19 @@ export function DockEditor({ dock, stages, selfId, onPatch, onReplace }) {
   const targets = stages.filter((s) => s.id !== selfId);
 
   return (
-    <div className="flex flex-col gap-3">
-      <Field label="Ends with" hint={DOCK_TYPES[dock.type]?.hint}>
-        <select className={inputClass} value={dock.type} onChange={(e) => onReplace(switchType(dock, e.target.value))}>
+    // Carded like a beat, because it is the same kind of thing — one more item
+    // in the stage, and the last one. Bare fields on the stage background read
+    // as loose settings rather than as the moment the visitor acts.
+    <div className="overflow-hidden rounded-lg border border-white/10 bg-[var(--surface-3)] shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+      <div className="flex items-center gap-2 border-b border-white/8 bg-[var(--surface-4)] px-2.5 py-1.5">
+        <span className="text-[.8rem]" aria-hidden="true">🎬</span>
+        <span className="flex-1 text-[.7rem] font-semibold uppercase tracking-wide text-white/50">Ends with</span>
+        <span className="shrink-0 text-[.68rem] text-white/35">{DOCK_TYPES[dock.type]?.label}</span>
+      </div>
+
+      <div className="flex flex-col gap-3 p-2.5">
+      <Field hint={DOCK_TYPES[dock.type]?.hint}>
+        <select className={selectClass} value={dock.type} onChange={(e) => onReplace(switchType(dock, e.target.value))}>
           {Object.entries(DOCK_TYPES).map(([value, meta]) => (
             <option key={value} value={value}>{meta.label}</option>
           ))}
@@ -40,10 +50,11 @@ export function DockEditor({ dock, stages, selfId, onPatch, onReplace }) {
       {dock.type === 'cta' && <CtaDock dock={dock} targets={targets} set={set} />}
 
       {dock.type === 'end' && (
-        <p className="rounded-lg border border-white/8 bg-[#101119] px-3 py-2 text-[.72rem] leading-snug text-white/40">
+        <p className="rounded-lg border border-white/8 bg-white/[.04] px-3 py-2 text-[.72rem] leading-snug text-white/40">
           The reading stops here. The dock shows the waiting line and nothing else.
         </p>
       )}
+      </div>
     </div>
   );
 }
@@ -68,7 +79,7 @@ function StageLink({ label, value, stages, onChange, allowEmpty = true }) {
   return (
     <Field label={label}>
       <select
-        className={`${inputClass} ${missing ? 'border-[#ff6b7d]/50' : ''}`}
+        className={`${selectClass} ${missing ? 'border-[#ff6b7d]/50' : ''}`}
         value={missing ? '' : value || ''}
         onChange={(e) => onChange(e.target.value)}
       >
@@ -92,10 +103,13 @@ function ButtonsDock({ dock, targets, set }) {
   const options = dock.options || [];
   const setOpt = (i, patch) => set({ options: options.map((o, j) => (j === i ? { ...o, ...patch } : o)) });
 
+  // Each answer sits one step up from the dock card holding it, as an overlay
+  // rather than another token — these nest, and the scale should not grow a
+  // level per depth.
   return (
     <div className="flex flex-col gap-2.5">
       {options.map((o, i) => (
-        <div key={o.id} className="rounded-lg border border-white/8 bg-[#101119] p-2.5">
+        <div key={o.id} className="rounded-lg border border-white/10 bg-white/[.04] p-2.5">
           <div className="flex items-center gap-1.5">
             <input
               className={inputClass}
@@ -141,7 +155,7 @@ function InputDock({ dock, targets, set }) {
     <>
       <Field label="Asking for">
         <select
-          className={inputClass}
+          className={selectClass}
           value={FIELD_PRESETS.some((p) => p.key === dock.key) ? dock.key : 'custom'}
           onChange={(e) => {
             const preset = FIELD_PRESETS.find((p) => p.key === e.target.value);
@@ -155,7 +169,7 @@ function InputDock({ dock, targets, set }) {
       <div className="grid grid-cols-2 gap-2">
         <KeyField dock={dock} set={set} placeholder="name" />
         <Field label="Keyboard type">
-          <select className={inputClass} value={dock.inputType || 'text'} onChange={(e) => set({ inputType: e.target.value })}>
+          <select className={selectClass} value={dock.inputType || 'text'} onChange={(e) => set({ inputType: e.target.value })}>
             <option value="text">Text</option>
             <option value="email">Email (validated)</option>
             <option value="tel">Phone</option>

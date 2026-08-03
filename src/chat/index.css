@@ -14,6 +14,18 @@
   --gold: #dfa73a;
   --gold-btn: #dfa73a;
 
+  /* Editor elevation. Each step up is roughly 20% lighter than the one under
+     it, so depth is what tells you which thing sits inside which — the panels
+     were all within a few points of each other and read as one flat sheet.
+     Fields go back DOWN a step: an input is a well cut into its card, not
+     another card stacked on it. */
+  --surface-0: #08090e; /* the page behind everything */
+  --surface-1: #0d0e15; /* a stage, closed */
+  --surface-2: #13141d; /* a stage, open */
+  --surface-3: #1c1e2b; /* a beat or dock card inside an open stage */
+  --surface-4: #24273a; /* the header band on one of those cards */
+  --field: #0b0c12;     /* inputs, recessed below whatever holds them */
+
   /* shadcn tokens (dark), themed for Selene — used by the Bubble component */
   --background: #120f1f;
   --foreground: #f4f2f8;

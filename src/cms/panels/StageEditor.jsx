@@ -96,7 +96,7 @@ function StageCard({ stage, index, funnel, expanded, isStart, previewing, onPrev
   const keys = collectKeysBefore(funnel, stage.id);
 
   return (
-    <section className={`overflow-hidden rounded-xl border transition-colors ${expanded ? 'border-[#7c5cff]/40 bg-[#0e0f16]' : 'border-white/8 bg-[#0c0d13]'}`}>
+    <section className={`overflow-hidden rounded-xl border transition-colors ${expanded ? 'border-[#7c5cff]/40 bg-[var(--surface-2)]' : 'border-white/8 bg-[var(--surface-1)]'}`}>
       <header className="flex items-center gap-2 px-3 py-2">
         <button type="button" onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
           <span className="grid size-6 shrink-0 place-items-center rounded-md bg-white/6 font-mono text-[.68rem] text-white/40">{index + 1}</span>
@@ -150,7 +150,8 @@ function StageCard({ stage, index, funnel, expanded, isStart, previewing, onPrev
             </div>
           </div>
 
-          <div className="border-t border-white/8 pt-3">
+          <div>
+            <p className="mb-1.5 text-[.7rem] font-semibold uppercase tracking-wide text-white/45">Then the visitor acts</p>
             <DockEditor
               dock={stage.dock || { type: 'none' }}
               stages={funnel.stages}

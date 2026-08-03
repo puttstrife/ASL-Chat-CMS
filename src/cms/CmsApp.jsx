@@ -79,7 +79,7 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
 
       {error && <p className="rounded-lg border border-[#ff6b7d]/25 bg-[#ff6b7d]/10 px-3 py-2 text-[.78rem] text-[#ff9aa7]">{error}</p>}
 
-      <p className="rounded-lg border border-white/8 bg-[#0e0f16] px-3.5 py-2.5 text-[.75rem] leading-relaxed text-white/40">
+      <p className="rounded-lg border border-white/8 bg-[var(--surface-2)] px-3.5 py-2.5 text-[.75rem] leading-relaxed text-white/40">
         Funnels are saved in <strong className="text-white/60">this browser only</strong> — not on a server. Clearing
         site data loses them, and nobody else can see them. <strong className="text-white/60">Export</strong> writes a
         funnel to a <code>.json</code> file; <strong className="text-white/60">Import funnel file</strong> loads one
@@ -91,7 +91,7 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
           const est = estimateFunnel(f);
           const broken = danglingLinks(f).length;
           return (
-            <li key={f.id} className="flex items-center gap-3 rounded-xl border border-white/8 bg-[#0e0f16] p-3 transition-colors hover:border-white/15">
+            <li key={f.id} className="flex items-center gap-3 rounded-xl border border-white/8 bg-[var(--surface-2)] p-3 transition-colors hover:border-white/15">
               <button type="button" onClick={() => onOpen(f.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
                 {f.persona?.avatar ? (
                   <img src={f.persona.avatar} alt="" className="size-11 shrink-0 rounded-full object-cover" style={{ objectPosition: 'center 18%' }} />
