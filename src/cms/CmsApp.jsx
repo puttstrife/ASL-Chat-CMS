@@ -7,6 +7,7 @@ import { PacingPanel } from './panels/PacingPanel.jsx';
 import { PersonaPanel } from './panels/PersonaPanel.jsx';
 import { PreviewPanel } from './panels/PreviewPanel.jsx';
 import { StageList } from './panels/StageEditor.jsx';
+import { TrackingPanel } from './panels/TrackingPanel.jsx';
 import * as store from './store.js';
 import { Btn, inputClass } from './ui.jsx';
 
@@ -110,6 +111,18 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
                     {f.persona?.name} · {f.stages.length} stages · about {fmtDuration(est.max)}
                     {broken > 0 && <span className="text-[#ff9aa7]"> · {broken} broken link{broken === 1 ? '' : 's'}</span>}
                   </span>
+                  {/* The channel id belongs on the list, not only inside the
+                      editor: matching a row in a CPV One report back to a funnel
+                      is a scanning job across every funnel at once. */}
+                  {f.tracking?.channel_id && (
+                    <span className="mt-0.5 block truncate font-mono text-[.68rem] text-white/25">
+                      {f.tracking.channel_id}
+                      {f.tracking.cpv_sync_status === 'linked' && (
+                        <span className="text-[#6ee7a8]/70"> · CPV {f.tracking.cpv_campaign_id}</span>
+                      )}
+                      {f.tracking.cpv_sync_status === 'error' && <span className="text-[#ff9aa7]"> · link failed</span>}
+                    </span>
+                  )}
                 </span>
               </button>
               <div className="flex shrink-0 gap-1.5">
@@ -147,6 +160,10 @@ function FunnelList({ funnels, onOpen, onRefresh }) {
 const TABS = [
   { id: 'script', label: 'Script' },
   { id: 'reader', label: 'Reader' },
+  // Its own tab rather than a block under the reader: what a funnel is
+  // attributed to is a different job from what it says, done by a different
+  // person at a different time.
+  { id: 'tracking', label: 'Tracking' },
 ];
 
 function Editor({ funnel, onBack, onChange }) {
@@ -233,7 +250,14 @@ function Editor({ funnel, onBack, onChange }) {
             </p>
           )}
 
-          {tab === 'script' ? (
+          {tab === 'tracking' ? (
+            <div className="flex max-w-xl flex-col gap-4">
+              <TrackingPanel
+                funnel={funnel}
+                onPatch={(patch) => onChange((prev) => ({ ...prev, tracking: { ...prev.tracking, ...patch } }))}
+              />
+            </div>
+          ) : tab === 'script' ? (
             <StageList
               funnel={funnel}
               selectedId={selectedStage}
