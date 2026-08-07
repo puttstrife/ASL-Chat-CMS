@@ -54,7 +54,28 @@ export default function App() {
     return channelId ? { channel_id: channelId } : {};
   }, [params]);
 
-  const engine = useFunnel(funnel, { seedAnswers });
+  // Everything else on the inbound URL, carried through untouched and handed
+  // back at the CTA. This app is one hop in a chain it does not own: CPV One
+  // forwards the parameters it does not consume, the offer page and the
+  // affiliate network expect them, and a parameter dropped here is attribution
+  // lost with nothing to say so.
+  //
+  // Kept apart from answers on purpose. Answers are the writer's namespace and
+  // interpolate into copy, so seeding them from the URL would let an inbound
+  // `?name=` pre-fill a question the visitor has not been asked yet.
+  const passThrough = useMemo(() => {
+    const out = {};
+    for (const [k, v] of params.entries()) {
+      // `f` selects which funnel to play. It is this app's own routing, means
+      // nothing downstream, and would collide with a real parameter of that
+      // name on the offer side.
+      if (k === 'f') continue;
+      out[k] = v;
+    }
+    return out;
+  }, [params]);
+
+  const engine = useFunnel(funnel, { seedAnswers, passThrough });
   const unread = useTabBadge(engine.messages, funnel?.persona);
 
   if (!funnel) {

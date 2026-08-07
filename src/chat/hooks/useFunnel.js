@@ -17,7 +17,7 @@ export const slugDob = ({ month, day, year }) => `${year}-${MONTHS[month - 1]}-$
 // typing itself: those are a fixed ~0.8s per message, so scaling only the
 // typing left a fifteen-message stage taking thirteen seconds however fast the
 // control claimed to be.
-export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat = 0 } = {}) {
+export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, passThrough, startBeat = 0 } = {}) {
   const [messages, setMessages] = useState([]);
   const [dock, setDock] = useState({ type: 'none' });
 
@@ -211,7 +211,14 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat 
   const finish = (d) => {
     const id = push({ who: 'user', text: d.label });
     scheduleReaction(id, d.label);
-    const params = {};
+    // Whatever arrived on the inbound URL goes back out, first and lowest
+    // priority. The chat sits mid-path between the campaign URL and the offer,
+    // so every parameter CPV One forwarded — click ids, affiliate parameters,
+    // utm_* — has to survive the reading or this page is where attribution
+    // quietly ends. It is not ours to interpret, only to carry.
+    const params = { ...(passThrough || {}) };
+    // Then the writer's declared keys, which may deliberately overwrite an
+    // inbound value of the same name.
     for (const k of d.passKeys || []) if (answers.current[k] != null) params[k] = answers.current[k];
     // The channel id rides along whether or not the writer listed it, because
     // it is not theirs to forget: without it the offer page cannot tell CPV One
