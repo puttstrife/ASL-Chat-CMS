@@ -163,9 +163,10 @@ lost with nothing to say so.
 
 ### Setup
 
-No env file is committed — not even a template, since one is a standing
-invitation to paste a key into a tracked file. Make a `.env.local` (git-ignored,
-along with everything else matching `.env*`) with these:
+Copy `.env.example` to `.env.local` and fill it in. `.env.example` holds names
+and no values, and is the only `.env` file git tracks — everything matching
+`.env*` is ignored, with that one exception. The values themselves are not in
+this repository and come from whoever owns the CPV One account.
 
 | Variable | Where it is read | Why |
 | --- | --- | --- |

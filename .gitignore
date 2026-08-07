@@ -1,6 +1,8 @@
 node_modules/
 .env
 .env.*
+# The one exception: names with no values, so a fresh clone knows what to make.
+!.env.example
 elevenlabs
 .DS_Store
 server/.cache/
