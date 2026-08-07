@@ -89,15 +89,27 @@ Both are shown, with a copy button, under the editor's **Tracking** tab, and the
 channel ID also sits on each row of the funnel list so a line in a CPV One report
 can be matched back to a funnel without opening anything.
 
-### What CPV One's API can and cannot do
+### Why a funnel is not a campaign
 
-Checked against [the API docs](https://cpvlab.pro/docs/cpv-lab-pro-api.html)
-before any of this was written. CPV One exposes campaign **list** and **edit**,
-stats, conversions, visitor stats, click lookup, and landing-page/offer
-management. There is **no endpoint that creates a campaign.**
+The obvious design — new funnel, new CPV One campaign, automatically — is the
+wrong one, and it is worth saying why before someone tries to build it.
 
-So this does not pretend to. The admin creates the campaign in CPV One, pastes
-its ID or its tracking URL into the Tracking tab, and the app:
+A campaign in this account is a **reporting bucket**, organised as domain →
+traffic source → variant. They are created deliberately and rarely. Funnel
+variants belong *inside* a campaign, as landing-page splits and Extra Tokens.
+One campaign per funnel would shatter the reporting the account already runs on.
+
+CPV One's API happens to agree: checked against
+[the API docs](https://cpvlab.pro/docs/cpv-lab-pro-api.html), it exposes campaign
+**list** and **edit**, stats, conversions, visitor stats, click lookup, and
+landing-page/offer management, and there is **no endpoint that creates a
+campaign.** But the missing endpoint is not the reason this app does not create
+campaigns. Even with one, it should not.
+
+So per-funnel attribution rides an Extra Token inside an existing campaign, which
+is how it should work here regardless of what the API allows. The admin creates
+the campaign in CPV One, pastes its ID or its tracking URL into the Tracking tab,
+and the app:
 
 1. checks the campaign exists (`/api/campaign/list/`),
 2. checks that campaign's **Extra Token** slot is set up to receive the channel ID,
@@ -128,8 +140,26 @@ slot is:
 | a split-test variable (`{multivariate1}`) | writing there would overwrite the test's data |
 
 **Per campaign, once, in CPV One:** open it, add Extra Token *N* reading the
-parameter `channel_id`, save. Then it is linkable. Pick an *N* that is free
-across the whole account — `npm run cpv:check` says which are.
+parameter `channel_id`, save. Then it is linkable.
+
+*N* has to be free across the whole account, not merely on one campaign.
+**In this account that means 11–15.** `extra1` carries `utm_source` and the
+traffic-source reporting depends on it; `extra2`–`extra4` are also in use. So
+`CPV_ONE_CHANNEL_TOKEN=11`, and the default is `extra11` rather than `extra1` for
+the same reason — an unset variable should not point at live reporting.
+`npm run cpv:check` confirms what is free before you commit to a number.
+
+### What this app does not send
+
+Nothing. Both routes only read from CPV One.
+
+Views and leads are already tracked by the pixel on the campaign URL, and backend
+conversion data comes from ClickBank. So the CMS has no reporting job: it has to
+**preserve the tracking parameters and stay out of the way.** Every parameter on
+the inbound URL is held for the session and reattached at the CTA — click IDs,
+affiliate parameters, `utm_*`, anything CPV One forwarded — because this page is
+one hop in a chain it does not own, and a parameter dropped here is attribution
+lost with nothing to say so.
 
 ### Setup
 
@@ -143,7 +173,7 @@ along with everything else matching `.env*`) with these:
 | `CPV_ONE_API_KEY` | server | General Settings → *Enable API Access*, then set a key |
 | `CPV_ONE_ACCOUNT_ID` | server | Optional; only for installs that scope calls |
 | `CPV_ONE_TRACKING_BASE_URL` | server | Used only when CPV One reports no URL for a campaign |
-| `CPV_ONE_CHANNEL_TOKEN` | server | Which Extra Token slot carries the channel ID |
+| `CPV_ONE_CHANNEL_TOKEN` | server | Which Extra Token slot carries the channel ID — `11` in this account; 1–4 are taken |
 | `VITE_CHAT_BASE_URL` | browser | Where the player is served from |
 | `VITE_CHAT_URL_PATTERN` | browser | The shape of a tracking URL |
 
@@ -272,9 +302,14 @@ following it would throw away the editor.
 8. **Tests cover tracking only.** Vitest specs cover channel IDs, tracking URLs
    and the store; the editor and the player engine have none, and Playwright is
    installed but still has no specs.
-9. **The CPV link is one-way.** Campaigns are made in CPV One and referenced
-   here, because its API has no create endpoint. If a campaign is deleted there,
-   the funnel goes on claiming it is linked until someone re-links it.
+9. **The CPV link is one-way, and never reconciled.** Campaigns are made in CPV
+   One and referenced here — by design, not only because the API has no create
+   endpoint. If a campaign is deleted or renamed there, the funnel goes on
+   claiming it is linked until someone re-links it. Nothing checks.
+10. **No pixel on this page.** If the campaign URL points a visitor straight at
+    the chat, then the chat *is* the landing page, and whatever view/lead pixel
+    normally sits on an LP is not here. Fine when the chat is reached by
+    redirect from a real LP; not fine if it replaces one. Unresolved.
 
 ---
 
@@ -288,6 +323,9 @@ above it knows where a funnel came from.
 **A flowchart view of the script.** The linear list is right for writing copy in
 order; it is wrong for seeing how branches rejoin. A node graph alongside it, not
 instead of it.
+
+**Not** automatic campaign creation. It is the first thing everyone asks for and
+it is the wrong shape for this account — see *Why a funnel is not a campaign*.
 
 ---
 
