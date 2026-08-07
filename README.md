@@ -71,6 +71,129 @@ value and it picks one at random, once, and holds it for the session.
 
 ---
 
+## Tracking with CPV One
+
+Every funnel gets a **channel ID** the moment it is created — `ch_<time><random>`,
+unique, and frozen from then on. It is what a click, a conversion and a funnel
+have in common, so it cannot be allowed to move: the store refuses writes that
+try to change it, and duplicating or importing a funnel mints a new one rather
+than carrying the original's.
+
+From it comes the **tracking URL**, the link handed to a traffic source:
+
+```
+https://chat.example.com/?f=<funnel-id>&channel_id=<channel-id>
+```
+
+Both are shown, with a copy button, under the editor's **Tracking** tab, and the
+channel ID also sits on each row of the funnel list so a line in a CPV One report
+can be matched back to a funnel without opening anything.
+
+### What CPV One's API can and cannot do
+
+Checked against [the API docs](https://cpvlab.pro/docs/cpv-lab-pro-api.html)
+before any of this was written. CPV One exposes campaign **list** and **edit**,
+stats, conversions, visitor stats, click lookup, and landing-page/offer
+management. There is **no endpoint that creates a campaign.**
+
+So this does not pretend to. The admin creates the campaign in CPV One, pastes
+its ID or its tracking URL into the Tracking tab, and the app:
+
+1. checks the campaign exists (`/api/campaign/list/`),
+2. checks that campaign's **Extra Token** slot is set up to receive the channel ID,
+3. attaches the channel ID to the campaign URL,
+4. saves the relationship on the funnel.
+
+The result is the URL to actually run traffic to. CPV One records the Extra Token
+and forwards the parameters it does not handle, so the channel ID reaches the
+player too, is held for the session, and is appended to the CTA URL on the way
+out — traffic, conversion and revenue all land on the same channel.
+
+### The Extra Token slot, and why step 2 exists
+
+The one part of this that cannot be guessed from the docs. **CPV One does not
+read a parameter called `extra1`.** Each campaign declares, per slot, *which* URL
+parameter feeds it — `ExtraTokenParam3` might be `hop`, `utm_source` or `{tid}`.
+Send `extra1=<channel id>` to a campaign expecting `tid` and it is dropped
+without complaint, leaving a funnel that looks linked and records nothing.
+
+So the slot number is ours (`CPV_ONE_CHANNEL_TOKEN`) and the parameter name is
+the campaign's. Linking is refused, with the fix in the message, when the chosen
+slot is:
+
+| Slot state | Why refused |
+| --- | --- |
+| unset | CPV One would ignore the value |
+| reads something else (`utm_source`, `tid`, `hop`) | sharing it makes that column mean two things |
+| a split-test variable (`{multivariate1}`) | writing there would overwrite the test's data |
+
+**Per campaign, once, in CPV One:** open it, add Extra Token *N* reading the
+parameter `channel_id`, save. Then it is linkable. Pick an *N* that is free
+across the whole account — `npm run cpv:check` says which are.
+
+### Setup
+
+No env file is committed — not even a template, since one is a standing
+invitation to paste a key into a tracked file. Make a `.env.local` (git-ignored,
+along with everything else matching `.env*`) with these:
+
+| Variable | Where it is read | Why |
+| --- | --- | --- |
+| `CPV_ONE_API_URL` | server | The CPV One install, without `/api` |
+| `CPV_ONE_API_KEY` | server | General Settings → *Enable API Access*, then set a key |
+| `CPV_ONE_ACCOUNT_ID` | server | Optional; only for installs that scope calls |
+| `CPV_ONE_TRACKING_BASE_URL` | server | Used only when CPV One reports no URL for a campaign |
+| `CPV_ONE_CHANNEL_TOKEN` | server | Which Extra Token slot carries the channel ID |
+| `VITE_CHAT_BASE_URL` | browser | Where the player is served from |
+| `VITE_CHAT_URL_PATTERN` | browser | The shape of a tracking URL |
+
+The CPV variables have no `VITE_` prefix on purpose. Vite compiles every
+`VITE_`-prefixed value into `dist/`, so a key named that way would ship to every
+visitor. They are read in `api/cpv/_cpv.js` — the only file that touches the key,
+and the only reason this otherwise-static app has a server side at all. Logs go
+through a redactor there, so no line can carry the key or a URL still holding it.
+
+### Checking the connection
+
+```bash
+npm run cpv:check
+```
+
+Read-only — it lists campaigns and counts them, creating and changing nothing, so
+it is safe against a live account. It runs the same `api/cpv/_cpv.js` the
+functions do, so a pass here means the functions will work. It reports the API
+host, whether the key authenticated, how many campaigns are visible, which of
+them have the channel slot set up, and which slots are free account-wide. The key
+is never printed — only its length.
+
+The same check is exposed as `POST /api/cpv/test` for use against a deployment.
+
+### Testing
+
+```bash
+npm test          # once
+npm run test:watch
+```
+
+Locally, `npm run dev` serves the editor but not the `/api` functions; the
+Tracking tab will say the tracking service is unavailable, which is accurate. Run
+`vercel dev` to exercise the whole path, or `npm run cpv:check` to test the CPV
+half without a server at all.
+
+`src/services/cpvOneService.test.js` covers the two things that must never drift
+— channel ID generation (shape, determinism under an injected clock, 5000 ids in
+one millisecond with no collision) and tracking URL construction (both URL
+patterns, escaping, idempotence).
+
+`src/cms/store.test.js` drives the real store against an in-memory
+`localStorage` and a stubbed `fetch`: creating a funnel, the v1 → v2 migration,
+the immutability guard, a sync round trip, a retried sync, and the failure paths.
+
+`api/cpv/_cpv.test.js` covers the server-side judgements — reading a campaign
+row, deciding whether an Extra Token slot is usable, and the log redactor.
+
+---
+
 ## Architecture
 
 ```
@@ -82,11 +205,21 @@ src/chat/                     the player
   components/ChatCard.jsx       the chat surface; everything comes from `persona`
 src/cms/
   model.js                      what a funnel is, and the factories for empty ones
-  store.js                      localStorage CRUD, export/import
+  store.js                      localStorage CRUD, schema migrations, export/import
   seed.js                       the two Selene readings, converted (generated)
   estimate.js                   how long a reading takes — mirrors useFunnel's timing
+  trackingConfig.js             the public half of tracking config
   CmsApp.jsx                    funnel list and editor shell
-  panels/                       persona, pace, stages, beats, docks, preview
+  panels/                       persona, pace, stages, beats, docks, preview, tracking
+src/services/
+  cpvOneService.js              channel ids, tracking URLs, the CPV One link
+api/cpv/                        the only server-side code; holds the CPV One key
+  _cpv.js                       config, redacted logging, the CPV One call,
+                                  Extra Token rules
+  validate.js                   POST — does this campaign exist, and is it ready?
+  sync.js                       POST — link a funnel's channel to a campaign
+  test.js                       POST — read-only connection check
+scripts/cpv-check.mjs           the same check from the command line
 ```
 
 ### One format, not two
@@ -130,12 +263,18 @@ following it would throw away the editor.
    longest path, but random per-line variation means a real run lands near it, not
    on it. If the engine's timing changes, `estimate.js` must change with it.
 6. **Nothing the player captures is stored.** Answers live in memory for the
-   session, exactly as in the original funnel. No ESP, no analytics, no
-   persistence.
+   session, exactly as in the original funnel. No ESP, no persistence. The
+   channel ID rides along with them and is passed on at the CTA, so attribution
+   happens in CPV One rather than here — this app records no visits itself.
 7. **Background tabs stall a reading.** Pacing is `setTimeout`-based and browsers
    throttle hidden tabs. Inherited from the original engine; the fix is
    timestamp-based scheduling.
-8. **No tests.** Playwright is installed but has no specs.
+8. **Tests cover tracking only.** Vitest specs cover channel IDs, tracking URLs
+   and the store; the editor and the player engine have none, and Playwright is
+   installed but still has no specs.
+9. **The CPV link is one-way.** Campaigns are made in CPV One and referenced
+   here, because its API has no create endpoint. If a campaign is deleted there,
+   the funnel goes on claiming it is linked until someone re-links it.
 
 ---
 
