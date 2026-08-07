@@ -7,6 +7,29 @@ export const formatDob = ({ month, day, year }) => `${MONTHS[month - 1]} ${day},
 // The form an offer page expects on a query string.
 export const slugDob = ({ month, day, year }) => `${year}-${MONTHS[month - 1]}-${day}`;
 
+/**
+ * What goes on the CTA URL, and in what order of precedence.
+ *
+ * Pulled out of the hook because this is the rule attribution actually rests
+ * on, and a rule worth testing should not need React rendered to reach it.
+ *
+ * Lowest to highest:
+ *
+ *   1. everything that arrived on the inbound URL. The chat is one hop between
+ *      the campaign URL and the offer, so click ids, affiliate parameters and
+ *      utm_* have to survive it. Not ours to interpret, only to carry.
+ *   2. the writer's declared pass keys, which may deliberately overwrite an
+ *      inbound value of the same name.
+ *   3. the channel id, which is not the writer's to forget — without it the
+ *      offer page cannot tell CPV One which funnel earned the conversion.
+ */
+export function ctaParams({ passThrough, passKeys, answers } = {}) {
+  const params = { ...(passThrough || {}) };
+  for (const k of passKeys || []) if (answers?.[k] != null) params[k] = answers[k];
+  if (answers?.channel_id) params.channel_id = answers.channel_id;
+  return params;
+}
+
 // Plays a funnel — the JSON the CMS produces, not a hand-written module.
 //
 // `onFinish` fires when a CTA is tapped, so the host decides what a CTA means:
@@ -211,19 +234,7 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, passThroug
   const finish = (d) => {
     const id = push({ who: 'user', text: d.label });
     scheduleReaction(id, d.label);
-    // Whatever arrived on the inbound URL goes back out, first and lowest
-    // priority. The chat sits mid-path between the campaign URL and the offer,
-    // so every parameter CPV One forwarded — click ids, affiliate parameters,
-    // utm_* — has to survive the reading or this page is where attribution
-    // quietly ends. It is not ours to interpret, only to carry.
-    const params = { ...(passThrough || {}) };
-    // Then the writer's declared keys, which may deliberately overwrite an
-    // inbound value of the same name.
-    for (const k of d.passKeys || []) if (answers.current[k] != null) params[k] = answers.current[k];
-    // The channel id rides along whether or not the writer listed it, because
-    // it is not theirs to forget: without it the offer page cannot tell CPV One
-    // which funnel earned the conversion.
-    if (answers.current.channel_id) params.channel_id = answers.current.channel_id;
+    const params = ctaParams({ passThrough, passKeys: d.passKeys, answers: answers.current });
     // A host returning false takes over — the preview uses this to report the
     // hand-off instead of navigating away from the editor.
     if (onFinish && onFinish({ dock: d, answers: { ...answers.current }, params }) === false) return;
