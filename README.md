@@ -165,13 +165,26 @@ lost with nothing to say so.
 
 Copy `.env.example` to `.env.local` and fill it in. `.env.example` holds names
 and no values, and is the only `.env` file git tracks — everything matching
-`.env*` is ignored, with that one exception. The values themselves are not in
-this repository and come from whoever owns the CPV One account.
+`.env*` is ignored, with that one exception. The values are not in this
+repository and never will be.
+
+**Get the API key yourself, from CPV One.** Anyone with admin on the account can
+read it at **Settings → General Settings → *Enable API Access***. No one needs to
+send it to you, and it should not arrive by email, chat or a pull request.
+
+It is one key for the whole account, not one per person — the same string
+everyone reads. So **regenerating it breaks every other integration using it at
+the same moment**, this app included. Read it; do not roll it because it is
+easier than finding it.
+
+The API URL is the install you log in to, without `/api`. The channel token is
+`11` here — see above for why. The two `VITE_` variables can stay blank on a
+single-origin deploy.
 
 | Variable | Where it is read | Why |
 | --- | --- | --- |
 | `CPV_ONE_API_URL` | server | The CPV One install, without `/api` |
-| `CPV_ONE_API_KEY` | server | General Settings → *Enable API Access*, then set a key |
+| `CPV_ONE_API_KEY` | server | Read it from Settings → General Settings → *Enable API Access*. Account-wide; do not regenerate |
 | `CPV_ONE_ACCOUNT_ID` | server | Optional; only for installs that scope calls |
 | `CPV_ONE_TRACKING_BASE_URL` | server | Used only when CPV One reports no URL for a campaign |
 | `CPV_ONE_CHANNEL_TOKEN` | server | Which Extra Token slot carries the channel ID — `11` in this account; 1–4 are taken |
