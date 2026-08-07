@@ -9,6 +9,8 @@
 // (`l()`, `drawing()`) and module imports, which cannot be serialised. Those are
 // gone; `seed.js` holds the same readings converted to this format.
 
+import { makeTracking } from '../services/cpvOneService.js';
+
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
 // ── Beats — what plays inside a stage, in order ──
@@ -124,10 +126,14 @@ export const makeFunnel = (over = {}) => {
   return {
     id: uid(),
     name: 'Untitled funnel',
+    createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     persona: makePersona(),
     pacing: makePacing(),
     audio: makeAudio(),
+    // Filled in by the store, which is the only thing that knows the deployment's
+    // base URL. Empty here so `makeFunnel` stays pure and testable.
+    tracking: makeTracking(),
     startStage: first.id,
     stages: [first],
     ...over,
@@ -143,6 +149,9 @@ export const withDefaults = (funnel) => ({
   persona: { ...makePersona(), ...funnel.persona },
   pacing: { ...makePacing(), ...funnel.pacing },
   audio: { ...makeAudio(), ...funnel.audio },
+  // Backfilled, never overwritten: a channel id already in the record is the
+  // one a traffic source has, so the spread order here matters.
+  tracking: makeTracking(funnel.tracking),
   stages: funnel.stages || [],
 });
 
