@@ -27,6 +27,15 @@ npm run dev
 Routing is hash-based on purpose: no server rewrite rules, so the same build
 works on any static host and under `vite preview`.
 
+The editor opens on two seeded readings. There are three more in
+[`examples/`](examples/) — the Selene A/B pair and the single Marisol flow that
+preceded them — brought in with **Import funnel file**, which always copies
+rather than overwrites. They are worth reading before writing a funnel from
+scratch: all three shipped as hand-written JavaScript first, so they are the
+evidence that this data model can express a real one. `examples/README.md` says
+what each covers, and the three things about Marisol that did not survive the
+conversion.
+
 ---
 
 ## What an admin can build
@@ -57,6 +66,17 @@ exactly one control:
 
 **Pace** — a words-per-minute slider with a live estimate of how long the reading
 takes down its longest path. The two are one decision, so they sit together.
+
+**Sound** — an ambient bed under the reading, set per funnel: a path to a file in
+`public/`, or an upload. A path costs nothing to store and is right for a track
+several funnels share; an upload keeps the funnel one portable file but is capped
+at 500KB, because audio is heavy and all of this lives in localStorage. The
+default volume is 0.05 — it should register as atmosphere, not as music.
+
+The two interface sounds are not configurable. A send sound when the visitor
+acts, a reply sound when a message lands, both inlined as data URIs in
+`src/chat/lib/sfx.js` so the first one never waits on a network fetch — a chat
+sound that arrives late is worse than no sound at all.
 
 ### Answers and interpolation
 
@@ -249,10 +269,17 @@ row, deciding whether an Extra Token slot is usable, and the log redactor.
 ```
 src/main.jsx                  hash routing: player vs editor
 src/chat/                     the player
-  hooks/useFunnel.js            the engine; consumes funnel JSON
+  hooks/useFunnel.js            the engine; consumes funnel JSON.
+                                  `ctaParams` — what goes on the CTA URL, and
+                                  in what order of precedence
   hooks/useChatSfx.js           send/reply sounds
   hooks/useTabBadge.js          unread count on the tab and the avatar
+  lib/sfx.js                    those two sounds, inlined as data URIs
   components/ChatCard.jsx       the chat surface; everything comes from `persona`
+  components/Bubble.jsx         one message
+  components/ReactionPicker.jsx the emoji reaction on a bubble
+  components/AIGradientBorder.jsx  the animated frame around the card
+  index.css                     Tailwind v4 tokens for the player and the editor
 src/cms/
   model.js                      what a funnel is, and the factories for empty ones
   store.js                      localStorage CRUD, schema migrations, export/import
@@ -260,9 +287,17 @@ src/cms/
   estimate.js                   how long a reading takes — mirrors useFunnel's timing
   trackingConfig.js             the public half of tracking config
   CmsApp.jsx                    funnel list and editor shell
-  panels/                       persona, pace, stages, beats, docks, preview, tracking
+  ui.jsx                        the editor's own primitives: Panel, Field, Btn,
+                                  upload handling
+  Confirm.jsx                   the in-app confirm, replacing window.confirm
+  panels/                       persona, pace, audio, stages, beats, docks,
+                                  preview, tracking
 src/services/
   cpvOneService.js              channel ids, tracking URLs, the CPV One link
+src/shared/                     used by both halves
+  components/RainbowButton.jsx  the CTA button
+  lib/utils.js                  `cn()` — class merging
+  styles/foundation.css         resets and base type
 api/cpv/                        the only server-side code; holds the CPV One key
   _cpv.js                       config, redacted logging, the CPV One call,
                                   Extra Token rules
@@ -270,6 +305,7 @@ api/cpv/                        the only server-side code; holds the CPV One key
   sync.js                       POST — link a funnel's channel to a campaign
   test.js                       POST — read-only connection check
 scripts/cpv-check.mjs           the same check from the command line
+examples/                       importable funnel files, with their own README
 ```
 
 ### One format, not two
