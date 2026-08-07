@@ -26,14 +26,35 @@ function Starfield() {
 
 // The player. `?f=<id>` picks which funnel to run; without one it plays the
 // first that exists, so a bare URL still shows something.
+//
+// A tracking URL also carries `?channel_id=<id>`, which is how a visit is
+// attributed. It is seeded as an answer rather than held separately, because
+// answers are already the thing that survives the reading and gets passed on at
+// the CTA — the channel id needs exactly that lifetime.
 export default function App() {
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+
   const funnel = useMemo(() => {
     const all = listFunnels();
-    const wanted = new URLSearchParams(window.location.search).get('f');
-    return all.find((f) => f.id === wanted) || all[0] || null;
-  }, []);
+    const wanted = params.get('f');
+    return (
+      all.find((f) => f.id === wanted) ||
+      // Also by slug, so a `/chat/<slug>`-shaped tracking URL resolves on a host
+      // that rewrites it to this page.
+      all.find((f) => wanted && f.tracking?.slug === wanted) ||
+      all[0] ||
+      null
+    );
+  }, [params]);
 
-  const engine = useFunnel(funnel);
+  const seedAnswers = useMemo(() => {
+    const channelId = params.get('channel_id');
+    // The funnel's own id is the fallback so a visit that arrived without a
+    // tracking URL is still attributed to the funnel, just not to a channel.
+    return channelId ? { channel_id: channelId } : {};
+  }, [params]);
+
+  const engine = useFunnel(funnel, { seedAnswers });
   const unread = useTabBadge(engine.messages, funnel?.persona);
 
   if (!funnel) {

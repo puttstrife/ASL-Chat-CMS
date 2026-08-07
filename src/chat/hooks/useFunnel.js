@@ -213,6 +213,10 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, startBeat 
     scheduleReaction(id, d.label);
     const params = {};
     for (const k of d.passKeys || []) if (answers.current[k] != null) params[k] = answers.current[k];
+    // The channel id rides along whether or not the writer listed it, because
+    // it is not theirs to forget: without it the offer page cannot tell CPV One
+    // which funnel earned the conversion.
+    if (answers.current.channel_id) params.channel_id = answers.current.channel_id;
     // A host returning false takes over — the preview uses this to report the
     // hand-off instead of navigating away from the editor.
     if (onFinish && onFinish({ dock: d, answers: { ...answers.current }, params }) === false) return;
