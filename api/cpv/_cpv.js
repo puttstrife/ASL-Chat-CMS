@@ -17,7 +17,12 @@ export function config() {
   const trackingBase = process.env.CPV_ONE_TRACKING_BASE_URL || '';
   // Which Extra Token slot carries the channel id. CPV One offers extra1…extra15
   // and which are free is an account decision, so it is configuration.
-  const tokenParam = (process.env.CPV_ONE_CHANNEL_TOKEN || 'extra1').toLowerCase();
+  //
+  // The default is deliberately high. extra1 holds `utm_source` and the
+  // traffic-source reporting depends on it; extra2…extra4 are in use as well.
+  // A default of extra1 would aim an unset variable at live reporting, so the
+  // fallback sits in the 11…15 range that is free account-wide.
+  const tokenParam = (process.env.CPV_ONE_CHANNEL_TOKEN || 'extra11').toLowerCase();
 
   const missing = [];
   if (!apiUrl) missing.push('CPV_ONE_API_URL');

@@ -19,15 +19,22 @@
 //   /api/click/lookup/     one click by subid
 //   /api/lp/*  /api/offer/*  landing pages and offers
 //
-// There is NO endpoint that creates a campaign. So this module never tries: the
-// admin makes the campaign in CPV One, pastes its id or its tracking URL here,
-// and we attach our own channel id to it. That is the documented fallback and
-// it is the only correct one.
+// There is NO endpoint that creates a campaign. But that is not why this module
+// never creates one.
+//
+// A campaign here is a reporting bucket — domain, traffic source, variant —
+// created deliberately and rarely, with funnel variants living INSIDE it as
+// landing-page splits and Extra Tokens. One campaign per funnel would fragment
+// the reporting the account runs on. So the admin makes the campaign in CPV One,
+// pastes its id or its tracking URL here, and we attach our own channel id to
+// it. That would still be the right shape if the API grew a create endpoint
+// tomorrow.
 //
 // Attribution rides on CPV One's Extra Tokens (`extra1`…`extra15`) — values
-// captured from the campaign URL and reportable as columns. The channel id goes
-// into whichever slot the account has free; the server decides which, because
-// that is configuration and configuration lives with the credentials.
+// captured from the campaign URL and reportable as columns. Which slot is an
+// account decision and belongs with the credentials, so the server picks it.
+// In this account 1 through 4 are taken (`extra1` is `utm_source`, which the
+// traffic-source reporting depends on) and 11 through 15 are free.
 //
 // Everything above the `── Calls that need credentials ──` line is pure and
 // runs in both the browser and a serverless function. Everything below it is a
@@ -137,7 +144,7 @@ export function buildTrackingUrl({ base, id, slug, channelId, pattern = DEFAULT_
  * handle itself, so the channel id lands on the funnel as well and the two ends
  * of the click agree on which funnel it was.
  */
-export function appendChannelToCampaignUrl(campaignUrl, { channelId, tokenParam = 'extra1' } = {}) {
+export function appendChannelToCampaignUrl(campaignUrl, { channelId, tokenParam = 'extra11' } = {}) {
   if (!channelId) throw new Error('A campaign URL needs a channel id to carry.');
   let url;
   try {
