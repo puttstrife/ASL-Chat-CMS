@@ -9,15 +9,33 @@
 // ── What CPV One's API can actually do ──
 //
 // Verified against https://cpvlab.pro/docs/cpv-lab-pro-api.html. The API is a
-// single key passed as `key=`, against `<your-cpv-domain>/api/<endpoint>/`, and
-// it offers:
+// single key passed as `key=`, against `<your-cpv-domain>/api/<endpoint>/`.
+// All fourteen documented endpoints, so nobody has to re-read the docs to find
+// out what is not here:
 //
-//   /api/campaign/list/    every campaign, optionally active only
-//   /api/campaign/edit/    change an EXISTING campaign's options
+//   READ
+//   /api/campaign/list/    every campaign, with its URLs and token config
+//   /api/ts/list/          every traffic source, with its tokens
 //   /api/stats/            campaign statistics
 //   /api/conversions/      conversion rows
-//   /api/click/lookup/     one click by subid
-//   /api/lp/*  /api/offer/*  landing pages and offers
+//   /api/visitorstats/     recent visitor records
+//   /api/click/lookup/     one click by subid or clickid
+//
+//   WRITE — landing pages and offers only
+//   /api/lp/add/           /api/lp/edit/           /api/lp/addtocamp/
+//   /api/offer/add/        /api/offer/edit/        /api/offer/addtocamp/
+//
+//   WRITE — existing campaigns only
+//   /api/campaign/edit/      engagement rate, bid, priority
+//   /api/campaign/editpage/  an LP or offer already inside a campaign
+//
+// This module calls exactly one of them: `campaign/list`. Everything else is
+// listed so the boundary is visible, not because it is used.
+//
+// `/api/ts/list/` is worth remembering. `cpv:check` currently works out which
+// Extra Token slots are free by scanning every campaign; the traffic sources
+// themselves declare which tokens they use, which is a better answer to the
+// same question. Not wired up.
 //
 // There is NO endpoint that creates a campaign. But that is not why this module
 // never creates one.

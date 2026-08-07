@@ -119,12 +119,41 @@ traffic source → variant. They are created deliberately and rarely. Funnel
 variants belong *inside* a campaign, as landing-page splits and Extra Tokens.
 One campaign per funnel would shatter the reporting the account already runs on.
 
-CPV One's API happens to agree: checked against
-[the API docs](https://cpvlab.pro/docs/cpv-lab-pro-api.html), it exposes campaign
-**list** and **edit**, stats, conversions, visitor stats, click lookup, and
-landing-page/offer management, and there is **no endpoint that creates a
-campaign.** But the missing endpoint is not the reason this app does not create
-campaigns. Even with one, it should not.
+CPV One's API happens to agree — but the missing endpoint is not the reason this
+app does not create campaigns. Even with one, it should not.
+
+### Every endpoint the API has
+
+Checked against [the API docs](https://cpvlab.pro/docs/cpv-lab-pro-api.html).
+All fourteen, written down so nobody has to re-read them to find out what is not
+here. Authentication is one `key` parameter, account-wide.
+
+| Read | |
+| --- | --- |
+| `/api/campaign/list/` | every campaign, with its URLs and Extra Token config |
+| `/api/ts/list/` | every traffic source, with its tokens |
+| `/api/stats/` | campaign statistics |
+| `/api/conversions/` | conversion rows |
+| `/api/visitorstats/` | recent visitor records |
+| `/api/click/lookup/` | one click, by SubID or ClickID |
+
+| Write | |
+| --- | --- |
+| `/api/lp/add/` `/api/lp/edit/` `/api/lp/addtocamp/` | landing pages |
+| `/api/offer/add/` `/api/offer/edit/` `/api/offer/addtocamp/` | offers |
+| `/api/campaign/edit/` | an existing campaign's engagement rate, bid, priority |
+| `/api/campaign/editpage/` | an LP or offer already inside a campaign |
+
+**There is no endpoint that creates a campaign.** Landing pages and offers *can*
+be created and attached to an existing campaign — which is the shape any future
+"register this chat funnel as an LP" work would take, if the pixel question below
+turns out to need it.
+
+This app calls exactly one endpoint: `campaign/list`. It writes nothing.
+
+`/api/ts/list/` is worth a note. `npm run cpv:check` works out which Extra Token
+slots are free by scanning all campaigns; the traffic sources declare which
+tokens they use, which is a better answer to the same question. Not wired up.
 
 So per-funnel attribution rides an Extra Token inside an existing campaign, which
 is how it should work here regardless of what the API allows. The admin creates
