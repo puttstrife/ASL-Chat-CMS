@@ -172,10 +172,16 @@ repository and never will be.
 read it at **Settings → General Settings → *Enable API Access***. No one needs to
 send it to you, and it should not arrive by email, chat or a pull request.
 
-It is one key for the whole account, not one per person — the same string
-everyone reads. So **regenerating it breaks every other integration using it at
-the same moment**, this app included. Read it; do not roll it because it is
-easier than finding it.
+CPV One issues **one key per account** — not one per user, not scoped, not
+individually revocable. That is their design and there is nothing to work around
+it: everyone who uses the API uses the same string. Two consequences worth
+knowing before you touch it:
+
+- **Regenerating it breaks every other integration at that moment**, this app
+  included. Read the key; do not roll it because that is quicker than finding it.
+- **Access cannot be withdrawn from one person.** Anyone who has read it has it
+  until the key is rolled for everybody, so treat handing out account admin as
+  the same decision as handing out the key.
 
 The API URL is the install you log in to, without `/api`. The channel token is
 `11` here — see above for why. The two `VITE_` variables can stay blank on a
