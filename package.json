@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cpv:check": "node --env-file=.env.local scripts/cpv-check.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "license": "ISC",
   "dependencies": {
@@ -23,6 +26,7 @@
     "@tailwindcss/vite": "^4.3.2",
     "@vitejs/plugin-react": "^4.3.4",
     "tailwindcss": "^4.3.2",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^3.2.7"
   }
 }
