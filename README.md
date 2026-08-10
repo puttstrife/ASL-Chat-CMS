@@ -291,6 +291,12 @@ the immutability guard, a sync round trip, a retried sync, and the failure paths
 `api/cpv/_cpv.test.js` covers the server-side judgements — reading a campaign
 row, deciding whether an Extra Token slot is usable, and the log redactor.
 
+`src/chat/hooks/ctaParams.test.js` covers the one function in the player engine
+with a test: `ctaParams`, which decides what lands on the CTA URL — inbound
+parameters pass through untouched, a declared pass key can overwrite one from
+a typed answer, nothing can overwrite the channel id, and an undeclared answer
+never reaches the URL.
+
 ---
 
 ## Architecture
@@ -384,9 +390,10 @@ following it would throw away the editor.
 7. **Background tabs stall a reading.** Pacing is `setTimeout`-based and browsers
    throttle hidden tabs. Inherited from the original engine; the fix is
    timestamp-based scheduling.
-8. **Tests cover tracking only.** Vitest specs cover channel IDs, tracking URLs
-   and the store; the editor and the player engine have none, and Playwright is
-   installed but still has no specs.
+8. **Tests cover tracking, the store, and one function in the player.** Vitest
+   specs cover channel IDs, tracking URLs, the store, and `useFunnel`'s
+   `ctaParams`; the rest of the player engine and the editor have none, and
+   Playwright is installed but still has no specs.
 9. **The CPV link is one-way, and never reconciled.** Campaigns are made in CPV
    One and referenced here — by design, not only because the API has no create
    endpoint. If a campaign is deleted or renamed there, the funnel goes on
