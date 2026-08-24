@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { normalizeCampaignRef, syncFunnelTracking, validateCpvCampaign } from '../../services/cpvOneService.js';
+import { bumpVersion, normalizeCampaignRef, syncFunnelTracking, validateCpvCampaign } from '../../services/cpvOneService.js';
 import * as store from '../store.js';
 import { trackingOptions } from '../trackingConfig.js';
 import { Btn, Field, inputClass, Panel } from '../ui.jsx';
@@ -103,8 +103,34 @@ export function TrackingPanel({ funnel, onPatch }) {
           <CopyRow value={t.channel_id} label="channel ID" mono />
         </Field>
 
-        <Field label="Tracking URL" hint="The link to give a traffic source. It carries the channel ID to the player.">
+        <Field label="Tracking URL" hint="The link to give a traffic source. It carries the slug, version and channel ID to the player.">
           <CopyRow value={t.tracking_url} label="tracking URL" />
+        </Field>
+
+        {/* Version is a label an admin can hand-edit or bump, not a record of what
+            actually shipped — a link handed out under an older version keeps working. */}
+        <Field label="Version" hint="A display label on the tracking URL, editable by hand or with Bump — not a history of what shipped under an older link.">
+          <span className="flex items-stretch gap-2">
+            <input
+              className={inputClass}
+              defaultValue={t.version || 'v1'}
+              key={t.version || 'v1'}
+              onBlur={(e) => {
+                const next = store.setTrackingVersion(funnel.id, e.target.value || 'v1');
+                if (next) onPatch(next.tracking);
+              }}
+              spellCheck={false}
+            />
+            <Btn
+              onClick={() => {
+                const next = store.setTrackingVersion(funnel.id, bumpVersion(t.version || 'v1'));
+                if (next) onPatch(next.tracking);
+              }}
+              title="Increment the version"
+            >
+              Bump
+            </Btn>
+          </span>
         </Field>
 
         <hr className="border-white/8" />

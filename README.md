@@ -102,8 +102,13 @@ than carrying the original's.
 From it comes the **tracking URL**, the link handed to a traffic source:
 
 ```
-https://chat.example.com/?f=<funnel-id>&channel_id=<channel-id>
+https://chat.example.com/<funnel-slug>/<version>/<channel-id>
 ```
+
+This path shape needs the `vercel.json` rewrite (already shipped in this
+change) or an equivalent rewrite on another host; where that isn't possible,
+`VITE_CHAT_URL_PATTERN` can be set back to the old query-string form
+(`{base}/?f={id}&channel_id={channel_id}`).
 
 Both are shown, with a copy button, under the editor's **Tracking** tab, and the
 channel ID also sits on each row of the funnel list so a line in a CPV One report
@@ -402,6 +407,11 @@ following it would throw away the editor.
     the chat, then the chat *is* the landing page, and whatever view/lead pixel
     normally sits on an LP is not here. Fine when the chat is reached by
     redirect from a real LP; not fine if it replaces one. Unresolved.
+11. **The version in the URL is a label, not a history.** It is only ever read
+    off the funnel's current state at link-generation time, never stored
+    against the link itself — so a previously-issued link with an old version
+    segment still plays today's live script, not a snapshot of what it looked
+    like when that link was sent.
 
 ---
 

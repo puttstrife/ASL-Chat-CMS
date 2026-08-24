@@ -122,16 +122,29 @@ export function slugify(name, fallback = 'funnel') {
   return slug || fallback;
 }
 
+// A funnel's version can be bumped from the editor without touching its
+// channel id or slug, so a traffic source can be repointed at a new variant
+// under the same tracking link. Anything that doesn't parse as an optional
+// `v` prefix plus digits is returned unchanged, left for the admin to edit by
+// hand rather than guessed at.
+export function bumpVersion(version) {
+  const m = /^(v)?(\d+)$/i.exec(String(version || ''));
+  if (!m) return version;
+  const [, prefix, digits] = m;
+  return `${prefix || ''}${Number(digits) + 1}`;
+}
+
 // ── Tracking URLs ──
 
 // Where the player lives. A pattern rather than a fixed path because the URL a
-// traffic source is given depends on how the app is hosted: this build is a
-// static bundle whose player selects a funnel from `?f=<id>`, but a host with a
-// rewrite rule can serve the prettier `/chat/<slug>` form. Both are expressible;
-// neither is hardcoded.
+// traffic source is given depends on how the app is hosted. The default is the
+// path form `{base}/{slug}/{version}/{channel_id}`, resolved by the vercel.json
+// rewrite added alongside this change; a host that cannot run that rewrite
+// should set VITE_CHAT_URL_PATTERN explicitly to the query-string form
+// `{base}/?f={id}&channel_id={channel_id}` instead.
 //
-//   {base}  {id}  {slug}  {channel_id}
-export const DEFAULT_URL_PATTERN = '{base}/?f={id}&channel_id={channel_id}';
+//   {base}  {id}  {slug}  {version}  {channel_id}
+export const DEFAULT_URL_PATTERN = '{base}/{slug}/{version}/{channel_id}';
 
 const trimSlashes = (s) => String(s || '').replace(/\/+$/, '');
 
@@ -140,13 +153,14 @@ const trimSlashes = (s) => String(s || '').replace(/\/+$/, '');
  * the one displayed in the editor. Deterministic: the same funnel and channel
  * id always produce the same string, which is what makes re-syncing safe.
  */
-export function buildTrackingUrl({ base, id, slug, channelId, pattern = DEFAULT_URL_PATTERN } = {}) {
+export function buildTrackingUrl({ base, id, slug, version, channelId, pattern = DEFAULT_URL_PATTERN } = {}) {
   if (!channelId) throw new Error('A tracking URL needs a channel id.');
   if (!base) throw new Error('A tracking URL needs a base URL — set VITE_CHAT_BASE_URL.');
   const values = {
     '{base}': trimSlashes(base),
     '{id}': encodeURIComponent(id || ''),
     '{slug}': encodeURIComponent(slug || ''),
+    '{version}': encodeURIComponent(version || ''),
     '{channel_id}': encodeURIComponent(channelId),
   };
   let out = pattern;
@@ -201,9 +215,14 @@ export function normalizeCampaignRef(input) {
 export const SYNC_STATES = ['unlinked', 'pending', 'linked', 'error'];
 
 export const makeTracking = (over = {}) => ({
-  // Ours. Minted once at creation and immutable from then on.
+  // Ours, minted once at creation and frozen from then on.
   channel_id: '',
   slug: '',
+  // Also ours, but not frozen: version can be bumped from the editor (see
+  // bumpVersion) when a traffic source needs to be pointed at a new variant
+  // without touching the channel id or slug. tracking_url is derived from all
+  // three and is rebuilt, not edited directly.
+  version: 'v1',
   tracking_url: '',
   // Theirs, filled in when an admin links a campaign.
   cpv_campaign_id: '',
@@ -237,9 +256,11 @@ export function ensureTracking(funnel, { base, pattern, ...opts } = {}) {
   const existing = makeTracking(funnel?.tracking);
   const channel_id = isChannelId(existing.channel_id) ? existing.channel_id : generateChannelId(opts);
   const slug = existing.slug || slugify(funnel?.name);
+  const version = existing.version || 'v1';
   const tracking_url =
-    existing.tracking_url || (base ? buildTrackingUrl({ base, id: funnel?.id, slug, channelId: channel_id, pattern }) : '');
-  return { ...funnel, tracking: { ...existing, channel_id, slug, tracking_url } };
+    existing.tracking_url ||
+    (base ? buildTrackingUrl({ base, id: funnel?.id, slug, version, channelId: channel_id, pattern }) : '');
+  return { ...funnel, tracking: { ...existing, channel_id, slug, version, tracking_url } };
 }
 
 // ── Calls that need credentials ──

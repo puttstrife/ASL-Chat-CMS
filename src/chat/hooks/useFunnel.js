@@ -172,7 +172,12 @@ export function useFunnel(funnel, { onFinish, speed = 1, seedAnswers, passThroug
 
     const d = stage.dock || { type: 'end' };
     if (d.type === 'continue') setDock({ type: 'continue', next: d.next });
-    else if (d.type === 'end' || d.type === 'none') setDock({ type: 'none' });
+    // 'end' and 'none' used to collapse to the same runtime dock, which is why
+    // there was nowhere to hang a "save this reading" action — the player could
+    // not tell a finished reading from a stage that simply has nothing to show
+    // yet. They diverge here so ChatCard can tell them apart.
+    else if (d.type === 'end') setDock({ type: 'end' });
+    else if (d.type === 'none') setDock({ type: 'none' });
     else setDock({ ...d });
 
     runningRef.current = false;

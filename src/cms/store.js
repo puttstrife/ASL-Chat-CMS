@@ -18,7 +18,7 @@
 import { makeFunnel, uid, withDefaults } from './model.js';
 import { SEED_FUNNELS } from './seed.js';
 import { trackingOptions } from './trackingConfig.js';
-import { ensureTracking, makeTracking, slugify } from '../services/cpvOneService.js';
+import { buildTrackingUrl, ensureTracking, makeTracking, slugify } from '../services/cpvOneService.js';
 
 // One key per schema version. The old key is left in place rather than deleted:
 // a migration that goes wrong should be recoverable by hand, and a few hundred
@@ -117,8 +117,10 @@ export const getFunnel = (id) => listFunnels().find((f) => f.id === id) || null;
 // Fields that identify a funnel to something outside this browser, and so can
 // never change once written. A traffic source, a CPV One report and a link in
 // somebody's ad account all point at these; letting the editor overwrite one
-// would silently detach a live campaign from its funnel.
-const FROZEN = ['channel_id', 'slug', 'tracking_url'];
+// would silently detach a live campaign from its funnel. tracking_url is not
+// listed here — it is derived from these frozen identity fields plus the
+// mutable version, so it is recomputed rather than frozen.
+const FROZEN = ['channel_id', 'slug'];
 
 function keepFrozen(previous, next) {
   const tracking = { ...makeTracking(previous?.tracking), ...makeTracking(next?.tracking) };
@@ -262,4 +264,27 @@ export function patchTracking(id, patch) {
   all[i] = { ...all[i], tracking, updatedAt: new Date().toISOString() };
   write(all);
   return all[i];
+}
+
+/**
+ * Change a funnel's tracking version and recompute tracking_url to match.
+ *
+ * Separate from a plain `patchTracking` call because tracking_url is not free
+ * text — it has to be rebuilt deterministically from the frozen identity
+ * fields plus the new version, the same way `ensureTracking` builds it the
+ * first time, or the URL and the version it claims to encode would drift
+ * apart.
+ */
+export function setTrackingVersion(id, version) {
+  const all = listFunnels();
+  const funnel = all.find((f) => f.id === id);
+  if (!funnel) return null;
+  const tracking_url = buildTrackingUrl({
+    ...trackingOptions(),
+    id: funnel.id,
+    slug: funnel.tracking.slug,
+    channelId: funnel.tracking.channel_id,
+    version,
+  });
+  return patchTracking(id, { version, tracking_url });
 }

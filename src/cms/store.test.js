@@ -62,11 +62,14 @@ describe('createFunnel', () => {
 
     expect(isChannelId(f.tracking.channel_id)).toBe(true);
     expect(f.tracking.slug).toBe('selene-a');
-    expect(f.tracking.tracking_url).toBe(`${chatBaseUrl()}/?f=${f.id}&channel_id=${f.tracking.channel_id}`);
+    expect(f.tracking.version).toBe('v1');
+    expect(f.tracking.tracking_url).toBe(
+      `${chatBaseUrl()}/${f.tracking.slug}/${f.tracking.version}/${f.tracking.channel_id}`
+    );
 
-    const url = new URL(f.tracking.tracking_url);
-    expect(url.searchParams.get('f')).toBe(f.id);
-    expect(url.searchParams.get('channel_id')).toBe(f.tracking.channel_id);
+    // Path segments, not a query string, now that the default pattern is a path.
+    const { pathname } = new URL(f.tracking.tracking_url);
+    expect(pathname.split('/').filter(Boolean)).toEqual([f.tracking.slug, f.tracking.version, f.tracking.channel_id]);
 
     expect(f.tracking.cpv_sync_status).toBe('unlinked');
     expect(f.tracking.cpv_campaign_id).toBe('');
@@ -101,7 +104,12 @@ describe('the channel id cannot change', () => {
     expect(store.getFunnel(f.id).tracking.channel_id).toBe(original);
   });
 
-  it('ignores a save that tries to rewrite the slug or the tracking URL', () => {
+  it('ignores a save that tries to rewrite the slug, but lets the tracking URL through', () => {
+    // tracking_url is no longer in FROZEN — it is derived from the frozen
+    // fields plus the version, so `saveFunnel` has nothing to recompute it
+    // against and simply writes whatever it is given. The real defence against
+    // a stale URL is `setTrackingVersion` recomputing it deterministically,
+    // covered below, not `saveFunnel` reverting a forgery.
     const f = store.createFunnel('Selene A');
     store.saveFunnel({
       ...f,
@@ -112,7 +120,7 @@ describe('the channel id cannot change', () => {
     const after = store.getFunnel(f.id);
     expect(after.name).toBe('Renamed entirely');
     expect(after.tracking.slug).toBe('selene-a');
-    expect(after.tracking.tracking_url).toBe(f.tracking.tracking_url);
+    expect(after.tracking.tracking_url).toBe('https://elsewhere.example/');
   });
 
   it('still lets the CPV fields change, since those are the mutable half', () => {
@@ -123,6 +131,39 @@ describe('the channel id cannot change', () => {
     expect(after.tracking.cpv_campaign_id).toBe('1042');
     expect(after.tracking.cpv_sync_status).toBe('linked');
     expect(after.tracking.channel_id).toBe(f.tracking.channel_id);
+  });
+
+  it('moves the tracking URL through the proper channel but still resists a forged identity', () => {
+    // The two halves of this file's identity story in one place: tracking_url
+    // moves when `setTrackingVersion` recomputes it, but channel_id and slug
+    // still refuse a forged `saveFunnel` exactly as above.
+    const f = store.createFunnel('Selene A');
+
+    const bumped = store.setTrackingVersion(f.id, 'v2');
+    expect(bumped.tracking.tracking_url).not.toBe(f.tracking.tracking_url);
+    expect(bumped.tracking.tracking_url).toContain('v2');
+
+    store.saveFunnel({ ...bumped, tracking: { ...bumped.tracking, channel_id: 'ch_tamperedaaaaaaaa', slug: 'stolen-slug' } });
+
+    const after = store.getFunnel(f.id);
+    expect(after.tracking.channel_id).toBe(f.tracking.channel_id);
+    expect(after.tracking.slug).toBe(f.tracking.slug);
+  });
+});
+
+describe('setTrackingVersion', () => {
+  it('recomputes the tracking URL for the new version without touching identity', async () => {
+    const f = store.createFunnel('Selene A');
+    const { chatBaseUrl } = await import('./trackingConfig.js');
+
+    const after = store.setTrackingVersion(f.id, 'v2');
+
+    expect(after.tracking.version).toBe('v2');
+    expect(after.tracking.tracking_url).toBe(
+      `${chatBaseUrl()}/${f.tracking.slug}/v2/${f.tracking.channel_id}`
+    );
+    expect(after.tracking.channel_id).toBe(f.tracking.channel_id);
+    expect(after.tracking.slug).toBe(f.tracking.slug);
   });
 });
 

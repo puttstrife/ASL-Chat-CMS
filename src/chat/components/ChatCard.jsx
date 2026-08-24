@@ -4,6 +4,7 @@ import { RainbowButton } from '../../shared/components/RainbowButton.jsx';
 import { Bubble, BubbleContent, BubbleReactions } from './Bubble.jsx';
 import { Reactable } from './ReactionPicker.jsx';
 import { useChatSfx } from '../hooks/useChatSfx.js';
+import { formatTranscript } from '../lib/transcript.js';
 
 // The chat surface. Everything that used to be Selene — the name, the face, the
 // role, the colours, the line shown while she is mid-flow — now comes from the
@@ -119,6 +120,7 @@ export function ChatCard({ funnel, persona, audio: audioConfig, unread = 0, soun
         <Dock
           dock={dock}
           persona={persona}
+          transcript={dock.type === 'end' ? formatTranscript(messages, persona?.name) : ''}
           onButton={withSound(chooseButton)}
           onSubmit={withSound(submitInput)}
           onDate={withSound(submitDate)}
@@ -286,7 +288,10 @@ function TrustRow({ items }) {
   );
 }
 
-function Dock({ dock, persona, onButton, onSubmit, onDate, onSelect, onContinue, onFinish }) {
+function Dock({ dock, persona, transcript, onButton, onSubmit, onDate, onSelect, onContinue, onFinish }) {
+  if (dock.type === 'end') {
+    return <EndActions transcript={transcript} personaName={persona?.name} />;
+  }
   if (dock.type === 'cta') {
     return (
       <div className="flex flex-col gap-2">
@@ -353,6 +358,64 @@ function Dock({ dock, persona, onButton, onSubmit, onDate, onSelect, onContinue,
     <p className="font-sans m-0 py-2.5 text-center text-[.8rem] italic text-white/40">
       {persona?.name || ''} {persona?.idleText || 'is with you…'}
     </p>
+  );
+}
+
+// Shown once a reading actually ends (not just a stage with nothing to say
+// yet — see the 'end' vs 'none' split in useFunnel). A reading someone cannot
+// leave with is a reading that convinced nobody: this is the only way to take
+// it with you when the funnel closes on scripted copy rather than a CTA.
+function EndActions({ transcript, personaName }) {
+  const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const copy = async () => {
+    setFailed(false);
+    try {
+      // Same secure-context caveat as the editor's own copy buttons: no
+      // clipboard API over plain http, so a failure has to say so rather than
+      // silently do nothing.
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(transcript);
+      else throw new Error('no clipboard');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setFailed(true);
+    }
+  };
+
+  const save = () => {
+    const blob = new Blob([transcript], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(personaName || 'reading').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-reading.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1600);
+  };
+
+  if (!transcript) return null;
+
+  return (
+    <div className="flex gap-2">
+      <button
+        type="button"
+        onClick={copy}
+        className="font-sans inline-flex h-12 flex-1 items-center justify-center rounded-xl border border-white/10 bg-[#15161c] text-[.85rem] font-semibold text-white/70 transition-colors hover:bg-[#1b1c24] hover:text-white/90"
+      >
+        {copied ? '✓ Copied' : failed ? 'Select the text above' : 'Copy this reading'}
+      </button>
+      <button
+        type="button"
+        onClick={save}
+        className="font-sans inline-flex h-12 flex-1 items-center justify-center rounded-xl border border-white/10 bg-[#15161c] text-[.85rem] font-semibold text-white/70 transition-colors hover:bg-[#1b1c24] hover:text-white/90"
+      >
+        {saved ? '✓ Saved' : 'Save as a file'}
+      </button>
+    </div>
   );
 }
 

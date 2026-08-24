@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   appendChannelToCampaignUrl,
   buildTrackingUrl,
+  bumpVersion,
   ensureTracking,
   generateChannelId,
   isChannelId,
@@ -73,10 +74,16 @@ describe('slugify', () => {
 });
 
 describe('buildTrackingUrl', () => {
-  const args = { base: 'https://chat.example.com', id: 'abc123', slug: 'selene', channelId: 'ch_abcdefgh12345678' };
+  const args = {
+    base: 'https://chat.example.com',
+    id: 'abc123',
+    slug: 'selene',
+    version: 'v1',
+    channelId: 'ch_abcdefgh12345678',
+  };
 
   it('builds the default player URL with the channel id on it', () => {
-    expect(buildTrackingUrl(args)).toBe('https://chat.example.com/?f=abc123&channel_id=ch_abcdefgh12345678');
+    expect(buildTrackingUrl(args)).toBe('https://chat.example.com/selene/v1/ch_abcdefgh12345678');
   });
 
   it('honours a configured pattern, including the slug form from the brief', () => {
@@ -87,8 +94,17 @@ describe('buildTrackingUrl', () => {
 
   it('does not double the slash when the base has a trailing one', () => {
     expect(buildTrackingUrl({ ...args, base: 'https://chat.example.com/' })).toBe(
-      'https://chat.example.com/?f=abc123&channel_id=ch_abcdefgh12345678'
+      'https://chat.example.com/selene/v1/ch_abcdefgh12345678'
     );
+  });
+
+  it('interpolates the version into the default pattern', () => {
+    expect(buildTrackingUrl({ ...args, version: 'v2' })).toBe('https://chat.example.com/selene/v2/ch_abcdefgh12345678');
+  });
+
+  it('falls back to an empty version segment rather than the literal token', () => {
+    const { version, ...rest } = args;
+    expect(buildTrackingUrl(rest)).toBe('https://chat.example.com/selene//ch_abcdefgh12345678');
   });
 
   it('escapes values so a slug can never break the query string', () => {
@@ -104,6 +120,23 @@ describe('buildTrackingUrl', () => {
   it('refuses to build a URL that would be missing its point', () => {
     expect(() => buildTrackingUrl({ ...args, channelId: '' })).toThrow(/channel id/i);
     expect(() => buildTrackingUrl({ ...args, base: '' })).toThrow(/base URL/i);
+  });
+});
+
+describe('bumpVersion', () => {
+  it('increments a bare number', () => {
+    expect(bumpVersion('3')).toBe('4');
+  });
+
+  it('increments a v-prefixed number, preserving the prefix case', () => {
+    expect(bumpVersion('v1')).toBe('v2');
+    expect(bumpVersion('V1')).toBe('V2');
+  });
+
+  it('leaves anything that is not an optional v plus digits for the admin to edit by hand', () => {
+    expect(bumpVersion('a')).toBe('a');
+    expect(bumpVersion('')).toBe('');
+    expect(bumpVersion(undefined)).toBe(undefined);
   });
 });
 
@@ -191,6 +224,17 @@ describe('ensureTracking', () => {
     });
     const out = ensureTracking({ id: 'f1', name: 'x', tracking: linked }, opts);
     expect(out.tracking).toEqual(linked);
+  });
+
+  it('defaults version to v1 for a funnel that has no tracking yet', () => {
+    const out = ensureTracking({ id: 'f1', name: 'x' }, opts);
+    expect(out.tracking.version).toBe('v1');
+  });
+
+  it('leaves an existing version alone rather than resetting it to v1', () => {
+    const linked = makeTracking({ channel_id: 'ch_abcdefgh12345678', slug: 'x', version: 'v3' });
+    const out = ensureTracking({ id: 'f1', name: 'x', tracking: linked }, opts);
+    expect(out.tracking.version).toBe('v3');
   });
 
   it('mints an id without a base URL, and simply leaves the URL empty', () => {

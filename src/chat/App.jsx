@@ -25,19 +25,29 @@ function Starfield() {
 }
 
 // The player. `?f=<id>` picks which funnel to run; without one it plays the
-// first that exists, so a bare URL still shows something.
+// first that exists, so a bare URL still shows something. A funnel can also
+// be reached by path, `/<slug>/<version>/<channel_id>`, which a vercel.json
+// rewrite (or an equivalent on another host) points at this same page.
 //
 // A tracking URL also carries `?channel_id=<id>`, which is how a visit is
 // attributed. It is seeded as an answer rather than held separately, because
 // answers are already the thing that survives the reading and gets passed on at
-// the CTA — the channel id needs exactly that lifetime.
+// the CTA — the channel id needs exactly that lifetime. The path form carries
+// the channel id as its third segment instead of a query parameter.
 export default function App() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
+
+  const pathInfo = useMemo(() => {
+    const segs = window.location.pathname.split('/').filter(Boolean);
+    if (segs.length !== 3) return null;
+    return { slug: decodeURIComponent(segs[0]), version: decodeURIComponent(segs[1]), channelId: decodeURIComponent(segs[2]) };
+  }, []);
 
   const funnel = useMemo(() => {
     const all = listFunnels();
     const wanted = params.get('f');
     return (
+      (pathInfo && all.find((f) => f.tracking?.slug === pathInfo.slug)) ||
       all.find((f) => f.id === wanted) ||
       // Also by slug, so a `/chat/<slug>`-shaped tracking URL resolves on a host
       // that rewrites it to this page.
@@ -45,14 +55,14 @@ export default function App() {
       all[0] ||
       null
     );
-  }, [params]);
+  }, [params, pathInfo]);
 
   const seedAnswers = useMemo(() => {
-    const channelId = params.get('channel_id');
+    const channelId = pathInfo?.channelId || params.get('channel_id');
     // The funnel's own id is the fallback so a visit that arrived without a
     // tracking URL is still attributed to the funnel, just not to a channel.
     return channelId ? { channel_id: channelId } : {};
-  }, [params]);
+  }, [params, pathInfo]);
 
   // Everything else on the inbound URL, carried through untouched and handed
   // back at the CTA. This app is one hop in a chain it does not own: CPV One
