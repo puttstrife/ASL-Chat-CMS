@@ -62,7 +62,7 @@ exactly one control:
 | Date picker | Month / day / year. |
 | Dropdown picker | Pick one, then confirm. |
 | Call to action | The final button. Goes to a URL, carrying chosen answers as query params. |
-| End | The reading stops. |
+| End | The reading stops. The visitor gets **Copy this reading** and **Save as a file** — the only way to leave with the transcript when the funnel closes on scripted copy rather than a CTA. |
 
 **Pace** — a words-per-minute slider with a live estimate of how long the reading
 takes down its longest path. The two are one decision, so they sit together.
@@ -315,6 +315,7 @@ src/chat/                     the player
   hooks/useChatSfx.js           send/reply sounds
   hooks/useTabBadge.js          unread count on the tab and the avatar
   lib/sfx.js                    those two sounds, inlined as data URIs
+  lib/transcript.js             the reading as plain text, for copy/save at the end
   components/ChatCard.jsx       the chat surface; everything comes from `persona`
   components/Bubble.jsx         one message
   components/ReactionPicker.jsx the emoji reaction on a bubble
